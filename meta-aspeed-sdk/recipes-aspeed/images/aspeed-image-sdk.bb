@@ -129,6 +129,7 @@ do_compile[depends] = " \
     virtual/kernel:do_deploy \
     u-boot:do_deploy \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
+    ${@bb.utils.contains('BMCU_RAM_BINARY', 'bmcu_ram.bin', 'bmcu-ram-image:do_deploy', '', d)} \
     "
 do_fetch[noexec] = "1"
 do_unpack[noexec] = "1"

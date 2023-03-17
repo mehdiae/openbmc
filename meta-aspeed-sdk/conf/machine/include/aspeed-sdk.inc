@@ -23,18 +23,6 @@ MACHINE_FEATURES += "hw-rng"
 
 MACHINEOVERRIDES =. "aspeed:"
 
-SERIAL_CONSOLES ?= "115200;ttyS4"
-
-DEFAULTTUNE:aspeed-g5 ?= "arm1176jzs"
-DEFAULTTUNE:aspeed-g6 ?= "armv7ahf-vfpv4d16"
-
-UBOOT_ENTRYPOINT:aspeed-g4 ?= "0x40000000"
-UBOOT_ENTRYPOINT:aspeed-g5 ?= "0x80000000"
-UBOOT_ENTRYPOINT:aspeed-g6 ?= "0x80000000"
-UBOOT_LOADADDRESS:aspeed-g4 ?= "0x40000000"
-UBOOT_LOADADDRESS:aspeed-g5 ?= "0x80000000"
-UBOOT_LOADADDRESS:aspeed-g6 ?= "0x80000000"
-
 PREFERRED_VERSION_iperf3 ?= "3.1.4"
 
 # It should be removed if kernel 5.4 is no longer supported.

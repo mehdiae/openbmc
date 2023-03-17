@@ -42,7 +42,6 @@ RDEPENDS:${PN}-apps = " \
 SUMMARY:${PN}-intel-pmci = "Open Source Intel PMCI Applications"
 RDEPENDS:${PN}-intel-pmci = " \
     libmctp-intel-test \
-    mctpd \
     "
 
 RDEPENDS:${PN}-apps:append:aspeed-g6 = " \

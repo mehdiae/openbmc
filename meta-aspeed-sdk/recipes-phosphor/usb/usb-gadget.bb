@@ -35,7 +35,9 @@ do_install() {
     install -m 0755 ${S}/usbB-uart.sh ${D}/${bindir}/usbB-uart.sh
     install -m 0755 ${S}/keyboard.sh ${D}/${bindir}/keyboard.sh
     install -m 0755 ${S}/mouse.sh ${D}/${bindir}/mouse.sh
-    install -m 0755 ${S}/hid_gadget_app ${D}/${bindir}/hid_gadget_app
+    if ${@bb.utils.contains('MACHINE', 'ast2700-fpga', 'false', 'true', d)}; then
+        install -m 0755 ${S}/hid_gadget_app ${D}/${bindir}/hid_gadget_app
+    fi
 }
 
 SYSTEMD_SERVICE:${PN} += " netusb.service"
