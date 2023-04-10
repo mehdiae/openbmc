@@ -1,9 +1,10 @@
-From 454346a09223ce5de1d66ff42561418691379e57 Mon Sep 17 00:00:00 2001
+From dd372a34e72a79571cc977fb6fae0fd18126795b Mon Sep 17 00:00:00 2001
 From: Jamin Lin <jamin_lin@aspeedtech.com>
 Date: Thu, 25 Aug 2022 09:28:04 +0800
 Subject: [PATCH] change u-boot-env and kernel address
 
 Signed-off-by: Jamin Lin <jamin_lin@aspeedtech.com>
+
 ---
  configs/ast2600-pfr_defconfig     | 2 +-
  include/configs/evb_ast2600_spl.h | 2 +-
@@ -35,6 +36,3 @@ index 23dd7ecd7f..bbcf067c6e 100644
  	"verify=yes\0"	\
  	""
  
--- 
-2.17.1
-

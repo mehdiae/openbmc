@@ -16,5 +16,6 @@ PACKAGES = " \
 SUMMARY:${PN}-apps = "Intel PFR App package"
 RDEPENDS:${PN}-apps = " \
     obmc-pfr-image \
+    bmc-boot-done \
     "
 
