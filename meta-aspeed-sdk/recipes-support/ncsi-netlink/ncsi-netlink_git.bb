@@ -23,7 +23,7 @@ do_compile() {
 
 do_install() {
     install -d ${D}${bindir}
-    install -m 755 ncsi-netlink ${D}${bindir}
+    install -m 755 ncsi-netlink ${D}${bindir}/ncsi-netlink-sammj
 }
 
 do_configure[noexec] = "1"

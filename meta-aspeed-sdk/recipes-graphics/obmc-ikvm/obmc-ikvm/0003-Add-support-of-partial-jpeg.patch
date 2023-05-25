@@ -1,6 +1,6 @@
-From 6b925015cfd977d99eb992f5f80a101e476ceb27 Mon Sep 17 00:00:00 2001
-From: Steven Lee <steven_lee@aspeedtech.com>
-Date: Mon, 6 Feb 2023 17:33:37 +0800
+From ed533710e09fabd062014c13f75ae1f1a6b79bd9 Mon Sep 17 00:00:00 2001
+From: Troy Lee <troy_lee@aspeedtech.com>
+Date: Thu, 25 May 2023 15:34:35 +0800
 Subject: [PATCH] Add support of partial jpeg
 
 Partial jpeg is a standard jpeg but only include the changed blocks to
@@ -12,18 +12,19 @@ Use '-m' to assign jpeg format
 Both 0/2 can be used with TightVNC like vnc-clients.
 
 Signed-off-by: Jammy Huang <jammy_huang@aspeedtech.com>
+Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
 ---
  ikvm_args.cpp   |  2 +-
  ikvm_server.cpp |  8 +++++++-
  ikvm_video.cpp  | 16 ++++++++++++++++
- ikvm_video.hpp  | 12 ++++++++++++
- 4 files changed, 36 insertions(+), 2 deletions(-)
+ ikvm_video.hpp  | 13 +++++++++++++
+ 4 files changed, 37 insertions(+), 2 deletions(-)
 
 diff --git a/ikvm_args.cpp b/ikvm_args.cpp
-index 77f9f7b..34ddc5c 100644
+index 085a7e1..6377f65 100644
 --- a/ikvm_args.cpp
 +++ b/ikvm_args.cpp
-@@ -40,7 +40,7 @@ Args::Args(int argc, char* argv[]) : frameRate(30), subsampling(0), format(0), c
+@@ -39,7 +39,7 @@ Args::Args(int argc, char* argv[]) :
                  break;
              case 'm':
                  format = (int)strtol(optarg, NULL, 0);
@@ -33,26 +34,26 @@ index 77f9f7b..34ddc5c 100644
                  break;
              case 'h':
 diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index ccd4dee..e8223c3 100644
+index 5050030..18367dd 100644
 --- a/ikvm_server.cpp
 +++ b/ikvm_server.cpp
-@@ -167,7 +167,13 @@ void Server::sendFrame()
-         else
-         {
-             cl->tightEncoding = rfbEncodingTight;
--            rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
-+            if (video.getFormat() == 2) {
-+                v4l2_rect r = video.getBoundingBox(i);
-+
-+                rfbSendTightHeader(cl, r.left, r.top, r.width, r.height);
-+            } else {
-+                rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
-+            }
+@@ -173,7 +173,13 @@ void Server::sendFrame()
+                 else
+                 {
+                     cl->tightEncoding = rfbEncodingTight;
+-                    rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
++                    if (video.getFormat() == 2) {
++                        v4l2_rect r = video.getBoundingBox(i);
++        
++                        rfbSendTightHeader(cl, r.left, r.top, r.width, r.height);
++                    } else {
++                        rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
++                    }
  
-             cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
-         }
+                     cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
+                 }
 diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index ffe1149..fdd9e21 100644
+index 7c6cf28..914ddb5 100644
 --- a/ikvm_video.cpp
 +++ b/ikvm_video.cpp
 @@ -20,6 +20,7 @@
@@ -100,7 +101,7 @@ index ffe1149..fdd9e21 100644
          case 0:
              fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_JPEG;
 diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index 0246d25..d3d8123 100644
+index 76b22e0..d21f111 100644
 --- a/ikvm_video.hpp
 +++ b/ikvm_video.hpp
 @@ -6,6 +6,7 @@
@@ -111,7 +112,7 @@ index 0246d25..d3d8123 100644
  
  namespace ikvm
  {
-@@ -157,6 +158,16 @@ class Video
+@@ -166,6 +167,17 @@ class Video
          format = _fmt;
      }
  
@@ -125,10 +126,11 @@ index 0246d25..d3d8123 100644
 +        return buffers[i].box;
 +    }
 +
++
      /* @brief Number of bits per component of a pixel */
      static const int bitsPerSample;
      /* @brief Number of bytes of storage for a pixel */
-@@ -189,6 +200,7 @@ class Video
+@@ -196,6 +208,7 @@ class Video
          size_t payload;
          size_t size;
          uint32_t sequence;
@@ -136,6 +138,3 @@ index 0246d25..d3d8123 100644
      };
  
      /*
--- 
-2.25.1
-

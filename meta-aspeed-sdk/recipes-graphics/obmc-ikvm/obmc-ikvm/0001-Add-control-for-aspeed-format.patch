@@ -1,6 +1,6 @@
-From f1c25e85d80e8888a1273a84ddc60b2e324c48e6 Mon Sep 17 00:00:00 2001
-From: Steven Lee <steven_lee@aspeedtech.com>
-Date: Mon, 6 Feb 2023 16:17:57 +0800
+From 7c9ce812efadef491dfbc6799985c44112655646 Mon Sep 17 00:00:00 2001
+From: Troy Lee <troy_lee@aspeedtech.com>
+Date: Thu, 25 May 2023 14:58:55 +0800
 Subject: [PATCH] Add control for aspeed format
 
 Add '-m' to assign jpeg compression format
@@ -11,27 +11,26 @@ which is different with previous video frame to reduce compression
 output.
 
 Signed-off-by: Jammy Huang <jammy_huang@aspeedtech.com>
+Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
 ---
- ikvm_args.cpp    | 13 ++++++++++---
+ ikvm_args.cpp    | 11 +++++++++--
  ikvm_args.hpp    |  7 +++++++
- ikvm_manager.cpp |  3 +--
+ ikvm_manager.cpp |  2 +-
  ikvm_server.cpp  | 20 ++++++++++++++++++--
- ikvm_video.cpp   | 29 ++++++++++++++++++++++++++---
- ikvm_video.hpp   | 24 +++++++++++++++++++++++-
- 6 files changed, 85 insertions(+), 11 deletions(-)
+ ikvm_video.cpp   | 28 ++++++++++++++++++++++++++--
+ ikvm_video.hpp   | 25 ++++++++++++++++++++++++-
+ 6 files changed, 85 insertions(+), 8 deletions(-)
 
 diff --git a/ikvm_args.cpp b/ikvm_args.cpp
-index 4887870..77f9f7b 100644
+index 681a9f8..085a7e1 100644
 --- a/ikvm_args.cpp
 +++ b/ikvm_args.cpp
-@@ -8,13 +8,14 @@
+@@ -8,12 +8,13 @@
  namespace ikvm
  {
- 
--Args::Args(int argc, char* argv[]) :
+ Args::Args(int argc, char* argv[]) :
 -    frameRate(30), subsampling(0), calcFrameCRC{false}, commandLine(argc, argv)
-+Args::Args(int argc, char* argv[]) : frameRate(30), subsampling(0), format(0), calcFrameCRC{false},
-+                                     commandLine(argc, argv)
++    frameRate(30), subsampling(0), format(0), calcFrameCRC{false}, commandLine(argc, argv)
  {
      int option;
 -    const char* opts = "f:s:h:k:p:u:v:c";
@@ -42,7 +41,7 @@ index 4887870..77f9f7b 100644
                               {"help", 0, 0, 'h'},
                               {"keyboard", 1, 0, 'k'},
                               {"mouse", 1, 0, 'p'},
-@@ -37,6 +38,11 @@ Args::Args(int argc, char* argv[]) :
+@@ -36,6 +37,11 @@ Args::Args(int argc, char* argv[]) :
                  if (subsampling < 0 || subsampling > 1)
                      subsampling = 0;
                  break;
@@ -54,7 +53,7 @@ index 4887870..77f9f7b 100644
              case 'h':
                  printUsage();
                  exit(0);
-@@ -66,6 +72,7 @@ void Args::printUsage()
+@@ -65,6 +71,7 @@ void Args::printUsage()
      fprintf(stderr, "Usage: obmc-ikvm [options]\n");
      fprintf(stderr, "-f frame rate          try this frame rate\n");
      fprintf(stderr, "-s subsampling         try this subsampling\n");
@@ -63,10 +62,10 @@ index 4887870..77f9f7b 100644
      fprintf(stderr, "-k device              HID keyboard gadget device\n");
      fprintf(stderr, "-p device              HID mouse gadget device\n");
 diff --git a/ikvm_args.hpp b/ikvm_args.hpp
-index cb3d3ad..51f3061 100644
+index 089c700..9d41966 100644
 --- a/ikvm_args.hpp
 +++ b/ikvm_args.hpp
-@@ -80,6 +80,11 @@ class Args
+@@ -78,6 +78,11 @@ class Args
          return subsampling;
      }
  
@@ -78,7 +77,7 @@ index cb3d3ad..51f3061 100644
      /*
       * @brief Get the path to the USB keyboard device
       *
-@@ -141,6 +146,8 @@ class Args
+@@ -139,6 +144,8 @@ class Args
      int frameRate;
      /* @brief Desired subsampling (0: 444, 1: 420) */
      int subsampling;
@@ -88,24 +87,23 @@ index cb3d3ad..51f3061 100644
      std::string keyboardPath;
      /* @brief Path to the USB mouse device */
 diff --git a/ikvm_manager.cpp b/ikvm_manager.cpp
-index 93fd1ce..4945cc7 100644
+index 2f66fd5..3a0b815 100644
 --- a/ikvm_manager.cpp
 +++ b/ikvm_manager.cpp
-@@ -8,8 +8,7 @@ namespace ikvm
- Manager::Manager(const Args& args) :
+@@ -8,7 +8,7 @@ Manager::Manager(const Args& args) :
      continueExecuting(true), serverDone(false), videoDone(true),
      input(args.getKeyboardPath(), args.getPointerPath(), args.getUdcName()),
--    video(args.getVideoPath(), input, args.getFrameRate(),
+     video(args.getVideoPath(), input, args.getFrameRate(),
 -          args.getSubsampling()),
-+    video(args.getVideoPath(), input, args.getFrameRate(), args.getSubsampling(), args.getFormat()),
++          args.getSubsampling(), args.getFormat()),
      server(args, input, video)
  {}
  
 diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index 141f6c6..67dfb5b 100644
+index 6a6cd06..22ca6ff 100644
 --- a/ikvm_server.cpp
 +++ b/ikvm_server.cpp
-@@ -8,6 +8,8 @@
+@@ -9,6 +9,8 @@
  #include <phosphor-logging/log.hpp>
  #include <xyz/openbmc_project/Common/error.hpp>
  
@@ -114,7 +112,7 @@ index 141f6c6..67dfb5b 100644
  namespace ikvm
  {
  
-@@ -94,6 +96,7 @@ void Server::run()
+@@ -95,6 +97,7 @@ void Server::run()
  void Server::sendFrame()
  {
      char* data = video.getData();
@@ -122,34 +120,34 @@ index 141f6c6..67dfb5b 100644
      rfbClientIteratorPtr it;
      rfbClientPtr cl;
      int64_t frame_crc = -1;
-@@ -160,10 +163,23 @@ void Server::sendFrame()
-         cl->ublen = sz_rfbFramebufferUpdateMsg;
-         rfbSendUpdateBuf(cl);
- 
--        cl->tightEncoding = rfbEncodingTight;
-+        cl->tightEncoding = rfbEncodingAspeed;
-         rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
- 
--        cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
-+        if (video.getFormat() == 1)
-+        {
-+            cl->updateBuf[cl->ublen++] = (char)(0);
-+            cl->updateBuf[cl->ublen++] = (char)(frameCount >> 24 & 0xff);
-+            cl->updateBuf[cl->ublen++] = (char)(frameCount >> 16 & 0xff);
-+            cl->updateBuf[cl->ublen++] = (char)(frameCount >> 8 & 0xff);
-+            cl->updateBuf[cl->ublen++] = (char)(frameCount & 0xff);
-+            cl->updateBuf[cl->ublen++] = (char)(video.getSubsampling());
-+            cl->updateBuf[cl->ublen++] = (char)(0x00); // the value of quality if changed
-+        }
-+        else if (video.getFormat() == 0)
-+        {
-+            cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
-+        }
-         rfbSendCompressedDataTight(cl, data, video.getFrameSize());
- 
-         if (cl->enableLastRectEncoding)
+@@ -169,10 +172,23 @@ void Server::sendFrame()
+                 fu->type = rfbFramebufferUpdate;
+                 cl->ublen = sz_rfbFramebufferUpdateMsg;
+                 rfbSendUpdateBuf(cl);
+-                cl->tightEncoding = rfbEncodingTight;
++                cl->tightEncoding = rfbEncodingAspeed;
+                 rfbSendTightHeader(cl, 0, 0, video.getWidth(),
+                                    video.getHeight());
+-                cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
++                if (video.getFormat() == 1)
++                {
++                    cl->updateBuf[cl->ublen++] = (char)(0);
++                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 24 & 0xff);
++                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 16 & 0xff);
++                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 8 & 0xff);
++                    cl->updateBuf[cl->ublen++] = (char)(frameCount & 0xff);
++                    cl->updateBuf[cl->ublen++] = (char)(video.getSubsampling());
++                    cl->updateBuf[cl->ublen++] = (char)(0x00); // the value of quality if changed
++                }
++                else if (video.getFormat() == 0)
++                {
++                    cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
++                }
+                 rfbSendCompressedDataTight(cl, data, video.getFrameSize());
+                 if (cl->enableLastRectEncoding)
+                 {
 diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index 734294e..c75ffc0 100644
+index 3445715..ee18d9c 100644
 --- a/ikvm_video.cpp
 +++ b/ikvm_video.cpp
 @@ -19,6 +19,8 @@
@@ -168,14 +166,13 @@ index 734294e..c75ffc0 100644
 -Video::Video(const std::string& p, Input& input, int fr, int sub) :
 +Video::Video(const std::string& p, Input& input, int fr, int sub, int fmt) :
      resizeAfterOpen(false), timingsError(false), fd(-1), frameRate(fr),
--    lastFrameIndex(-1), height(600), width(800), subSampling(sub), input(input),
--    path(p)
-+    lastFrameIndex(-1), height(600), width(800), subSampling(sub),
-+    format(fmt), input(input), path(p)
+     lastFrameIndex(-1), height(600), width(800), subSampling(sub), input(input),
+-    path(p), pixelformat(V4L2_PIX_FMT_JPEG)
++    format(fmt), path(p), pixelformat(V4L2_PIX_FMT_JPEG)
  {}
  
  Video::~Video()
-@@ -434,6 +436,27 @@ void Video::start()
+@@ -434,6 +436,28 @@ void Video::start()
                  CALLOUT_DEVICE_PATH(path.c_str()));
      }
  
@@ -200,11 +197,12 @@ index 734294e..c75ffc0 100644
 +                CALLOUT_DEVICE_PATH(path.c_str()));
 +    }
 +
++
      memset(&sparm, 0, sizeof(v4l2_streamparm));
      sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
      sparm.parm.capture.timeperframe.numerator = 1;
 diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index 17477df..69ec79c 100644
+index 15bbb0b..6dac969 100644
 --- a/ikvm_video.hpp
 +++ b/ikvm_video.hpp
 @@ -23,7 +23,7 @@ class Video
@@ -216,10 +214,10 @@ index 17477df..69ec79c 100644
      ~Video();
      Video(const Video&) = default;
      Video& operator=(const Video&) = default;
-@@ -111,6 +111,26 @@ class Video
-     {
+@@ -120,6 +120,27 @@ class Video
          subSampling = _sub;
      }
+ 
 +    /*
 +     * @brief Gets the jpeg format of the video frame
 +     *
@@ -240,18 +238,16 @@ index 17477df..69ec79c 100644
 +    {
 +        format = _fmt;
 +    }
- 
++
      /* @brief Number of bits per component of a pixel */
      static const int bitsPerSample;
-@@ -160,6 +180,8 @@ class Video
-     size_t width;
-     /* @brief jpeg's subsampling, 1:420/0:444 */
+     /* @brief Number of bytes of storage for a pixel */
+@@ -169,6 +190,8 @@ class Video
      int subSampling;
-+    /* @brief jpeg format */
-+    int format;
      /* @brief Reference to the Input object */
      Input& input;
++    /* @brief jpeg format */
++    int format;
      /* @brief Path to the V4L2 video device */
--- 
-2.25.1
-
+     const std::string path;
+     /* @brief Streaming buffer storage */
