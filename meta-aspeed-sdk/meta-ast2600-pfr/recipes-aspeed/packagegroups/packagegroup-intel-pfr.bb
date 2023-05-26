@@ -16,6 +16,8 @@ PACKAGES = " \
 SUMMARY:${PN}-apps = "Intel PFR App package"
 RDEPENDS:${PN}-apps = " \
     obmc-pfr-image \
-    bmc-boot-done \
     "
 
+RDEPENDS:${PN}-apps:append:ast2600-dcscm-avenue-city = " \
+    bmc-boot-done \
+    "
