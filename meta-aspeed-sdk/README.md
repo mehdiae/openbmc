@@ -1,18 +1,15 @@
 # Create build environment
 ## Prerequisite
-### Ubuntu 18.04
+
+### Ubuntu 20.04
 ```
-sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc-multilib \
-     build-essential chrpath socat libsdl1.2-dev xterm
+sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils \
+    debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev python3-subunit mesa-common-dev zstd liblz4-tool file locales
 ```
 
-### Fedora
-```
-sudo yum install gawk make wget tar bzip2 gzip python unzip perl patch \
-     diffutils diffstat git cpp gcc gcc-c++ glibc-devel texinfo chrpath \
-     ccache perl-Data-Dumper perl-Text-ParseWords perl-Thread-Queue socat \
-     findutils which SDL-devel xterm
-```
+### Required Python and gcc Versions
+- Python 3.8.0 or greater
+- gcc 8.0 or greater
 
 Reference:
 - [OpenBMC/README.md](https://github.com/openbmc/openbmc#1-prerequisite)
