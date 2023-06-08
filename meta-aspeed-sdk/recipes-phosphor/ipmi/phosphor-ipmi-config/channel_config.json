@@ -99,7 +99,7 @@
     }
   },
   "9" : {
-    "name" : "ipmi_kcs6",
+    "name" : "ipmi_kcs5",
     "is_valid" : true,
     "active_sessions" : 0,
     "channel_info" : {
@@ -110,7 +110,7 @@
     }
   },
   "10" : {
-    "name" : "ipmi_kcs7",
+    "name" : "ipmi_kcs6",
     "is_valid" : true,
     "active_sessions" : 0,
     "channel_info" : {
@@ -121,7 +121,7 @@
     }
   },
   "11" : {
-    "name" : "ipmi_kcs8",
+    "name" : "ipmi_kcs7",
     "is_valid" : true,
     "active_sessions" : 0,
     "channel_info" : {
@@ -132,7 +132,7 @@
     }
   },
   "12" : {
-    "name" : "ipmi_kcs9",
+    "name" : "ipmi_kcs8",
     "is_valid" : true,
     "active_sessions" : 0,
     "channel_info" : {
