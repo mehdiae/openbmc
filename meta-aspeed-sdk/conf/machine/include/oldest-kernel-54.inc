@@ -6,7 +6,7 @@
 # The higher the version number is, the less compatibility code is added,
 # and the faster the code gets.
 
-# Yocto bitbake.conf set the oldest kernel version to 5.15
+# Yocto set the oldest kernel version to 5.15 in bitbake.conf
 # To support kernel 5.4 and fix compatible issue, set oldest kernel version to
 # 5.4 in ASPEED SDK.
 OLDEST_KERNEL = "5.4"

@@ -7,9 +7,12 @@ sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential chrpat
     debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev python3-subunit mesa-common-dev zstd liblz4-tool file locales
 ```
 
-### Required Python and gcc Versions
+### Required Git, tar, Python, make, gcc/g++ Versions
+- Git 1.8.3.1 or greater
+- tar 1.28 or greater
 - Python 3.8.0 or greater
-- gcc 8.0 or greater
+- GNU make 4.0 or greater
+- gcc/g++ 8.0 or greater
 
 Reference:
 - [OpenBMC/README.md](https://github.com/openbmc/openbmc#1-prerequisite)
