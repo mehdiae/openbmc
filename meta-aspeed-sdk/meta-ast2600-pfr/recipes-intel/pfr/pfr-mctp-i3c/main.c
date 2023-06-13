@@ -223,7 +223,7 @@ void send_mctp_set_eid(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 	}
 }
 
-void send_doe_registration_res(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
+int send_doe_registration_res(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 {
 	uint8_t pec, i3c_addr = BMC_I3C_SLAVE_ADDR << 1;
 	struct mctp_i3c_doe_registration *msg = (struct mctp_i3c_doe_registration *)mctp_msg;
@@ -240,7 +240,10 @@ void send_doe_registration_res(struct i3c_mctp_packet_data *mctp_msg, uint16_t l
 
 	if (write(fd, msg, len) < 0) {
 		printf("Failed to send doe registration response\n");
+		return -1;
 	}
+
+	return 0;
 }
 
 void process_mctp_control_message( struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
@@ -265,6 +268,7 @@ void process_mctp_control_message( struct i3c_mctp_packet_data *mctp_msg, uint16
 void process_mctp_vendor_message( struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 {
 	struct mctp_i3c_doe_msg *msg = (struct mctp_i3c_doe_msg *)mctp_msg->payload;
+	int ret;
 
 	if (!is_mctp_vendor_message_valid(msg, len))
 		return;
@@ -272,7 +276,11 @@ void process_mctp_vendor_message( struct i3c_mctp_packet_data *mctp_msg, uint16_
 	switch (msg->doe_cmd) {
 		case MCTP_VENDOR_DOE_REGISTRATION:
 			printf("Received DOE eid registration\n");
-			send_doe_registration_res(mctp_msg, len);
+			ret = send_doe_registration_res(mctp_msg, len);
+			if (ret == 0) {
+				printf("EID registration flow completed");
+				exit(0);
+			}
 			break;
 		default:
 			printf("Drop doe command : %x\n", msg->doe_cmd);

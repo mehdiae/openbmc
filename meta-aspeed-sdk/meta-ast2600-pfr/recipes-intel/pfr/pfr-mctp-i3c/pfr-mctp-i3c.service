@@ -4,9 +4,8 @@ After=BootCompleted.service
 
 [Service]
 ExecStart=/usr/bin/pfr-mctpd -d /sys/bus/i3c/devices/i3c-0/slave-mqueue
-Type=simple
+Type=oneshot
 RemainAfterExit=yes
-Restart=always
 SyslogIdentifier=pfr-mctp-i3c
 
 [Install]
