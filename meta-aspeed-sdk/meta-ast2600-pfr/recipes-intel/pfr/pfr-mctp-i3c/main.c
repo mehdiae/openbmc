@@ -294,8 +294,15 @@ void *mctp_i3c_state_handler(void *arg)
 	uint8_t buf[MCTP_BTU];
 	uint16_t length;
 	struct i3c_mctp_packet_data *mctp_msg;
+	struct pollfd fds[1];
+
+	fds[0].fd = fd;
+	fds[0].events = POLLIN | POLLOUT | POLLPRI | POLLERR;
 
 	while(1) {
+		if (poll(fds, 1 , -1) <= 0) {
+			continue;
+		}
 		lseek(fd, 0, SEEK_SET);
 		ret = read(fd, buf, sizeof(buf));
 		if (ret > 0) {
@@ -317,8 +324,6 @@ void *mctp_i3c_state_handler(void *arg)
 		} else if (ret < 0) {
 			perror("Error :");
 		}
-
-		sleep(1);
 	}
 
 	pthread_exit(NULL);
@@ -344,7 +349,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	fd = open(dev, O_RDWR | O_NONBLOCK);
+	fd = open(dev, O_RDWR);
+
 	if (fd < 0) {
 		printf("Failed to open i3c dev\n");
 		print_usage(argv[0]);
