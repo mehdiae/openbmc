@@ -1,0 +1,309 @@
+From f488f92e30e4e57cfd794b2e265a80624507db8b Mon Sep 17 00:00:00 2001
+From: Troy Lee <troy_lee@aspeedtech.com>
+Date: Wed, 14 Jun 2023 16:44:53 +0800
+Subject: [PATCH] Add support libmctp-intel asti3c with slavemq mode
+
+Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
+---
+ spdm_emu/spdm_emu_common/key.c                |   1 +
+ spdm_emu/spdm_emu_common/spdm_emu.c           |  10 ++
+ spdm_emu/spdm_emu_common/spdm_emu.h           |   1 +
+ .../spdm_responder_emu/spdm_responder_emu.c   | 168 ++++++++++++------
+ 4 files changed, 123 insertions(+), 57 deletions(-)
+
+diff --git a/spdm_emu/spdm_emu_common/key.c b/spdm_emu/spdm_emu_common/key.c
+index 1945dfe..4c6c326 100644
+--- a/spdm_emu/spdm_emu_common/key.c
++++ b/spdm_emu/spdm_emu_common/key.c
+@@ -183,6 +183,7 @@ uint8_t m_session_policy =
+ uint8_t m_end_session_attributes =
+     SPDM_END_SESSION_REQUEST_ATTRIBUTES_PRESERVE_NEGOTIATED_STATE_CLEAR;
+ 
++uint8_t m_mctp_medium = 0; /* 0: SMBus, 1: I3C */
+ uint8_t m_mctp_bus = 4;
+ uint8_t m_mctp_sa = 0x10;
+ uint8_t m_mctp_eid = 0x0a;
+diff --git a/spdm_emu/spdm_emu_common/spdm_emu.c b/spdm_emu/spdm_emu_common/spdm_emu.c
+index 2df6c84..7a5a369 100644
+--- a/spdm_emu/spdm_emu_common/spdm_emu.c
++++ b/spdm_emu/spdm_emu_common/spdm_emu.c
+@@ -28,6 +28,7 @@ void print_usage(const char *name)
+     printf("\n%s [--trans MCTP|PCI_DOE|NONE]\n", name);
+     printf("   [--ver 1.0|1.1|1.2]\n");
+     printf("   [--sec_ver 0|1.0|1.1]\n");
++    printf("   [--mctp_medium 0|1]\n");
+     printf("   [--mctp_bus 4]\n");
+     printf("   [--mctp_sa 0x10]\n");
+     printf("   [--mctp_rot_sa 0x38]\n");
+@@ -67,6 +68,7 @@ void print_usage(const char *name)
+     printf(
+         "   [--sec_ver] is secured message version. By default, 1.0 is used. 0 means no secured message version negotiation.\n");
+ 
++    printf("   [--mctp_medium] is the mctp medium. 0 is SMBus and 1 is I3C\n");
+     printf("   [--mctp_bus] is the smbus channel. By default, set to /dev/i2c-4\n");
+     printf("   [--mctp_sa] is the slave address of smbus channel. By default, set to 0x10 (7-bit address)\n");
+     printf("   [--mctp_eid] is the endpoint id of mctp. By default, set to 0x0a.\n");
+@@ -516,6 +518,14 @@ void process_args(char *program_name, int argc, char *argv[])
+             continue;
+ 	}
+ 
++	if (strcmp(argv[0], "--mctp_medium") == 0) {
++            data32 = strtol(argv[1], NULL, 0);
++            m_mctp_medium = data32 & 0xff;
++            argc -= 2;
++            argv += 2;
++            continue;
++	}
++
+ 	if (strcmp(argv[0], "--mctp_sa") == 0) {
+             data32 = strtol(argv[1], NULL, 0);
+             m_mctp_sa = data32 & 0xff;
+diff --git a/spdm_emu/spdm_emu_common/spdm_emu.h b/spdm_emu/spdm_emu_common/spdm_emu.h
+index 183dac5..51492b2 100644
+--- a/spdm_emu/spdm_emu_common/spdm_emu.h
++++ b/spdm_emu/spdm_emu_common/spdm_emu.h
+@@ -57,6 +57,7 @@ extern uint8_t m_support_other_params_support;
+ extern uint8_t m_session_policy;
+ extern uint8_t m_end_session_attributes;
+ 
++extern uint8_t m_mctp_medium;
+ extern uint8_t m_mctp_bus;
+ extern uint8_t m_mctp_sa;
+ extern uint8_t m_mctp_eid;
+diff --git a/spdm_emu/spdm_responder_emu/spdm_responder_emu.c b/spdm_emu/spdm_responder_emu/spdm_responder_emu.c
+index b55e0c7..65a8639 100644
+--- a/spdm_emu/spdm_responder_emu/spdm_responder_emu.c
++++ b/spdm_emu/spdm_responder_emu/spdm_responder_emu.c
+@@ -28,13 +28,16 @@ libspdm_return_t pci_doe_init_responder ();
+ #include <libmctp.h>
+ #include <libmctp-log.h>
+ #include <libmctp-smbus.h>
++#include <libmctp-asti3c.h>
+ #include <libmctp-cmds.h>
+ #include <libmctp-msgtypes.h>
+ 
+ #include "working_queue.h"
+ 
+-#define MCTP_RX "/sys/bus/i2c/devices/%d-%04x/slave-mqueue"
+-#define MCTP_TX "/dev/i2c-%d"
++#define MCTP_SMBUS_RX "/sys/bus/i2c/devices/%d-%04x/slave-mqueue"
++#define MCTP_SMBUS_TX "/dev/i2c-%d"
++
++#define MCTP_I3C_RXTX "/sys/bus/i3c/devices/i3c-%d/slave-mqueue"
+ 
+ extern struct wq_t *comm_queue;
+ 
+@@ -44,6 +47,7 @@ void rx_request_handler(mctp_eid_t src, void *data, void *msg, size_t len,
+     uint8_t *req = (uint8_t *)msg;
+     uint8_t mctp_type;
+ 
++    printf("%s\n", __func__);
+     if (len > 0) {
+         mctp_type = req[0];
+ 
+@@ -93,6 +97,7 @@ void rx_request_control_handler(mctp_eid_t src, void *data, void *msg, size_t le
+ 	struct mctp_ctrl_resp resp = { 0 };
+ 	uint8_t cmd;
+ 	int rc;
++    printf("%s\n", __func__);
+ 	if (ctx == NULL) {
+ 		mctp_prerr("%s: ctx not found", __func__);
+ 		return;
+@@ -139,13 +144,21 @@ void *platform_mctp_server(void *ctx)
+ {
+     struct spdm_mctp_ctx *mctp_ctx = ctx;
+     struct mctp_binding_smbus *smbus = (struct mctp_binding_smbus *)mctp_ctx->prot;
++    struct mctp_binding_asti3c *i3c = (struct mctp_binding_smbus *)mctp_ctx->prot;
+     struct mctp *mctp = mctp_ctx->mctp;
+     struct pollfd pfd = { 0 };
+     int count = 0;
+     int r;
+ 
+-    pfd.fd = smbus->in_fd;
+-    pfd.events = POLLPRI;
++    if (m_mctp_medium == 0) {
++        pfd.events = POLLPRI;
++        pfd.fd = smbus->in_fd;
++    }
++    else if (m_mctp_medium == 1) {
++        pfd.fd = m_server_socket;
++        // pfd.events = POLLIN | POLLOUT;
++        pfd.events = POLLERR | POLLPRI;
++    }
+ 
+     mctp_set_rx_all(mctp, rx_request_handler, mctp_ctx);
+     mctp_set_rx_ctrl(mctp, rx_request_control_handler, mctp_ctx);
+@@ -156,14 +169,30 @@ void *platform_mctp_server(void *ctx)
+             printf("Poll returned error status (errno=%d)\n", errno);
+             break;
+         }
+-        if (r == 0 || !(pfd.revents & POLLPRI))
+-            continue;
+-        if (mctp_smbus_read(smbus) < 0) {
+-            printf("%s: MCTP RX error\n", __func__);
+-            break;
+-        } /*else {
++	if (m_mctp_medium == 0) {
++            if (r == 0 || !(pfd.revents & POLLPRI)) {
++                printf("Poll timeout\n");
++                continue;
++            }
++            if (mctp_smbus_read(smbus) < 0) {
++                printf("%s: MCTP RX error\n", __func__);
++                break;
++            }
++	} else if (m_mctp_medium == 1) {
++            
++	    // if (r > 0 && pfd.revents & POLLIN) {
++	    if (r > 0 && pfd.revents & (POLLERR | POLLPRI)) {
++                printf("incoming i3c message r=%d evt=%x\n", r, pfd.revents);
++		lseek(m_server_socket, 0, SEEK_SET);
++                mctp_asti3c_rx(i3c, m_server_socket);
++            }
++	    continue;
++	}
++	
++	else {
+             printf("%s: SMBUS READ Done\n", __func__);
+-        }*/
++        } 
++	
+         if (mctp_ctx->len > 0) {
+             count++;
+             mctp_ctx->len = 0;
+@@ -177,64 +206,89 @@ void *platform_mctp_server(void *ctx)
+ bool init_mctp_server()
+ {
+     char binding[128];
+-    int fd;
+-    struct mctp *mctp;
+-    struct mctp_binding_smbus *smbus;
++    struct mctp *mctp = mctp_init();
++    struct spdm_mctp_ctx *mctp_ctx = (struct spdm_mctp_ctx *)malloc(sizeof(struct spdm_mctp_ctx));
++
++    if (mctp == NULL) {
++	printf("Fail to init mctp structure\n");
++	return false;
++    }
+ 
+     comm_queue = wq_create();
+ 
+-    mctp_set_log_stdio(MCTP_LOG_ERR);
++    mctp_set_log_stdio(MCTP_LOG_DEBUG);
+     mctp_set_tracing_enabled(true);
+ 
+-    /* Open Slave MQ */
+-    snprintf(binding, sizeof(binding), MCTP_RX, m_mctp_bus, m_mctp_sa);
+-
+-    fd = open(binding, O_RDONLY | O_NONBLOCK);
+-    if (fd < 0) {
+-        printf("Failed to open %s\n", binding);
+-        return false;
+-    }
+-    m_server_socket = fd;
+-
+-    /* Open MCTP TX */
+-    snprintf(binding, sizeof(binding), MCTP_TX, m_mctp_bus);
+-    fd = open(binding, O_RDONLY /*| O_NONBLOCK*/);
+-    if (fd < 0) {
+-        printf("Failed to open %s\n", binding);
+-        return false;
+-    }
+-    m_mctp_tx = fd;
+-
+-    mctp = mctp_init();
+-    smbus = mctp_smbus_init();
++    if (m_mctp_medium == 0) {
++	struct mctp_binding_smbus *smbus = mctp_smbus_init();
+ 
+-    if (mctp == NULL || smbus == NULL) {
+-        printf("Fail to init mctp/smbus structure\n");
+-        return false;
+-    }
++	if (smbus == NULL) {
++	    printf("Fail to init smbus structure\n");
++	    return false;
++	}
+ 
+-    if (mctp_smbus_register_bus(smbus, mctp, m_mctp_eid) < 0) {
+-        printf("Failed to register smbus src eid\n");
+-        return false;
+-    }
++	/* Open SMBus Slave MQ */
++	snprintf(binding, sizeof(binding), MCTP_SMBUS_RX, m_mctp_bus, m_mctp_sa);
++	m_server_socket = open(binding, O_RDONLY | O_NONBLOCK);
++	if (m_server_socket < 0) {
++	    printf("Failed to open %s\n", binding);
++	    return false;
++	}
+ 
+-    mctp_smbus_set_src_slave_addr(smbus, m_mctp_sa << 1);
+-    mctp_smbus_set_out_fd(smbus, m_mctp_tx);
+-    mctp_smbus_set_in_fd(smbus, m_server_socket);
++	/* Open MCTP TX */
++	snprintf(binding, sizeof(binding), MCTP_SMBUS_TX, m_mctp_bus);
++	m_mctp_tx = open(binding, O_RDONLY /*| O_NONBLOCK*/);
++	if (m_mctp_tx < 0) {
++	    printf("Failed to open %s\n", binding);
++	    return false;
++	}
+ 
+-    struct mctp_smbus_pkt_private *smbus_private =
+-        (struct mctp_smbus_pkt_private *)malloc(sizeof(struct mctp_smbus_pkt_private));
+-    smbus_private->mux_hold_timeout = 0;
+-    smbus_private->mux_flags = 0;
+-    smbus_private->fd = m_mctp_tx;
+-    smbus_private->slave_addr = m_mctp_rot_sa << 1;
++	if (mctp_smbus_register_bus(smbus, mctp, m_mctp_eid) < 0) {
++	    printf("Failed to register smbus src eid\n");
++	    return false;
++	}
+ 
++	mctp_smbus_set_src_slave_addr(smbus, m_mctp_sa << 1);
++	mctp_smbus_set_out_fd(smbus, m_mctp_tx);
++	mctp_smbus_set_in_fd(smbus, m_server_socket);
++
++	struct mctp_smbus_pkt_private *smbus_private =
++	    (struct mctp_smbus_pkt_private *)malloc(sizeof(struct mctp_smbus_pkt_private));
++	smbus_private->mux_hold_timeout = 0;
++	smbus_private->mux_flags = 0;
++	smbus_private->fd = m_mctp_tx;
++	smbus_private->slave_addr = m_mctp_rot_sa << 1;
++
++
++	mctp_ctx->prot = (void *)smbus;
++	mctp_ctx->priv_binding = smbus_private;
++    } else if (m_mctp_medium == 1) {
++    	struct mctp_binding_asti3c  *i3c = mctp_asti3c_init();
++	if (i3c == NULL) {
++            printf("Failed to alloc i3c structure\n");
++	    return false;
++	}
++	snprintf(binding, sizeof(binding), MCTP_I3C_RXTX, m_mctp_bus);
++#if 0
++	m_server_socket = open(binding, O_RDONLY | O_NONBLOCK);
++	m_mctp_tx = open(binding, O_WRONLY | O_NONBLOCK);
++#else
++	m_mctp_tx = open(binding, O_RDWR | O_NONBLOCK);
++	m_server_socket = m_mctp_tx;
++#endif
++	struct mctp_asti3c_pkt_private *i3c_private =
++	    (struct mctp_asti3c_pkt_private *)malloc(sizeof(struct mctp_asti3c_pkt_private));
++	i3c_private->fd = m_mctp_tx;
++	i3c_private->append_pec = true;
++	mctp_ctx->prot = (void *)i3c;
++	mctp_ctx->priv_binding = i3c_private;
++
++	mctp_register_bus(mctp, &i3c->binding, m_mctp_eid);
++	mctp_binding_set_tx_enabled(&i3c->binding, true);
++    }
+ 
+-    struct spdm_mctp_ctx *mctp_ctx = (struct spdm_mctp_ctx *)malloc(sizeof(struct spdm_mctp_ctx));
+-    mctp_ctx->mctp = mctp;
+-    mctp_ctx->prot = (void *)smbus;
+     mctp_ctx->len = 0;
+-    mctp_ctx->priv_binding = smbus_private;
++    mctp_ctx->mctp = mctp;
+     m_mctp_context = mctp_ctx;
+ 
+     pthread_t mctp_server;
