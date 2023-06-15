@@ -484,7 +484,7 @@ index b76e644..48149b6 100644
 +
 +    comm_queue = wq_create();
 +
-+    mctp_set_log_stdio(MCTP_LOG_INFO);
++    mctp_set_log_stdio(MCTP_LOG_ERR);
 +    mctp_set_tracing_enabled(true);
 +
 +    /* Open Slave MQ */

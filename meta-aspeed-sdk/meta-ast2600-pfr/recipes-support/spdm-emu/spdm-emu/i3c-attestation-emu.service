@@ -30,6 +30,7 @@ ExecStart=/usr/bin/spdm_responder_emu \
 RestartSec=5
 StartLimitInterval=0
 Type=simple
+StandardOutput=null
 
 [Install]
 WantedBy=multi-user.target
