@@ -16,11 +16,23 @@ from random import choice
 import oeqa
 import oe
 import bb.utils
+import bb.tinfoil
 
 from oeqa.core.context import OETestContext, OETestContextExecutor
 from oeqa.core.exception import OEQAPreRun, OEQATestNotFound
 
 from oeqa.utils.commands import runCmd, get_bb_vars, get_test_layer
+
+OESELFTEST_METADATA=["run_all_tests", "run_tests", "skips", "machine", "select_tags", "exclude_tags"]
+
+def get_oeselftest_metadata(args):
+    result = {}
+    raw_args = vars(args)
+    for metadata in OESELFTEST_METADATA:
+        if metadata in raw_args:
+            result[metadata] = raw_args[metadata]
+
+    return result
 
 class NonConcurrentTestSuite(unittest.TestSuite):
     def __init__(self, suite, processes, setupfunc, removefunc):
@@ -68,6 +80,12 @@ class OESelftestTestContext(OETestContext):
             self.removebuilddir = removebuilddir
 
     def setup_builddir(self, suffix, selftestdir, suite):
+        # Get SSTATE_DIR from the parent build dir
+        with bb.tinfoil.Tinfoil(tracking=True) as tinfoil:
+            tinfoil.prepare(quiet=2, config_only=True)
+            d = tinfoil.config_data
+            sstatedir = str(d.getVar('SSTATE_DIR'))
+
         builddir = os.environ['BUILDDIR']
         if not selftestdir:
             selftestdir = get_test_layer()
@@ -86,16 +104,29 @@ class OESelftestTestContext(OETestContext):
         oe.path.copytree(builddir + "/cache", newbuilddir + "/cache")
         oe.path.copytree(selftestdir, newselftestdir)
 
+        subprocess.check_output("git init; git add *; git commit -a -m 'initial'", cwd=newselftestdir, shell=True)
+
+        # Tried to used bitbake-layers add/remove but it requires recipe parsing and hence is too slow
+        subprocess.check_output("sed %s/conf/bblayers.conf -i -e 's#%s#%s#g'" % (newbuilddir, selftestdir, newselftestdir), cwd=newbuilddir, shell=True)
+
+        # Relative paths in BBLAYERS only works when the new build dir share the same ascending node
+        if self.newbuilddir:
+            bblayers = subprocess.check_output("bitbake-getvar --value BBLAYERS | tail -1", cwd=builddir, shell=True, text=True)
+            if '..' in bblayers:
+                bblayers_abspath = [os.path.abspath(path) for path in bblayers.split()]
+                with open("%s/conf/bblayers.conf" % newbuilddir, "a") as f:
+                    newbblayers = "# new bblayers to be used by selftest in the new build dir '%s'\n" % newbuilddir
+                    newbblayers += 'BBLAYERS = "%s"\n' % ' '.join(bblayers_abspath)
+                    f.write(newbblayers)
+
         for e in os.environ:
             if builddir + "/" in os.environ[e]:
                 os.environ[e] = os.environ[e].replace(builddir + "/", newbuilddir + "/")
             if os.environ[e].endswith(builddir):
                 os.environ[e] = os.environ[e].replace(builddir, newbuilddir)
 
-        subprocess.check_output("git init; git add *; git commit -a -m 'initial'", cwd=newselftestdir, shell=True)
-
-        # Tried to used bitbake-layers add/remove but it requires recipe parsing and hence is too slow
-        subprocess.check_output("sed %s/conf/bblayers.conf -i -e 's#%s#%s#g'" % (newbuilddir, selftestdir, newselftestdir), cwd=newbuilddir, shell=True)
+        # Set SSTATE_DIR to match the parent SSTATE_DIR
+        subprocess.check_output("echo 'SSTATE_DIR ?= \"%s\"' >> %s/conf/local.conf" % (sstatedir, newbuilddir), cwd=newbuilddir, shell=True)
 
         os.chdir(newbuilddir)
 
@@ -334,12 +365,14 @@ class OESelftestTestContextExecutor(OETestContextExecutor):
         import platform
         from oeqa.utils.metadata import metadata_from_bb
         metadata = metadata_from_bb()
+        oeselftest_metadata = get_oeselftest_metadata(args)
         configuration = {'TEST_TYPE': 'oeselftest',
                         'STARTTIME': args.test_start_time,
                         'MACHINE': self.tc.td["MACHINE"],
                         'HOST_DISTRO': oe.lsb.distro_identifier().replace(' ', '-'),
                         'HOST_NAME': metadata['hostname'],
-                        'LAYERS': metadata['layers']}
+                        'LAYERS': metadata['layers'],
+                        'OESELFTEST_METADATA': oeselftest_metadata}
         return configuration
 
     def get_result_id(self, configuration):

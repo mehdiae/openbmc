@@ -36,4 +36,6 @@ UBOOT_LOADADDRESS:aspeed-g5 ?= "0x80000000"
 UBOOT_LOADADDRESS:aspeed-g6 ?= "0x80000000"
 
 PREFERRED_VERSION_iperf3 ?= "3.1.4"
-PREFERRED_VERSION_nbd ?= "3.20"
+
+# It should be removed if kernel 5.4 is no longer supported.
+require oldest-kernel-54.inc

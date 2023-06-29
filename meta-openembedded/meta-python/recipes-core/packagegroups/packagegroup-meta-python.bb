@@ -157,6 +157,7 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-gmqtt \
     python3-gnupg \
     python3-google-api-python-client \
+    python3-gpiod \
     python3-gpsd-py3 \
     python3-graphviz \
     python3-greenlet \
@@ -393,6 +394,7 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-send2trash \
     python3-sentry-sdk \
     python3-serpent \
+    python3-service-identity \
     python3-setuptools-declarative-requirements \
     python3-setuptools-scm-git-archive \
     python3-sh \
@@ -430,6 +432,7 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-trafaret-config \
     python3-traitlets \
     python3-transitions \
+    python3-trustme \
     python3-twine \
     python3-twisted \
     python3-twitter \

@@ -1,18 +1,18 @@
 # Create build environment
 ## Prerequisite
-### Ubuntu 18.04
+
+### Ubuntu 20.04
 ```
-sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc-multilib \
-     build-essential chrpath socat libsdl1.2-dev xterm
+sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils \
+    debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev python3-subunit mesa-common-dev zstd liblz4-tool file locales
 ```
 
-### Fedora
-```
-sudo yum install gawk make wget tar bzip2 gzip python unzip perl patch \
-     diffutils diffstat git cpp gcc gcc-c++ glibc-devel texinfo chrpath \
-     ccache perl-Data-Dumper perl-Text-ParseWords perl-Thread-Queue socat \
-     findutils which SDL-devel xterm
-```
+### Required Git, tar, Python, make, gcc/g++ Versions
+- Git 1.8.3.1 or greater
+- tar 1.28 or greater
+- Python 3.8.0 or greater
+- GNU make 4.0 or greater
+- gcc/g++ 8.0 or greater
 
 Reference:
 - [OpenBMC/README.md](https://github.com/openbmc/openbmc#1-prerequisite)
@@ -25,6 +25,7 @@ Target machine must be specified. Use one of:
 ast2500-default
 ast2500-default-54
 ast2600-dcscm
+ast2600-dcscm-amd
 ast2600-default
 ast2600-default-510
 ast2600-default-54
@@ -47,7 +48,6 @@ ast2600-secure-rsa4096-sha512-o1
 ast2600-secure-rsa4096-sha512-o2-pub
 ast2600-a2
 ast2600-a2-54
-ast2600-ecc
 ast2600-a2-emmc
 ast2600-a2-emmc-secure-rsa2048-sha256
 ast2600-a2-emmc-secure-rsa4096-sha512
@@ -63,7 +63,6 @@ ast2600-a2-secure-rsa4096-sha512-o1
 ast2600-a2-secure-rsa4096-sha512-o2-pub
 ast2600-a1
 ast2600-a1-54
-ast2600-ecc
 ast2600-a1-secure-rsa2048-sha256
 ast2600-a1-secure-rsa2048-sha256-ncot
 ast2600-a1-secure-rsa2048-sha256-o1

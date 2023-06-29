@@ -243,12 +243,12 @@ system and gives an overview of their function and contents.
       To add a tune to the list, be sure to append it with spaces using the
       "+=" BitBake operator. Do not simply replace the list by using the
       "=" operator. See the
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:basic syntax`" section in the BitBake
+      ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:basic syntax`" section in the BitBake
       User Manual for more information.
 
    :term:`AZ_SAS`
       Azure Storage Shared Access Signature, when using the
-      :ref:`Azure Storage fetcher (az://) <bitbake:bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`
+      :ref:`Azure Storage fetcher (az://) <bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`
       This variable can be defined to be used by the fetcher to authenticate
       and gain access to non-public artifacts::
 
@@ -353,6 +353,9 @@ system and gives an overview of their function and contents.
 
    :term:`BB_BASEHASH_IGNORE_VARS`
       See :term:`bitbake:BB_BASEHASH_IGNORE_VARS` in the BitBake manual.
+
+   :term:`BB_CACHEDIR`
+      See :term:`bitbake:BB_CACHEDIR` in the BitBake manual.
 
    :term:`BB_CHECK_SSL_CERTS`
       See :term:`bitbake:BB_CHECK_SSL_CERTS` in the BitBake manual.
@@ -1313,6 +1316,26 @@ system and gives an overview of their function and contents.
       optional at the distribution level, in case the hardware supports
       Bluetooth but you do not ever intend to use it.
 
+   :term:`COMMERCIAL_AUDIO_PLUGINS`
+      This variable is specific to the :yocto_git:`GStreamer recipes
+      </poky/tree/meta/recipes-multimedia/gstreamer/gstreamer1.0-meta-base.bb>`.
+      It allows to build the GStreamer `"ugly"
+      <https://github.com/GStreamer/gst-plugins-ugly>`__  and
+      `"bad" <https://github.com/GStreamer/gst-plugins-bad>`__ audio plugins.
+
+      See the :ref:`dev-manual/licenses:other variables related to commercial licenses`
+      section for usage details.
+
+   :term:`COMMERCIAL_VIDEO_PLUGINS`
+      This variable is specific to the :yocto_git:`GStreamer recipes
+      </poky/tree/meta/recipes-multimedia/gstreamer/gstreamer1.0-meta-base.bb>`.
+      It allows to build the GStreamer `"ugly"
+      <https://github.com/GStreamer/gst-plugins-ugly>`__  and
+      `"bad" <https://github.com/GStreamer/gst-plugins-bad>`__ video plugins.
+
+      See the :ref:`dev-manual/licenses:other variables related to commercial licenses`
+      section for usage details.
+
    :term:`COMMON_LICENSE_DIR`
       Points to ``meta/files/common-licenses`` in the
       :term:`Source Directory`, which is where generic license
@@ -1813,15 +1836,14 @@ system and gives an overview of their function and contents.
 
           DEPENDS = "bar"
 
-      The practical effect of the previous
-      assignment is that all files installed by bar will be available in
-      the appropriate staging sysroot, given by the
-      :term:`STAGING_DIR* <STAGING_DIR>` variables, by the time the
-      :ref:`ref-tasks-configure` task for ``foo`` runs.
-      This mechanism is implemented by having :ref:`ref-tasks-configure` depend on
-      the :ref:`ref-tasks-populate_sysroot` task of
-      each recipe listed in :term:`DEPENDS`, through a
-      ``[``\ :ref:`deptask <bitbake:bitbake-user-manual/bitbake-user-manual-metadata:variable flags>`\ ``]``
+      The practical effect of the previous assignment is that all files
+      installed by bar will be available in the appropriate staging sysroot,
+      given by the :term:`STAGING_DIR* <STAGING_DIR>` variables, by the time
+      the :ref:`ref-tasks-configure` task for ``foo`` runs. This mechanism is
+      implemented by having :ref:`ref-tasks-configure` depend on the
+      :ref:`ref-tasks-populate_sysroot` task of each recipe listed in
+      :term:`DEPENDS`, through a
+      ``[``\ :ref:`deptask <bitbake-user-manual/bitbake-user-manual-metadata:variable flags>`\ ``]``
       declaration in the :ref:`ref-classes-base` class.
 
       .. note::
@@ -1868,12 +1890,12 @@ system and gives an overview of their function and contents.
             to the recipe that installs ``libbar``, other recipes might
             fail to link against ``libfoo``.
 
-      For information on runtime dependencies, see the
-      :term:`RDEPENDS` variable. You can also see the
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-execution:dependencies`" sections in the
-      BitBake User Manual for additional information on tasks and
-      dependencies.
+      For information on runtime dependencies, see the :term:`RDEPENDS`
+      variable. You can also see the
+      ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
+      ":ref:`bitbake-user-manual/bitbake-user-manual-execution:dependencies`"
+      sections in the BitBake User Manual for additional information on tasks
+      and dependencies.
 
    :term:`DEPLOY_DIR`
       Points to the general area that the OpenEmbedded build system uses to
@@ -1967,25 +1989,6 @@ system and gives an overview of their function and contents.
       ":ref:`overview-manual/concepts:package feeds`" section
       in the Yocto Project Overview and Concepts Manual.
 
-   :term:`DEPLOY_DIR_TAR`
-      Points to the area that the OpenEmbedded build system uses to place
-      tarballs that are ready to be used outside of the build system. This
-      variable applies only when :term:`PACKAGE_CLASSES` contains
-      ":ref:`ref-classes-package_tar`".
-
-      The BitBake configuration file initially defines this variable as a
-      sub-folder of :term:`DEPLOY_DIR`::
-
-         DEPLOY_DIR_TAR = "${DEPLOY_DIR}/tar"
-
-      The :ref:`ref-classes-package_tar` class uses the
-      :term:`DEPLOY_DIR_TAR` variable to make sure the
-      :ref:`ref-tasks-package_write_tar` task
-      writes TAR packages into the appropriate folder. For more information
-      on how packaging works, see the
-      ":ref:`overview-manual/concepts:package feeds`" section
-      in the Yocto Project Overview and Concepts Manual.
-
    :term:`DEPLOYDIR`
       When inheriting the :ref:`ref-classes-deploy` class, the
       :term:`DEPLOYDIR` points to a temporary work area for deployed files that
@@ -2004,9 +2007,9 @@ system and gives an overview of their function and contents.
       variable.
 
    :term:`DEV_PKG_DEPENDENCY`
-      Provides an easy way for recipes to disable or adjust the runtime
-      dependency (:term:`RDEPENDS`) of the ``${PN}-dev`` package on the main
-      (``${PN}``) package, particularly where the main package may be empty.
+      Provides an easy way for recipes to disable or adjust the runtime recommendation
+      (:term:`RRECOMMENDS`) of the ``${PN}-dev`` package on the main
+      (``${PN}``) package.
 
    :term:`DISABLE_STATIC`
       Used in order to disable static linking by default (in order to save
@@ -2091,19 +2094,27 @@ system and gives an overview of their function and contents.
       provide with this variable, see the ":ref:`ref-features-distro`" section.
 
    :term:`DISTRO_FEATURES_BACKFILL`
-      Features to be added to :term:`DISTRO_FEATURES` if not also present in
-      :term:`DISTRO_FEATURES_BACKFILL_CONSIDERED`.
+      A space-separated list of features to be added to :term:`DISTRO_FEATURES`
+      if not also present in :term:`DISTRO_FEATURES_BACKFILL_CONSIDERED`.
 
       This variable is set in the ``meta/conf/bitbake.conf`` file. It is
       not intended to be user-configurable. It is best to just reference
-      the variable to see which distro features are being backfilled for
-      all distro configurations. See the ":ref:`ref-features-backfill`" section
-      for more information.
+      the variable to see which distro features are being
+      :ref:`backfilled <ref-features-backfill>` for all distro configurations.
 
    :term:`DISTRO_FEATURES_BACKFILL_CONSIDERED`
-      Features from :term:`DISTRO_FEATURES_BACKFILL` that should not be
-      backfilled (i.e. added to :term:`DISTRO_FEATURES`) during the build. See
-      the ":ref:`ref-features-backfill`" section for more information.
+      A space-separated list of features from :term:`DISTRO_FEATURES_BACKFILL`
+      that should not be :ref:`backfilled <ref-features-backfill>` (i.e. added
+      to :term:`DISTRO_FEATURES`) during the build.
+
+      This corresponds to an opt-out mechanism. When new default distro
+      features are introduced, distribution maintainers can review (`consider`)
+      them and decide to exclude them from the
+      :ref:`backfilled <ref-features-backfill>` features. Therefore, the
+      combination of :term:`DISTRO_FEATURES_BACKFILL` and
+      :term:`DISTRO_FEATURES_BACKFILL_CONSIDERED` makes it possible to
+      add new default features without breaking existing distributions.
+
 
    :term:`DISTRO_FEATURES_DEFAULT`
       A convenience variable that gives you the default list of distro
@@ -2528,6 +2539,20 @@ system and gives an overview of their function and contents.
       variable specifies additional configuration options you want to pass
       to the ``scons`` command line.
 
+   :term:`EXTRA_OEMESON`
+      Additional `Meson <https://mesonbuild.com/>`__ options. See the
+      :ref:`ref-classes-meson` class for additional information.
+
+      In addition to standard Meson options, such options correspond to
+      `Meson build options <https://mesonbuild.com/Build-options.html>`__
+      defined in the ``meson_options.txt`` file in the sources to build.
+      Here is an example::
+
+         EXTRA_OEMESON = "-Dpython=disabled -Dvalgrind=disabled"
+
+      Note that any custom value for the Meson ``--buildtype`` option
+      should be set through the :term:`MESON_BUILDTYPE` variable.
+
    :term:`EXTRA_USERS_PARAMS`
       When inheriting the :ref:`ref-classes-extrausers`
       class, this variable provides image level user and group operations.
@@ -2775,15 +2800,13 @@ system and gives an overview of their function and contents.
       recipe to correctly extend the path.
 
    :term:`FILESOVERRIDES`
-      A subset of :term:`OVERRIDES` used by the
-      OpenEmbedded build system for creating
-      :term:`FILESPATH`. The :term:`FILESOVERRIDES` variable
-      uses overrides to automatically extend the
-      :term:`FILESPATH` variable. For an example of how
-      that works, see the :term:`FILESPATH` variable
+      A subset of :term:`OVERRIDES` used by the OpenEmbedded build system for
+      creating :term:`FILESPATH`. The :term:`FILESOVERRIDES` variable uses
+      overrides to automatically extend the :term:`FILESPATH` variable. For an
+      example of how that works, see the :term:`FILESPATH` variable
       description. Additionally, you find more information on how overrides
       are handled in the
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:conditional syntax (overrides)`"
+      ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:conditional syntax (overrides)`"
       section of the BitBake User Manual.
 
       By default, the :term:`FILESOVERRIDES` variable is defined as::
@@ -2875,6 +2898,30 @@ system and gives an overview of their function and contents.
       For guidance on how to create your own file permissions settings
       table file, examine the existing ``fs-perms.txt``.
 
+   :term:`FIT_ADDRESS_CELLS`
+
+      Specifies the value of the ``#address-cells`` value for the
+      description of the kernel FIT image.  
+
+      The default value is set to "1" by the :ref:`ref-classes-kernel-fitimage`
+      class, which corresponds to 32 bit addresses. 
+
+      For platforms who need to set 64 bit addresses in
+      :term:`UBOOT_LOADADDRESS` and :term:`UBOOT_ENTRYPOINT`, you need to
+      set this value to "2", as two 32 bit values (cells) will be needed 
+      to represent such addresses.
+
+      Here is an example setting "0x400000000" as a load address::
+    
+         FIT_ADDRESS_CELLS = "2"
+         UBOOT_LOADADDRESS= "0x04 0x00000000"
+
+      See `more details about #address-cells <https://elinux.org/Device_Tree_Usage#How_Addressing_Works>`__.
+
+   :term:`FIT_CONF_DEFAULT_DTB`
+      Specifies the default device tree binary (dtb) file for a fitImage when
+      multiple are provided.
+
    :term:`FIT_DESC`
       Specifies the description string encoded into a fitImage. The default
       value is set by the :ref:`ref-classes-kernel-fitimage`
@@ -2892,13 +2939,14 @@ system and gives an overview of their function and contents.
 
    :term:`FIT_KERNEL_COMP_ALG`
       Compression algorithm to use for the kernel image inside the FIT Image.
-      At present, the only supported values are "gzip" (default) or "none"
+      At present, the only supported values are "gzip" (default), "lzo" or "none".
       If you set this variable to anything other than "none" you may also need
       to set :term:`FIT_KERNEL_COMP_ALG_EXTENSION`.
 
    :term:`FIT_KERNEL_COMP_ALG_EXTENSION`
       File extension corresponding to :term:`FIT_KERNEL_COMP_ALG`. The default
-      value is ".gz".
+      value is ".gz". If you set :term:`FIT_KERNEL_COMP_ALG` to "lzo",
+      you may want to set this variable to ".lzo".
 
    :term:`FIT_KEY_GENRSA_ARGS`
       Arguments to openssl genrsa for generating RSA private key for signing
@@ -3504,19 +3552,19 @@ system and gives an overview of their function and contents.
             section in the Yocto Project Development Tasks Manual.
 
          -  Using :term:`IMAGE_INSTALL` with the
-            :ref:`+= <bitbake:bitbake-user-manual/bitbake-user-manual-metadata:appending (+=) and prepending (=+) with spaces>`
+            :ref:`+= <bitbake-user-manual/bitbake-user-manual-metadata:appending (+=) and prepending (=+) with spaces>`
             BitBake operator within the ``/conf/local.conf`` file or from
-            within an image recipe is not recommended. Use of this operator
-            in these ways can cause ordering issues. Since
-            :ref:`ref-classes-core-image` sets :term:`IMAGE_INSTALL` to a default
-            value using the
-            :ref:`?= <bitbake:bitbake-user-manual/bitbake-user-manual-metadata:setting a default value (?=)>`
+            within an image recipe is not recommended. Use of this operator in
+            these ways can cause ordering issues. Since
+            :ref:`ref-classes-core-image` sets :term:`IMAGE_INSTALL` to a
+            default value using the
+            :ref:`?= <bitbake-user-manual/bitbake-user-manual-metadata:setting a default value (?=)>`
             operator, using a ``+=`` operation against :term:`IMAGE_INSTALL`
             results in unexpected behavior when used within
-            ``conf/local.conf``. Furthermore, the same operation from
-            within an image recipe may or may not succeed depending on the
-            specific situation. In both these cases, the behavior is
-            contrary to how most users expect the ``+=`` operator to work.
+            ``conf/local.conf``. Furthermore, the same operation from within an
+            image recipe may or may not succeed depending on the specific
+            situation. In both these cases, the behavior is contrary to how
+            most users expect the ``+=`` operator to work.
 
    :term:`IMAGE_LINGUAS`
       Specifies the list of locales to install into the image during the
@@ -3543,11 +3591,34 @@ system and gives an overview of their function and contents.
    :term:`IMAGE_LINK_NAME`
       The name of the output image symlink (which does not include
       the version part as :term:`IMAGE_NAME` does). The default value
-      is derived using the :term:`IMAGE_BASENAME` and :term:`MACHINE`
-      variables::
+      is derived using the :term:`IMAGE_BASENAME` and
+      :term:`IMAGE_MACHINE_SUFFIX` variables::
 
-         IMAGE_LINK_NAME ?= "${IMAGE_BASENAME}-${MACHINE}"
+         IMAGE_LINK_NAME ?= "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}"
 
+      .. note::
+
+         It is possible to set this to "" to disable symlink creation,
+         however, you also need to set :term:`IMAGE_NAME` to still have
+         a reasonable value e.g.::
+
+            IMAGE_LINK_NAME = ""
+            IMAGE_NAME = "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_VERSION_SUFFIX}"
+
+   :term:`IMAGE_MACHINE_SUFFIX`
+      Specifies the by default machine-specific suffix for image file names
+      (before the extension). The default value is set as follows::
+
+         IMAGE_MACHINE_SUFFIX ??= "-${MACHINE}"
+
+      The default :term:`DEPLOY_DIR_IMAGE` already has a :term:`MACHINE`
+      subdirectory, so you may find it unnecessary to also include this suffix
+      in the name of every image file. If you prefer to remove the suffix you
+      can set this variable to an empty string::
+
+         IMAGE_MACHINE_SUFFIX = ""
+
+      (Not to be confused with :term:`IMAGE_NAME_SUFFIX`.)
 
    :term:`IMAGE_MANIFEST`
       The manifest file for the image. This file lists all the installed
@@ -3568,12 +3639,11 @@ system and gives an overview of their function and contents.
       section in the Yocto Project Overview and Concepts Manual.
 
    :term:`IMAGE_NAME`
-      The name of the output image files minus the extension. This variable
-      is derived using the :term:`IMAGE_BASENAME`,
-      :term:`MACHINE`, and :term:`IMAGE_VERSION_SUFFIX`
-      variables::
+      The name of the output image files minus the extension. By default
+      this variable is set using the :term:`IMAGE_LINK_NAME`, and
+      :term:`IMAGE_VERSION_SUFFIX` variables::
 
-         IMAGE_NAME ?= "${IMAGE_BASENAME}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+         IMAGE_NAME ?= "${IMAGE_LINK_NAME}${IMAGE_VERSION_SUFFIX}"
 
    :term:`IMAGE_NAME_SUFFIX`
       Suffix used for the image output filename --- defaults to ``".rootfs"``
@@ -3614,12 +3684,7 @@ system and gives an overview of their function and contents.
       Defines the package type (i.e. DEB, RPM, IPK, or TAR) used by the
       OpenEmbedded build system. The variable is defined appropriately by
       the :ref:`ref-classes-package_deb`, :ref:`ref-classes-package_rpm`,
-      :ref:`ref-classes-package_ipk`, or :ref:`ref-classes-package_tar` class.
-
-      .. note::
-
-         The ``package_tar`` class is broken and is not supported. It is
-         recommended that you do not use it.
+      or :ref:`ref-classes-package_ipk` class.
 
       The :ref:`ref-classes-populate-sdk-*` and :ref:`ref-classes-image`
       classes use the :term:`IMAGE_PKGTYPE` for packaging up images and SDKs.
@@ -3797,43 +3862,6 @@ system and gives an overview of their function and contents.
       files to be deployed into :term:`IMGDEPLOYDIR`, and the class will take
       care of copying them into :term:`DEPLOY_DIR_IMAGE` afterwards.
 
-   :term:`INC_PR`
-      Helps define the recipe revision for recipes that share a common
-      ``include`` file. You can think of this variable as part of the
-      recipe revision as set from within an include file.
-
-      Suppose, for example, you have a set of recipes that are used across
-      several projects. And, within each of those recipes the revision (its
-      :term:`PR` value) is set accordingly. In this case, when
-      the revision of those recipes changes, the burden is on you to find
-      all those recipes and be sure that they get changed to reflect the
-      updated version of the recipe. In this scenario, it can get
-      complicated when recipes that are used in many places and provide
-      common functionality are upgraded to a new revision.
-
-      A more efficient way of dealing with this situation is to set the
-      :term:`INC_PR` variable inside the ``include`` files that the recipes
-      share and then expand the :term:`INC_PR` variable within the recipes to
-      help define the recipe revision.
-
-      The following provides an example that shows how to use the
-      :term:`INC_PR` variable given a common ``include`` file that defines the
-      variable. Once the variable is defined in the ``include`` file, you
-      can use the variable to set the :term:`PR` values in each recipe. You
-      will notice that when you set a recipe's :term:`PR` you can provide more
-      granular revisioning by appending values to the :term:`INC_PR` variable::
-
-         recipes-graphics/xorg-font/xorg-font-common.inc:INC_PR = "r2"
-         recipes-graphics/xorg-font/encodings_1.0.4.bb:PR = "${INC_PR}.1"
-         recipes-graphics/xorg-font/font-util_1.3.0.bb:PR = "${INC_PR}.0"
-         recipes-graphics/xorg-font/font-alias_1.0.3.bb:PR = "${INC_PR}.3"
-
-      The
-      first line of the example establishes the baseline revision to be
-      used for all recipes that use the ``include`` file. The remaining
-      lines in the example are from individual recipes and show how the
-      :term:`PR` value is set.
-
    :term:`INCOMPATIBLE_LICENSE`
       Specifies a space-separated list of license names (as they would
       appear in :term:`LICENSE`) that should be excluded
@@ -3878,7 +3906,7 @@ system and gives an overview of their function and contents.
       ``classes-global/`` or ``classes/`` subdirectories.
 
       For more information on :term:`INHERIT`, see the
-      :ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:\`\`inherit\`\` configuration directive`"
+      :ref:`bitbake-user-manual/bitbake-user-manual-metadata:\`\`inherit\`\` configuration directive`"
       section in the BitBake User Manual.
 
    :term:`INHERIT_DISTRO`
@@ -3948,46 +3976,31 @@ system and gives an overview of their function and contents.
          even if the toolchain's binaries are strippable, there are other files
          needed for the build that are not strippable.
 
-   :term:`Initramfs`
-      An Initial RAM Filesystem (:term:`Initramfs`) is an optionally compressed
-      :wikipedia:`cpio <Cpio>` archive which is extracted
-      by the Linux kernel into RAM in a special :wikipedia:`tmpfs <Tmpfs>`
-      instance, used as the initial root filesystem.
+   :term:`INIT_MANAGER`
+      Specifies the system init manager to use. Available options are:
 
-      This is a replacement for the legacy init RAM disk ("initrd")
-      technique, booting on an emulated block device in RAM, but being less
-      efficient because of the overhead of going through a filesystem and
-      having to duplicate accessed file contents in the file cache in RAM,
-      as for any block device.
+      -  ``sysvinit``
+      -  ``systemd``
+      -  ``mdev-busybox``
 
-      .. note:
+      With ``sysvinit``, the init manager is set to
+      :wikipedia:`SysVinit <Init#SysV-style>`, the traditional UNIX init
+      system. This is the default choice in the Poky distribution, together with
+      the Udev device manager (see the ":ref:`device-manager`" section).
 
-         As far as bootloaders are concerned, :term:`Initramfs` and "initrd"
-         images are still copied to RAM in the same way. That's why most
-	 most bootloaders refer to :term:`Initramfs` images as "initrd"
-	 or "init RAM disk".
+      With ``systemd``, the init manager becomes :wikipedia:`systemd <Systemd>`,
+      which comes with the :wikipedia:`udev <Udev>` device manager.
 
-      This kind of mechanism is typically used for two reasons:
+      With ``mdev-busybox``, the init manager becomes the much simpler BusyBox
+      init, together with the BusyBox mdev device manager. This is the simplest
+      and lightest solution, and probably the best choice for low-end systems
+      with a rather slow CPU and a limited amount of RAM.
 
-      -  For booting the same kernel binary on multiple systems requiring
-         different device drivers. The :term:`Initramfs` image is then customized
-	 for each type of system, to include the specific  kernel modules
-         necessary to access the final root filesystem. This technique
-	 is used on all GNU / Linux distributions for desktops and servers.
-
-      -  For booting faster. As the root filesystem is extracted into RAM,
-         accessing the first user-space applications is very fast, compared
-         to having to initialize a block device, to access multiple blocks
-         from it, and to go through a filesystem having its own overhead.
-         For example, this allows to display a splashscreen very early,
-	 and to later take care of mounting the final root filesystem and
-         loading less time-critical kernel drivers.
-
-      This cpio archive can either be loaded to RAM by the bootloader,
-      or be included in the kernel binary.
-
-      For information on creating and using an :term:`Initramfs`, see the
-      ":ref:`dev-manual/building:building an initial ram filesystem (Initramfs) image`"
+      More concretely, this is used to include
+      ``conf/distro/include/init-manager-${INIT_MANAGER}.inc`` into the global
+      configuration. You can have a look at the
+      :yocto_git:`meta/conf/distro/include/init-manager-*.inc </poky/tree/meta/conf/distro/include>`
+      files for more information, and also the ":ref:`init-manager`"
       section in the Yocto Project Development Tasks Manual.
 
    :term:`INITRAMFS_DEPLOY_DIR_IMAGE`
@@ -4100,6 +4113,19 @@ system and gives an overview of their function and contents.
       :term:`Initramfs`, see the ":ref:`dev-manual/building:building an initial ram filesystem (Initramfs) image`" section
       in the Yocto Project Development Tasks Manual.
 
+   :term:`INITRAMFS_IMAGE_NAME`
+
+      This value needs to stay in sync with :term:`IMAGE_LINK_NAME`, but with
+      :term:`INITRAMFS_IMAGE` instead of :term:`IMAGE_BASENAME`. The default value
+      is set as follows:
+
+         INITRAMFS_IMAGE_NAME ?= "${@['${INITRAMFS_IMAGE}${IMAGE_MACHINE_SUFFIX}', ''][d.getVar('INITRAMFS_IMAGE') == '']}"
+
+      That is, if :term:`INITRAMFS_IMAGE` is set, the value of
+      :term:`INITRAMFS_IMAGE_NAME` will be set based upon
+      :term:`INITRAMFS_IMAGE` and :term:`IMAGE_MACHINE_SUFFIX`.
+
+
    :term:`INITRAMFS_LINK_NAME`
       The link name of the initial RAM filesystem image. This variable is
       set in the ``meta/classes-recipe/kernel-artifact-names.bbclass`` file as
@@ -4134,10 +4160,7 @@ system and gives an overview of their function and contents.
 
          INITRAMFS_NAME ?= "initramfs-${KERNEL_ARTIFACT_NAME}"
 
-      The value of the :term:`KERNEL_ARTIFACT_NAME`
-      variable, which is set in the same file, has the following value::
-
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+      See :term:`KERNEL_ARTIFACT_NAME` for additional information.
 
    :term:`INITRD`
       Indicates list of filesystem images to concatenate and use as an
@@ -4274,9 +4297,9 @@ system and gives an overview of their function and contents.
       To use the variable, set it in the append file for your kernel recipe
       using the following form::
 
-         KBUILD_DEFCONFIG_KMACHINE ?= defconfig_file
+         KBUILD_DEFCONFIG:<machine> ?= "defconfig_file"
 
-      Here is an example from a "raspberrypi2" :term:`KMACHINE` build that uses
+      Here is an example from a "raspberrypi2" :term:`MACHINE` build that uses
       a ``defconfig`` file named "bcm2709_defconfig"::
 
          KBUILD_DEFCONFIG:raspberrypi2 = "bcm2709_defconfig"
@@ -4341,9 +4364,9 @@ system and gives an overview of their function and contents.
       ``meta/classes-recipe/kernel-artifact-names.bbclass`` file, has the
       following default value::
 
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}${IMAGE_MACHINE_SUFFIX}${IMAGE_VERSION_SUFFIX}"
 
-      See the :term:`PKGE`, :term:`PKGV`, :term:`PKGR`, :term:`MACHINE`
+      See the :term:`PKGE`, :term:`PKGV`, :term:`PKGR`, :term:`IMAGE_MACHINE_SUFFIX`
       and :term:`IMAGE_VERSION_SUFFIX` variables for additional information.
 
    :term:`KERNEL_CLASSES`
@@ -4354,6 +4377,20 @@ system and gives an overview of their function and contents.
       fitImage support and resides in ``meta/classes-recipe/kernel-fitimage.bbclass``.
       You can register custom kernel image types with the
       :ref:`ref-classes-kernel` class using this variable.
+
+   :term:`KERNEL_DANGLING_FEATURES_WARN_ONLY`
+      When kernel configuration fragments are missing for some
+      :term:`KERNEL_FEATURES` specified by layers or BSPs,
+      building and configuring the kernel stops with an error.
+    
+      You can turn these errors into warnings by setting the
+      following in ``conf/local.conf``::
+
+         KERNEL_DANGLING_FEATURES_WARN_ONLY = "1"
+    
+      You will still be warned that runtime issues may occur,
+      but at least the kernel configuration and build process will
+      be allowed to continue.
 
    :term:`KERNEL_DEBUG_TIMESTAMPS`
       If set to "1", enables timestamping functionality during building
@@ -4401,10 +4438,7 @@ system and gives an overview of their function and contents.
 
          KERNEL_DTB_NAME ?= "${KERNEL_ARTIFACT_NAME}"
 
-      The value of the :term:`KERNEL_ARTIFACT_NAME`
-      variable, which is set in the same file, has the following value::
-
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+      See :term:`KERNEL_ARTIFACT_NAME` for additional information.
 
    :term:`KERNEL_DTC_FLAGS`
       Specifies the ``dtc`` flags that are passed to the Linux kernel build
@@ -4467,10 +4501,7 @@ system and gives an overview of their function and contents.
 
          KERNEL_FIT_NAME ?= "${KERNEL_ARTIFACT_NAME}"
 
-      The value of the :term:`KERNEL_ARTIFACT_NAME`
-      variable, which is set in the same file, has the following value::
-
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+      See :term:`KERNEL_ARTIFACT_NAME` for additional information.
 
    :term:`KERNEL_IMAGE_LINK_NAME`
       The link name for the kernel image. This variable is set in the
@@ -4506,11 +4537,7 @@ system and gives an overview of their function and contents.
 
          KERNEL_IMAGE_NAME ?= "${KERNEL_ARTIFACT_NAME}"
 
-      The value of the
-      :term:`KERNEL_ARTIFACT_NAME` variable,
-      which is set in the same file, has the following value::
-
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+      See :term:`KERNEL_ARTIFACT_NAME` for additional information.
 
    :term:`KERNEL_IMAGETYPE`
       The type of kernel to build for a device, usually set by the machine
@@ -4701,31 +4728,7 @@ system and gives an overview of their function and contents.
       ``LAYERRECOMMENDS_mylayer``).
 
    :term:`LAYERSERIES_COMPAT`
-      Lists the versions of the :term:`OpenEmbedded-Core (OE-Core)` for which
-      a layer is compatible. Using the :term:`LAYERSERIES_COMPAT` variable
-      allows the layer maintainer to indicate which combinations of the
-      layer and OE-Core can be expected to work. The variable gives the
-      system a way to detect when a layer has not been tested with new
-      releases of OE-Core (e.g. the layer is not maintained).
-
-      To specify the OE-Core versions for which a layer is compatible, use
-      this variable in your layer's ``conf/layer.conf`` configuration file.
-      For the list, use the Yocto Project
-      :yocto_wiki:`Release Name </Releases>` (e.g.
-      &DISTRO_NAME_NO_CAP;). To specify multiple OE-Core versions for the
-      layer, use a space-separated list::
-
-         LAYERSERIES_COMPAT_layer_root_name = "&DISTRO_NAME_NO_CAP; &DISTRO_NAME_NO_CAP_MINUS_ONE;"
-
-      .. note::
-
-         Setting :term:`LAYERSERIES_COMPAT` is required by the Yocto Project
-         Compatible version 2 standard.
-         The OpenEmbedded build system produces a warning if the variable
-         is not set for any given layer.
-
-      See the ":ref:`dev-manual/layers:creating your own layer`"
-      section in the Yocto Project Development Tasks Manual.
+      See :term:`bitbake:LAYERSERIES_COMPAT` in the BitBake manual.
 
    :term:`LAYERVERSION`
       Optionally specifies the version of a layer as a single number. You
@@ -5094,19 +5097,27 @@ system and gives an overview of their function and contents.
       shipped, see the ":ref:`ref-features-machine`" section.
 
    :term:`MACHINE_FEATURES_BACKFILL`
-      Features to be added to :term:`MACHINE_FEATURES` if not also present in
+      A list of space-separated features to be added to
+      :term:`MACHINE_FEATURES` if not also present in
       :term:`MACHINE_FEATURES_BACKFILL_CONSIDERED`.
 
-      This variable is set in the ``meta/conf/bitbake.conf`` file. It is
-      not intended to be user-configurable. It is best to just reference
-      the variable to see which machine features are being backfilled for
-      all machine configurations. See the ":ref:`ref-features-backfill`"
-      section for more information.
+      This variable is set in the ``meta/conf/bitbake.conf`` file. It is not
+      intended to be user-configurable. It is best to just reference the
+      variable to see which machine features are being
+      :ref:`backfilled <ref-features-backfill>` for all machine configurations.
 
    :term:`MACHINE_FEATURES_BACKFILL_CONSIDERED`
-      Features from :term:`MACHINE_FEATURES_BACKFILL` that should not be
-      backfilled (i.e. added to :term:`MACHINE_FEATURES`) during the build. See
-      the ":ref:`ref-features-backfill`" section for more information.
+      A list of space-separated features from :term:`MACHINE_FEATURES_BACKFILL`
+      that should not be :ref:`backfilled <ref-features-backfill>` (i.e. added
+      to :term:`MACHINE_FEATURES`) during the build.
+
+      This corresponds to an opt-out mechanism. When new default machine
+      features are introduced, machine definition maintainers can review
+      (`consider`) them and decide to exclude them from the
+      :ref:`backfilled <ref-features-backfill>` features. Therefore, the
+      combination of :term:`MACHINE_FEATURES_BACKFILL` and
+      :term:`MACHINE_FEATURES_BACKFILL_CONSIDERED` makes it possible to
+      add new default features without breaking existing machine definitions.
 
    :term:`MACHINEOVERRIDES`
       A colon-separated list of overrides that apply to the current
@@ -5136,6 +5147,17 @@ system and gives an overview of their function and contents.
 
    :term:`MAINTAINER`
       The email address of the distribution maintainer.
+
+   :term:`MESON_BUILDTYPE`
+      Value of the Meson ``--buildtype`` argument used by the
+      :ref:`ref-classes-meson` class. It defaults to ``debug`` if
+      :term:`DEBUG_BUILD` is set to "1", and ``plain`` otherwise.
+
+      See `Meson build options <https://mesonbuild.com/Builtin-options.html>`__
+      for the values you could set in a recipe. Values such as ``plain``,
+      ``debug``, ``debugoptimized``, ``release`` and ``minsize`` allow
+      you to specify the inclusion of debugging symbols and the compiler
+      optimizations (none, performance or size).
 
    :term:`METADATA_BRANCH`
       The branch currently checked out for the OpenEmbedded-Core layer (path
@@ -5264,10 +5286,7 @@ system and gives an overview of their function and contents.
 
          MODULE_TARBALL_NAME ?= "${KERNEL_ARTIFACT_NAME}"
 
-      The value of the :term:`KERNEL_ARTIFACT_NAME` variable,
-      which is set in the same file, has the following value::
-
-         KERNEL_ARTIFACT_NAME ?= "${PKGE}-${PKGV}-${PKGR}-${MACHINE}${IMAGE_VERSION_SUFFIX}"
+      See :term:`KERNEL_ARTIFACT_NAME` for additional information.
 
    :term:`MOUNT_BASE`
       On non-systemd systems (where ``udev-extraconf`` is being used),
@@ -5397,6 +5416,16 @@ system and gives an overview of their function and contents.
       See the ``meta/classes-recipe/binconfig.bbclass`` in the
       :term:`Source Directory` for details on how this class
       applies these additional sed command arguments.
+
+   :term:`OECMAKE_GENERATOR`
+      A variable for the :ref:`ref-classes-cmake` class, allowing to choose
+      which back-end will be generated by CMake to build an application.
+
+      By default, this variable is set to ``Ninja``, which is faster than GNU
+      make, but if building is broken with Ninja, a recipe can use this
+      variable to use GNU make instead::
+
+         OECMAKE_GENERATOR = "Unix Makefiles"
 
    :term:`OE_IMPORTS`
       An internal variable used to tell the OpenEmbedded build system what
@@ -5547,7 +5576,7 @@ system and gives an overview of their function and contents.
          FOO:an-override = "overridden"
 
       See the
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:conditional syntax (overrides)`"
+      ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:conditional syntax (overrides)`"
       section in the BitBake User Manual for more information on the
       overrides mechanism.
 
@@ -5633,14 +5662,7 @@ system and gives an overview of their function and contents.
       You can provide one or more of the following arguments for the
       variable::
 
-         PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk package_tar"
-
-      .. note::
-
-         While it is a legal option, the :ref:`ref-classes-package_tar`
-         class has limited functionality due to no support for package
-         dependencies by that backend. Therefore, it is recommended that
-         you do not use it.
+         PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk"
 
       The build system uses only the first argument in the list as the
       package manager when creating your image or SDK. However, packages
@@ -6752,12 +6774,11 @@ system and gives an overview of their function and contents.
 
          RDEPENDS:${PN} = "foo (>= 1.2)"
 
-      For information on build-time dependencies, see the
-      :term:`DEPENDS` variable. You can also see the
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
-      ":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-execution:dependencies`" sections in the
-      BitBake User Manual for additional information on tasks and
-      dependencies.
+      For information on build-time dependencies, see the :term:`DEPENDS`
+      variable. You can also see the
+      ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
+      ":ref:`bitbake-user-manual/bitbake-user-manual-execution:dependencies`" sections in the
+      BitBake User Manual for additional information on tasks and dependencies.
 
    :term:`RECIPE_NO_UPDATE_REASON`
       If a recipe should not be replaced by a more recent upstream version,
@@ -6996,6 +7017,11 @@ system and gives an overview of their function and contents.
 
          RSUGGESTS:${PN} = "useful_package another_package"
 
+   :term:`RUST_CHANNEL`
+      Specifies which version of Rust to build - "stable", "beta" or "nightly".
+      The default value is "stable". Set this at your own risk, as values other
+      than "stable" are not guaranteed to work at a given time.
+
    :term:`S`
       The location in the :term:`Build Directory` where
       unpacked recipe source code resides. By default, this directory is
@@ -7045,6 +7071,14 @@ system and gives an overview of their function and contents.
    :term:`SDK_ARCH`
       The target architecture for the SDK. Typically, you do not directly
       set this variable. Instead, use :term:`SDKMACHINE`.
+
+   :term:`SDK_ARCHIVE_TYPE`
+      Specifies the type of archive to create for the SDK. Valid values:
+
+      - ``tar.xz`` (default)
+      - ``zip``
+
+      Only one archive type can be specified.
 
    :term:`SDK_BUILDINFO_FILE`
       When using the :ref:`ref-classes-image-buildinfo` class,
@@ -7274,6 +7308,11 @@ system and gives an overview of their function and contents.
       :term:`DISTRO_VERSION` and
       :term:`METADATA_REVISION` variables.
 
+   :term:`SDK_ZIP_OPTIONS`
+      Specifies extra options to pass to the ``zip`` command when zipping the SDK
+      (i.e. when :term:`SDK_ARCHIVE_TYPE` is set to "zip"). The default value is
+      "-y".
+
    :term:`SDKEXTPATH`
       The default installation directory for the Extensible SDK. By
       default, this directory is based on the :term:`DISTRO`
@@ -7341,9 +7380,9 @@ system and gives an overview of their function and contents.
 
    :term:`SERIAL_CONSOLES`
       Defines a serial console (TTY) to enable using
-      `getty <https://en.wikipedia.org/wiki/Getty_(Unix)>`__. Provide a
-      value that specifies the baud rate followed by the TTY device name
-      separated by a semicolon. Use spaces to separate multiple devices::
+      :wikipedia:`getty <Getty_(Unix)>`. Provide a value that specifies the
+      baud rate followed by the TTY device name separated by a semicolon.
+      Use spaces to separate multiple devices::
 
          SERIAL_CONSOLES = "115200;ttyS0 115200;ttyS1"
 
@@ -7585,6 +7624,32 @@ system and gives an overview of their function and contents.
       (+ 0.07\% with the tested image), compared to just enabling
       :term:`SPDX_INCLUDE_SOURCES`.
 
+   :term:`SPDX_CUSTOM_ANNOTATION_VARS`
+      This option allows to associate `SPDX annotations
+      <https://spdx.github.io/spdx-spec/v2.3/annotations/>`__ to a recipe,
+      using the values of variables in the recipe::
+        
+         ANNOTATION1 = "First annotation for recipe"
+         ANNOTATION2 = "Second annotation for recipe"
+         SPDX_CUSTOM_ANNOTATION_VARS = "ANNOTATION1 ANNOTATION2"
+
+      This will add a new block to the recipe ``.sdpx.json`` output::
+
+         "annotations": [
+           {
+             "annotationDate": "2023-04-18T08:32:12Z",
+             "annotationType": "OTHER",
+             "annotator": "Tool: oe-spdx-creator - 1.0",
+             "comment": "ANNOTATION1=First annotation for recipe"
+           },
+           {
+             "annotationDate": "2023-04-18T08:32:12Z",
+             "annotationType": "OTHER",
+             "annotator": "Tool: oe-spdx-creator - 1.0",
+             "comment": "ANNOTATION2=Second annotation for recipe"
+           }
+         ],
+
    :term:`SPDX_INCLUDE_SOURCES`
       This option allows to add a description of the source files used to build
       the host tools and the target packages, to the ``spdx.json`` files in
@@ -7793,7 +7858,7 @@ system and gives an overview of their function and contents.
 
       :term:`SSTATE_EXCLUDEDEPS_SYSROOT` is evaluated as two regular
       expressions of recipe and dependency to ignore. An example
-      is the rule in :oe_git:`meta/conf/layer.conf </meta/conf/layer.conf>`::
+      is the rule in :oe_git:`meta/conf/layer.conf </openembedded-core/tree/meta/conf/layer.conf>`::
 
          # Nothing needs to depend on libc-initial
          # base-passwd/shadow-sysroot don't need their dependencies
@@ -8272,12 +8337,10 @@ system and gives an overview of their function and contents.
       will be silently ignored.
 
    :term:`SYSVINIT_ENABLED_GETTYS`
-      When using
-      :ref:`SysVinit <dev-manual/new-recipe:enabling system services>`,
+      When using :ref:`SysVinit <dev-manual/new-recipe:enabling system services>`,
       specifies a space-separated list of the virtual terminals that should
-      run a `getty <https://en.wikipedia.org/wiki/Getty_%28Unix%29>`__
-      (allowing login), assuming :term:`USE_VT` is not set to
-      "0".
+      run a :wikipedia:`getty <Getty_(Unix)>` (allowing login), assuming
+      :term:`USE_VT` is not set to "0".
 
       The default value for :term:`SYSVINIT_ENABLED_GETTYS` is "1" (i.e. only
       run a getty on the first virtual terminal).
@@ -8480,7 +8543,7 @@ system and gives an overview of their function and contents.
          responsibility to ensure that the toolchain is compatible with the
          default toolchain. Using older or newer versions of these
          components might cause build problems. See
-         :yocto_docs:`Release Information </migration-guides/>` for your
+         :doc:`Release Information </migration-guides/index>` for your
          version of the Yocto Project, to find the specific components with
          which the toolchain must be compatible.
 
@@ -8998,10 +9061,16 @@ system and gives an overview of their function and contents.
       creation, the :term:`UBOOT_ENTRYPOINT` variable is passed as a
       command-line parameter to the ``uboot-mkimage`` utility.
 
+      To pass a 64 bit address for FIT image creation, you will need to set
+      the :term:`FIT_ADDRESS_CELLS` variable too.
+
    :term:`UBOOT_LOADADDRESS`
       Specifies the load address for the U-Boot image. During U-Boot image
       creation, the :term:`UBOOT_LOADADDRESS` variable is passed as a
       command-line parameter to the ``uboot-mkimage`` utility.
+
+      To pass a 64 bit address for FIT image creation, you will need to set
+      the :term:`FIT_ADDRESS_CELLS` variable too.
 
    :term:`UBOOT_LOCALVERSION`
       Appends a string to the name of the local version of the U-Boot
@@ -9184,9 +9253,8 @@ system and gives an overview of their function and contents.
    :term:`USE_VT`
       When using
       :ref:`SysVinit <dev-manual/new-recipe:enabling system services>`,
-      determines whether or not to run a
-      `getty <https://en.wikipedia.org/wiki/Getty_%28Unix%29>`__ on any
-      virtual terminals in order to enable logging in through those
+      determines whether or not to run a :wikipedia:`getty <Getty_(Unix)>`
+      on any virtual terminals in order to enable logging in through those
       terminals.
 
       The default value used for :term:`USE_VT` is "1" when no default value is
@@ -9342,6 +9410,18 @@ system and gives an overview of their function and contents.
       By default, :term:`VOLATILE_LOG_DIR` is set to "yes", which means the
       file is not persistent. You can override this setting by setting the
       variable to "no" to make the log directory persistent.
+
+   :term:`VOLATILE_TMP_DIR`
+      Specifies the persistence of the target's ``/tmp`` directory.
+
+      By default, :term:`VOLATILE_TMP_DIR` is set to "yes", in which case
+      ``/tmp`` links to a directory which resides in RAM in a ``tmpfs``
+      filesystem.
+
+      If instead, you want the ``/tmp`` directory to be persistent, set the
+      variable to "no" to make it a regular directory in the root filesystem.
+
+      This supports both sysvinit and systemd based systems.
 
    :term:`WARN_QA`
       Specifies the quality assurance checks whose failures are reported as

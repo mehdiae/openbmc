@@ -29,7 +29,26 @@ and conceptual information in the :doc:`/overview-manual/index`.
    For more information about the Yocto Project Documentation set, see
    the :ref:`ref-manual/resources:links and related documentation` section.
 
-.. _detailed-supported-distros:
+Minimum Free Disk Space
+=======================
+
+To build an image such as ``core-image-sato`` for the ``qemux86-64`` machine,
+you need a system with at least &MIN_DISK_SPACE; Gbytes of free disk space.
+However, much more disk space will be necessary to build more complex images,
+to run multiple builds and to cache build artifacts, improving build efficiency.
+
+If you have a shortage of disk space, see the ":doc:`/dev-manual/disk-space`"
+section of the Development Tasks Manual.
+
+Minimum System RAM
+==================
+
+You will manage to build an image such as ``core-image-sato`` for the
+``qemux86-64`` machine with as little as &MIN_RAM; Gbytes of RAM on an old
+system with 4 CPU cores, but your builds will be much faster on a system with
+as much RAM and as many CPU cores as possible.
+
+.. _system-requirements-supported-distros:
 
 Supported Linux Distributions
 =============================
@@ -42,17 +61,19 @@ Currently, the Yocto Project is supported on the following distributions:
 
 -  Ubuntu 22.04 (LTS)
 
--  Fedora 34
+-  Fedora 36
 
--  Fedora 35
+-  Fedora 37
 
--  AlmaLinux 8.5
+-  AlmaLinux 8.7
 
--  Debian GNU/Linux 10.x (Buster)
+-  AlmaLinux 9.1
 
 -  Debian GNU/Linux 11.x (Bullseye)
 
 -  OpenSUSE Leap 15.3
+
+-  OpenSUSE Leap 15.4
 
 .. note::
 
@@ -108,8 +129,10 @@ function.
 Ubuntu and Debian
 -----------------
 
-Here are the required packages by function given a
-supported Ubuntu or Debian Linux distribution:
+Here are the packages needed to build an image on a headless system
+with a supported Ubuntu or Debian Linux distribution::
+
+   $ sudo apt install &UBUNTU_HOST_PACKAGES_ESSENTIAL;
 
 .. note::
 
@@ -121,80 +144,63 @@ supported Ubuntu or Debian Linux distribution:
          $ sudo apt build-dep qemu
          $ sudo apt remove oss4-dev
 
--  *Essentials:* Packages needed to build an image on a headless system::
+Here are the packages needed to build Project documentation manuals::
 
-      $ sudo apt install &UBUNTU_HOST_PACKAGES_ESSENTIAL;
-
--  *Documentation:* Packages needed if you are going to build out the
-   Yocto Project documentation manuals::
-
-      $ sudo apt install make python3-pip inkscape texlive-latex-extra
-      &PIP3_HOST_PACKAGES_DOC;
+   $ sudo apt install make python3-pip inkscape texlive-latex-extra
+   &PIP3_HOST_PACKAGES_DOC;
 
 Fedora Packages
 ---------------
 
-Here are the required packages by function given a
-supported Fedora Linux distribution:
+Here are the packages needed to build an image on a headless system
+with a supported Fedora Linux distribution::
 
--  *Essentials:* Packages needed to build an image for a headless
-   system::
+   $ sudo dnf install &FEDORA_HOST_PACKAGES_ESSENTIAL;
 
-      $ sudo dnf install &FEDORA_HOST_PACKAGES_ESSENTIAL;
+Here are the packages needed to build Project documentation manuals::
 
--  *Documentation:* Packages needed if you are going to build out the
-   Yocto Project documentation manuals::
-
-      $ sudo dnf install make python3-pip which inkscape texlive-fncychap
-      &PIP3_HOST_PACKAGES_DOC;
+   $ sudo dnf install make python3-pip which inkscape texlive-fncychap
+   &PIP3_HOST_PACKAGES_DOC;
 
 openSUSE Packages
 -----------------
 
-Here are the required packages by function given a
-supported openSUSE Linux distribution:
+Here are the packages needed to build an image on a headless system
+with a supported openSUSE distribution::
 
--  *Essentials:* Packages needed to build an image for a headless
-   system::
+   $ sudo zypper install &OPENSUSE_HOST_PACKAGES_ESSENTIAL;
 
-      $ sudo zypper install &OPENSUSE_HOST_PACKAGES_ESSENTIAL;
+Here are the packages needed to build Project documentation manuals::
 
--  *Documentation:* Packages needed if you are going to build out the
-   Yocto Project documentation manuals::
-
-      $ sudo zypper install make python3-pip which inkscape texlive-fncychap
-      &PIP3_HOST_PACKAGES_DOC;
+   $ sudo zypper install make python3-pip which inkscape texlive-fncychap
+   &PIP3_HOST_PACKAGES_DOC;
 
 
-AlmaLinux-8 Packages
---------------------
+AlmaLinux Packages
+------------------
 
-Here are the required packages by function given a
-supported AlmaLinux-8 Linux distribution:
+Here are the packages needed to build an image on a headless system
+with a supported AlmaLinux distribution::
 
--  *Essentials:* Packages needed to build an image for a headless
-   system::
+   $ sudo dnf install &ALMALINUX_HOST_PACKAGES_ESSENTIAL;
 
-      $ sudo dnf install &CENTOS8_HOST_PACKAGES_ESSENTIAL;
+.. note::
 
-   .. note::
+   -  Extra Packages for Enterprise Linux (i.e. ``epel-release``) is
+      a collection of packages from Fedora built on RHEL/CentOS for
+      easy installation of packages not included in enterprise Linux
+      by default. You need to install these packages separately.
 
-      -  Extra Packages for Enterprise Linux (i.e. ``epel-release``) is
-         a collection of packages from Fedora built on RHEL/CentOS for
-         easy installation of packages not included in enterprise Linux
-         by default. You need to install these packages separately.
+   -  The ``PowerTools/CRB`` repo provides additional packages such as
+      ``rpcgen`` and ``texinfo``.
 
-      -  The ``PowerTools`` repo provides additional packages such as
-         ``rpcgen`` and ``texinfo``.
+   -  The ``makecache`` command consumes additional Metadata from
+      ``epel-release``.
 
-      -  The ``makecache`` command consumes additional Metadata from
-         ``epel-release``.
+Here are the packages needed to build Project documentation manuals::
 
--  *Documentation:* Packages needed if you are going to build out the
-   Yocto Project documentation manuals::
-
-      $ sudo dnf install make python3-pip which inkscape texlive-fncychap
-      &PIP3_HOST_PACKAGES_DOC;
+   $ sudo dnf install make python3-pip which inkscape texlive-fncychap
+   &PIP3_HOST_PACKAGES_DOC;
 
 .. _system-requirements-buildtools:
 

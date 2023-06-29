@@ -34,6 +34,7 @@ INITSCRIPT_PACKAGES = "${PN}-httpd ${PN}-syslog ${PN}-udhcpd ${PN}-mdev ${PN}-hw
 
 INITSCRIPT_NAME:${PN}-httpd = "busybox-httpd"
 INITSCRIPT_NAME:${PN}-hwclock = "hwclock.sh"
+INITSCRIPT_PARAMS:${PN}-hwclock = "start 40 S . stop 20 0 1 6 ."
 INITSCRIPT_NAME:${PN}-mdev = "mdev"
 INITSCRIPT_PARAMS:${PN}-mdev = "start 04 S ."
 INITSCRIPT_NAME:${PN}-syslog = "syslog"
@@ -55,7 +56,7 @@ RDEPENDS:${PN} = "${@["", "busybox-inittab"][(d.getVar('VIRTUAL-RUNTIME_init_man
 inherit cml1 systemd update-rc.d ptest
 
 # busybox's unzip test case needs zip command, which busybox itself does not provide
-RDEPENDS:${PN}-ptest = "zip"
+RDEPENDS:${PN}-ptest = "zip coreutils"
 
 # internal helper
 def busybox_cfg(feature, tokens, cnf, rem):

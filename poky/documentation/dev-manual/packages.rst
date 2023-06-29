@@ -227,18 +227,6 @@ default value is "r0", the practice of adding it to a new recipe makes
 it harder to forget to bump the variable when you make changes to the
 recipe in future.
 
-If you are sharing a common ``.inc`` file with multiple recipes, you can
-also use the :term:`INC_PR` variable to ensure that the recipes sharing the
-``.inc`` file are rebuilt when the ``.inc`` file itself is changed. The
-``.inc`` file must set :term:`INC_PR` (initially to "r0"), and all recipes
-referring to it should set :term:`PR` to "${INC_PR}.0" initially,
-incrementing the last number when the recipe is changed. If the ``.inc``
-file is changed then its :term:`INC_PR` should be incremented.
-
-When upgrading the version of a binary package, assuming the :term:`PV`
-changes, the :term:`PR` variable should be reset to "r0" (or "${INC_PR}.0"
-if you are using :term:`INC_PR`).
-
 Usually, version increases occur only to binary packages. However, if
 for some reason :term:`PV` changes but does not increase, you can increase
 the :term:`PE` variable (Package Epoch). The :term:`PE` variable defaults to
@@ -999,12 +987,12 @@ test. Here is what you have to do for each recipe:
 Creating Node Package Manager (NPM) Packages
 ============================================
 
-:wikipedia:`NPM <Npm_(software)>` is a package
-manager for the JavaScript programming language. The Yocto Project
-supports the NPM :ref:`fetcher <bitbake:bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`. You can
-use this fetcher in combination with
-:doc:`devtool </ref-manual/devtool-reference>` to create
-recipes that produce NPM packages.
+:wikipedia:`NPM <Npm_(software)>` is a package manager for the JavaScript
+programming language. The Yocto Project supports the NPM
+:ref:`fetcher <bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`.
+You can use this fetcher in combination with
+:doc:`devtool </ref-manual/devtool-reference>` to create recipes that produce
+NPM packages.
 
 There are two workflows that allow you to create NPM packages using
 ``devtool``: the NPM registry modules method and the NPM project code

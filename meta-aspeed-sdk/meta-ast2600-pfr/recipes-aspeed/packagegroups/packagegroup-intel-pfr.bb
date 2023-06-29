@@ -18,3 +18,6 @@ RDEPENDS:${PN}-apps = " \
     obmc-pfr-image \
     "
 
+RDEPENDS:${PN}-apps:append:ast2600-dcscm-avenue-city = " \
+    bmc-boot-done \
+    "

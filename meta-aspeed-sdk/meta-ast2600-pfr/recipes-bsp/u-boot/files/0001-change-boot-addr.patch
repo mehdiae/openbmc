@@ -1,3 +1,13 @@
+From 176cab4f0a8d6b6ca6aefd2950e26847b202c2c2 Mon Sep 17 00:00:00 2001
+From: Steven Lee <steven_lee@aspeedtech.com>
+Date: Wed, 11 May 2022 11:12:55 +0800
+Subject: [PATCH] Support generating signed capsule for ast2600-pfr and
+
+---
+ configs/ast2600-pfr_defconfig     | 2 +-
+ include/configs/evb_ast2600_spl.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
 diff --git a/configs/ast2600-pfr_defconfig b/configs/ast2600-pfr_defconfig
 index 398e55d0f3..42c512bff7 100644
 --- a/configs/ast2600-pfr_defconfig

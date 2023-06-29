@@ -32,6 +32,12 @@ EXTRA_OEMESON:ast2600-pfr = " \
     -Dbmc_recovery_offset=0x02a00000 \
     "
 
+EXTRA_OEMESON:ast2600-dcscm-avenue-city = " \
+    -Dpch_active_pfm_offset=0x03fe0000 \
+    -Dpch_staging_offset=0x04000000 \
+    -Dpch_recovery_offset=0x06000000 \
+    "
+
 inherit obmc-phosphor-systemd
 SYSTEMD_SERVICE:${PN} = "BootCompleted.service"
 

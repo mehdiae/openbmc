@@ -9,9 +9,11 @@ inherit obmc-phosphor-systemd
 SRC_URI = " \
 	gitsm://github.com/DMTF/spdm-emu;protocol=https;branch=main \
 	file://0001-Support-Yocto-build-and-LibMCTP-Intel-with-SPDM-EMU.patch \
+	file://0001-Add-support-libmctp-intel-asti3c-with-slavemq-mode.patch \
 	file://slave-mqueue.sh \
 	file://bmc-attestation-emu.service \
 	file://pch-attestation-emu.service \
+	file://i3c-attestation-emu.service \
 	file://ecp384 \
 	"
 
@@ -26,7 +28,7 @@ DEPENDS += " \
 	libmctp-intel \
 	"
 
-SYSTEMD_SERVICE:${PN} = "bmc-attestation-emu.service pch-attestation-emu.service"
+SYSTEMD_SERVICE:${PN} = "bmc-attestation-emu.service pch-attestation-emu.service i3c-attestation-emu.service"
 
 FILES:${PN}:append = " ${datadir}/spdm-emu"
 
@@ -34,6 +36,7 @@ do_install:append () {
 	install -d ${D}${systemd_system_unitdir}
 	install -m 0644 ${WORKDIR}/bmc-attestation-emu.service ${D}${systemd_system_unitdir}/
 	install -m 0644 ${WORKDIR}/pch-attestation-emu.service ${D}${systemd_system_unitdir}/
+	install -m 0644 ${WORKDIR}/i3c-attestation-emu.service ${D}${systemd_system_unitdir}/
 
 	install -d ${D}${bindir}
 	install -m 0755 ${WORKDIR}/slave-mqueue.sh ${D}${bindir}

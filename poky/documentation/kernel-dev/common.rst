@@ -649,12 +649,12 @@ append files, you can direct the OpenEmbedded build system to use a
 To specify an "in-tree" ``defconfig`` file, use the following statement
 form::
 
-   KBUILD_DEFCONFIG_KMACHINE ?= "defconfig_file"
+   KBUILD_DEFCONFIG:<machine> ?= "defconfig_file"
 
-Here is an example
-that assigns the :term:`KBUILD_DEFCONFIG` variable based on "raspberrypi2"
-and provides the path to the "in-tree" ``defconfig`` file to be used for
-a Raspberry Pi 2, which is based on the Broadcom 2708/2709 chipset::
+Here is an example that assigns the :term:`KBUILD_DEFCONFIG` variable utilizing
+an override for the "raspberrypi2" :term:`MACHINE` and provides the path to the
+"in-tree" ``defconfig`` file to be used for a Raspberry Pi 2, which is based on
+the Broadcom 2708/2709 chipset::
 
    KBUILD_DEFCONFIG:raspberrypi2 ?= "bcm2709_defconfig"
 
@@ -1083,7 +1083,7 @@ Consider an example that configures the "CONFIG_SMP" setting for the
 .. note::
 
    The OpenEmbedded build system recognizes this kernel as ``linux-yocto``
-   through Metadata (e.g. :term:`PREFERRED_VERSION`\ ``_linux-yocto ?= "12.4%"``).
+   through Metadata (e.g. :term:`PREFERRED_VERSION`\ ``_linux-yocto ?= "4.12%"``).
 
 Once ``menuconfig`` launches, use the interface to navigate through the
 selections to find the configuration settings in which you are
@@ -1384,7 +1384,7 @@ runs. This task validates the kernel configuration by checking the final
 ``.config`` file against the input files. During the check, the task
 produces warning messages for the following issues:
 
--  Requested options that did not make the final ``.config`` file.
+-  Requested options that did not make it into the final ``.config`` file.
 
 -  Configuration items that appear twice in the same configuration
    fragment.

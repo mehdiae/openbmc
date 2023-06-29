@@ -1496,6 +1496,23 @@ functionality of the task:
    directory listed is used as the current working directory for the
    task.
 
+- ``[file-checksums]``: Controls the file dependencies for a task. The
+  baseline file list is the set of files associated with
+  :term:`SRC_URI`. May be used to set additional dependencies on
+  files not associated with :term:`SRC_URI`.
+
+  The value set to the list is a file-boolean pair where the first
+  value is the file name and the second is whether or not it
+  physically exists on the filesystem. ::
+
+    do_configure[file-checksums] += "${MY_DIRPATH}/my-file.txt:True"
+
+  It is important to record any paths which the task looked at and
+  which didn't exist. This means that if these do exist at a later
+  time, the task can be rerun with the new additional files. The
+  "exists" True or False value after the path allows this to be
+  handled.
+
 -  ``[lockfiles]``: Specifies one or more lockfiles to lock while the
    task executes. Only one task may hold a lockfile, and any task that
    attempts to lock an already locked file will block until the lock is
@@ -1954,6 +1971,24 @@ looking at the source code of the ``bb`` module, which is in
 ``bitbake/lib/bb``. For example, ``bitbake/lib/bb/utils.py`` includes
 the commonly used functions ``bb.utils.contains()`` and
 ``bb.utils.mkdirhier()``, which come with docstrings.
+
+Extending Python Library Code
+-----------------------------
+
+If you wish to add your own Python library code (e.g. to provide
+functions/classes you can use from Python functions in the metadata)
+you can do so from any layer using the ``addpylib`` directive.
+This directive is typically added to your layer configuration (
+``conf/layer.conf``) although it will be handled in any ``.conf`` file.
+
+Usage is of the form::
+
+   addpylib <directory> <namespace>
+
+Where <directory> specifies the directory to add to the library path.
+The specified <namespace> is imported automatically, and if the imported
+module specifies an attribute named ``BBIMPORTS``, that list of
+sub-modules is iterated and imported too.
 
 Testing and Debugging BitBake Python code
 -----------------------------------------
