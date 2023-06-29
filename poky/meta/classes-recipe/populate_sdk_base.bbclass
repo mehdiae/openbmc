@@ -15,7 +15,7 @@ COMPLEMENTARY_GLOB[staticdev-pkgs] = '*-staticdev'
 COMPLEMENTARY_GLOB[doc-pkgs] = '*-doc'
 COMPLEMENTARY_GLOB[dbg-pkgs] = '*-dbg'
 COMPLEMENTARY_GLOB[src-pkgs] = '*-src'
-COMPLEMENTARY_GLOB[ptest-pkgs] = '*-ptest ptest-runner'
+COMPLEMENTARY_GLOB[ptest-pkgs] = '*-ptest ${MLPREFIX}ptest-runner'
 COMPLEMENTARY_GLOB[bash-completion-pkgs] = '*-bash-completion'
 
 def complementary_globs(featurevar, d):
@@ -208,7 +208,7 @@ fakeroot python do_populate_sdk() {
 }
 SSTATETASKS += "do_populate_sdk"
 SSTATE_SKIP_CREATION:task-populate-sdk = '1'
-do_populate_sdk[cleandirs] = "${SDKDEPLOYDIR}"
+do_populate_sdk[cleandirs] += "${SDKDEPLOYDIR}"
 do_populate_sdk[sstate-inputdirs] = "${SDKDEPLOYDIR}"
 do_populate_sdk[sstate-outputdirs] = "${SDK_DEPLOY}"
 do_populate_sdk[stamp-extra-info] = "${MACHINE_ARCH}${SDKMACHINE}"

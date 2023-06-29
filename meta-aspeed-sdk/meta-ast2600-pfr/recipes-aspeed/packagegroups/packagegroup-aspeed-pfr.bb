@@ -17,5 +17,6 @@ SUMMARY:${PN}-apps = "AspeedTech PFR App package"
 RDEPENDS:${PN}-apps = " \
     aspeed-pfr-tool \
     spdm-emu \
+    pfr-mctp-i3c \
     "
 

@@ -42,7 +42,7 @@ BBLAYERS_CONF_UPDATE_FUNCS += " \
 
 SANITY_DIFF_TOOL ?= "meld"
 
-SANITY_LOCALCONF_SAMPLE ?= "${COREBASE}/meta*/conf/local.conf.sample"
+SANITY_LOCALCONF_SAMPLE ?= "${COREBASE}/meta*/conf/templates/default/local.conf.sample"
 python oecore_update_localconf() {
     # Check we are using a valid local.conf
     current_conf  = d.getVar('CONF_VERSION')
@@ -62,7 +62,7 @@ is a good way to visualise the changes."""
     raise NotImplementedError(failmsg)
 }
 
-SANITY_SITECONF_SAMPLE ?= "${COREBASE}/meta*/conf/site.conf.sample"
+SANITY_SITECONF_SAMPLE ?= "${COREBASE}/meta*/conf/templates/default/site.conf.sample"
 python oecore_update_siteconf() {
     # If we have a site.conf, check it's valid
     current_sconf = d.getVar('SCONF_VERSION')
@@ -82,7 +82,7 @@ is a good way to visualise the changes."""
     raise NotImplementedError(failmsg)
 }
 
-SANITY_BBLAYERCONF_SAMPLE ?= "${COREBASE}/meta*/conf/bblayers.conf.sample"
+SANITY_BBLAYERCONF_SAMPLE ?= "${COREBASE}/meta*/conf/templates/default/bblayers.conf.sample"
 python oecore_update_bblayers() {
     # bblayers.conf is out of date, so see if we can resolve that
 
@@ -475,7 +475,7 @@ def check_wsl(d):
             bb.warn("You are running bitbake under WSLv2, this works properly but you should optimize your VHDX file eventually to avoid running out of storage space")
     return None
 
-# Require at least gcc version 7.5.
+# Require at least gcc version 8.0
 #
 # This can be fixed on CentOS-7 with devtoolset-6+
 # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/
@@ -488,8 +488,8 @@ def check_gcc_version(sanity_data):
     
     build_cc, version = oe.utils.get_host_compiler_version(sanity_data)
     if build_cc.strip() == "gcc":
-        if bb.utils.vercmp_string_op(version, "7.5", "<"):
-            return "Your version of gcc is older than 7.5 and will break builds. Please install a newer version of gcc (you could use the project's buildtools-extended-tarball or use scripts/install-buildtools).\n"
+        if bb.utils.vercmp_string_op(version, "8.0", "<"):
+            return "Your version of gcc is older than 8.0 and will break builds. Please install a newer version of gcc (you could use the project's buildtools-extended-tarball or use scripts/install-buildtools).\n"
     return None
 
 # Tar version 1.24 and onwards handle overwriting symlinks correctly

@@ -9,5 +9,5 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6a6e689d19255cf0557f3fe7d7068212 \
 
 inherit gnomebase upstream-version-is-even
 
-SRC_URI[archive.sha256sum] = "0938e2279e5cfbc2204766ca9d3fea570911699b07c10cbe01aca62a7e8b2bee"
-PV = "3.46.3"
+SRC_URI[archive.sha256sum] = "5ce62c1e67f2789342a7f4a035b102f74e62ed85f60e81a5b7f3e04165404dff"
+PV = "3.48.1"

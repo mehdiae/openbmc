@@ -617,22 +617,14 @@ def check_32bit_symbols(path, packagename, d, elf, messages):
             # At this point, any symbol information is stripped into the debug
             # package, so that is the only place we will find them.
             elfpath = elfpath.replace('.debug/', '')
-            allowed = (
-                d.getVarFlag(
-                    'INSANE_SKIP:' + d.getVar('PN'), elfpath.replace('/', '_')
-                ) or ''
-            ).split()
-            usedapis -= set(allowed)
-            if usedapis:
+            allowed = "32bit-time" in (d.getVar('INSANE_SKIP') or '').split()
+            if not allowed:
                 msgformat = elfpath + " uses 32-bit api '%s'"
                 for sym in usedapis:
                     oe.qa.add_message(messages, '32bit-time', msgformat % sym)
                 oe.qa.add_message(
                     messages, '32bit-time',
-                    'Suppress with INSANE_SKIP:%s[%s] = "%s"' % (
-                        d.getVar('PN'), elfpath.replace('/', '_'),
-                        ' '.join(usedapis)
-                    )
+                    'Suppress with INSANE_SKIP = "32bit-time"'
                 )
 
 # Check license variables
@@ -1348,31 +1340,18 @@ python do_qa_patch() {
 
     coremeta_path = os.path.join(d.getVar('COREBASE'), 'meta', '')
     for url in patch.src_patches(d):
-       (_, _, fullpath, _, _, _) = bb.fetch.decodeurl(url)
+        (_, _, fullpath, _, _, _) = bb.fetch.decodeurl(url)
 
-       # skip patches not in oe-core
-       patchtype = "patch-status-core"
-       if not os.path.abspath(fullpath).startswith(coremeta_path):
-           patchtype = "patch-status-noncore"
-           if not allpatches:
-               continue
+        # skip patches not in oe-core
+        patchtype = "patch-status-core"
+        if not os.path.abspath(fullpath).startswith(coremeta_path):
+            patchtype = "patch-status-noncore"
+            if not allpatches:
+                continue
 
-       kinda_status_re = re.compile(r"^.*upstream.*status.*$", re.IGNORECASE | re.MULTILINE)
-       strict_status_re = re.compile(r"^Upstream-Status: (Pending|Submitted|Denied|Accepted|Inappropriate|Backport|Inactive-Upstream)( .+)?$", re.MULTILINE)
-       guidelines = "https://www.openembedded.org/wiki/Commit_Patch_Message_Guidelines#Patch_Header_Recommendations:_Upstream-Status"
-
-       with open(fullpath, encoding='utf-8', errors='ignore') as f:
-           file_content = f.read()
-           match_kinda = kinda_status_re.search(file_content)
-           match_strict = strict_status_re.search(file_content)
-
-           if not match_strict:
-               if match_kinda:
-                   msg = "Malformed Upstream-Status in patch\n%s\nPlease correct according to %s :\n%s" % (fullpath, guidelines, match_kinda.group(0))
-                   oe.qa.handle_error(patchtype, msg, d)
-               else:
-                   msg = "Missing Upstream-Status in patch\n%s\nPlease add according to %s ." % (fullpath, guidelines)
-                   oe.qa.handle_error(patchtype, msg, d)
+        msg = oe.qa.check_upstream_status(fullpath)
+        if msg:
+            oe.qa.handle_error(patchtype, msg, d)
 
     oe.qa.exit_if_errors(d)
 }

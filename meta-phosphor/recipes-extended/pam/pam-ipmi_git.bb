@@ -9,11 +9,13 @@ SRCREV = "8e5d061775553f137c89ef4ba223eb5b0f5dbb30"
 PV = "1.0+git${SRCPV}"
 PR = "r1"
 
-SRC_URI += "git://github.com/openbmc/pam-ipmi;branch=master;protocol=https"
+SRC_URI = "git://github.com/openbmc/pam-ipmi;branch=master;protocol=https"
 
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig
+
+EXTRA_OECONF += "--libdir=${base_libdir}"
 
 FILES:${PN} += " \
                ${base_libdir}/security/ \

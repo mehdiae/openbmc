@@ -14,8 +14,8 @@ Normal Recipe Build Tasks
 
 The following sections describe normal tasks associated with building a
 recipe. For more information on tasks and dependencies, see the
-":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
-":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-execution:dependencies`" sections in the
+":ref:`bitbake-user-manual/bitbake-user-manual-metadata:tasks`" and
+":ref:`bitbake-user-manual/bitbake-user-manual-execution:dependencies`" sections in the
 BitBake User Manual.
 
 .. _ref-tasks-build:
@@ -118,9 +118,9 @@ If the :ref:`ref-tasks-deploy` task re-executes, any previous output is removed
 ``do_fetch``
 ------------
 
-Fetches the source code. This task uses the
-:term:`SRC_URI` variable and the argument's prefix to
-determine the correct :ref:`fetcher <bitbake:bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`
+Fetches the source code. This task uses the :term:`SRC_URI` variable and the
+argument's prefix to determine the correct
+:ref:`fetcher <bitbake-user-manual/bitbake-user-manual-fetching:fetchers>`
 module.
 
 .. _ref-tasks-image:
@@ -256,17 +256,6 @@ the Yocto Project Overview and Concepts Manual.
 
 Creates RPM packages (i.e. ``*.rpm`` files) and places them in the
 ``${``\ :term:`DEPLOY_DIR_RPM`\ ``}`` directory in
-the package feeds area. For more information, see the
-":ref:`overview-manual/concepts:package feeds`" section in
-the Yocto Project Overview and Concepts Manual.
-
-.. _ref-tasks-package_write_tar:
-
-``do_package_write_tar``
-------------------------
-
-Creates tarballs and places them in the
-``${``\ :term:`DEPLOY_DIR_TAR`\ ``}`` directory in
 the package feeds area. For more information, see the
 ":ref:`overview-manual/concepts:package feeds`" section in
 the Yocto Project Overview and Concepts Manual.

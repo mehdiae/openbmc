@@ -361,7 +361,7 @@ Yocto Project:
    of the :oe_layerindex:`OpenEmbedded Layer Index <>`, which
    is a website that indexes OpenEmbedded-Core layers.
 
--  *Patchwork:* `Patchwork <http://jk.ozlabs.org/projects/patchwork/>`__
+-  *Patchwork:* `Patchwork <https://patchwork.yoctoproject.org/>`__
    is a fork of a project originally started by
    `OzLabs <https://ozlabs.org/>`__. The project is a web-based tracking
    system designed to streamline the process of bringing contributions
@@ -704,7 +704,7 @@ BitBake also supports both ``:prepend`` and ``:append`` operators as a
 method of extending task functionality. These operators inject code into
 the beginning or end of a task. For information on these BitBake
 operators, see the
-":ref:`bitbake:bitbake-user-manual/bitbake-user-manual-metadata:appending and prepending (override style syntax)`"
+":ref:`bitbake-user-manual/bitbake-user-manual-metadata:appending and prepending (override style syntax)`"
 section in the BitBake User's Manual.
 
 The OpenEmbedded Build System Workflow
