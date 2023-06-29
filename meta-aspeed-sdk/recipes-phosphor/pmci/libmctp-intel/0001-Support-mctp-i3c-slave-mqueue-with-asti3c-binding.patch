@@ -55,7 +55,7 @@ index bc89e10..8e3cd3c 100644
  
 -	write_len = write(pkt_prv->fd, pkt->data, len);
 +        if (pkt_prv->append_pec) {
-+		uint8_t i3c_addr = BMC_I3C_SLAVE_ADDR << 1;
++		uint8_t i3c_addr = (BMC_I3C_SLAVE_ADDR << 1) | 0x01;
 +		uint8_t pec;
 +		uint8_t *buffer = malloc(len + 1);
 +		pec = crc8(0, &i3c_addr, 1);

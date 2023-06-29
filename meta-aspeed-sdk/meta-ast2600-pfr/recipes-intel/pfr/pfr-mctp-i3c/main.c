@@ -193,7 +193,7 @@ bool is_mctp_vendor_message_valid(struct mctp_i3c_doe_msg *msg, uint16_t len)
 
 void send_mctp_set_eid(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 {
-	uint8_t pec, i3c_addr = BMC_I3C_SLAVE_ADDR << 1;
+	uint8_t pec, i3c_addr = (BMC_I3C_SLAVE_ADDR << 1) | 0x01;
 	struct mctp_i3c_set_eid *msg = (struct mctp_i3c_set_eid *)mctp_msg;
 
 	msg->mctp_header.dest_eid = 0;
@@ -225,7 +225,7 @@ void send_mctp_set_eid(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 
 int send_doe_registration_res(struct i3c_mctp_packet_data *mctp_msg, uint16_t len)
 {
-	uint8_t pec, i3c_addr = BMC_I3C_SLAVE_ADDR << 1;
+	uint8_t pec, i3c_addr = (BMC_I3C_SLAVE_ADDR << 1) | 0x01;
 	struct mctp_i3c_doe_registration *msg = (struct mctp_i3c_doe_registration *)mctp_msg;
 	msg->mctp_header.dest_eid = ROT_EID;
 	msg->mctp_header.src_eid = CPU0_EID;
@@ -270,8 +270,9 @@ void process_mctp_vendor_message( struct i3c_mctp_packet_data *mctp_msg, uint16_
 	struct mctp_i3c_doe_msg *msg = (struct mctp_i3c_doe_msg *)mctp_msg->payload;
 	int ret;
 
-	if (!is_mctp_vendor_message_valid(msg, len))
+	if (!is_mctp_vendor_message_valid(msg, len)) {
 		return;
+	}
 
 	switch (msg->doe_cmd) {
 		case MCTP_VENDOR_DOE_REGISTRATION:
@@ -306,6 +307,10 @@ void *mctp_i3c_state_handler(void *arg)
 		lseek(fd, 0, SEEK_SET);
 		ret = read(fd, buf, sizeof(buf));
 		if (ret > 0) {
+			printf("I3C Buffer: ");
+			for (uint16_t i = 0; i < ret; ++i)
+				printf("%02x ", *(buf + i));
+			printf("\n");
 			length = ret;
 			mctp_msg = (struct i3c_mctp_packet_data *)buf;
 			ret = process_mctp_header(mctp_msg, length);
