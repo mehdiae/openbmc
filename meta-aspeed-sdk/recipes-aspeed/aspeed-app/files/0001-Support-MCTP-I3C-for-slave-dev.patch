@@ -42,7 +42,7 @@ index ed67d99..61b96fe 100644
 +
 +#ifdef APPEND_PEC_FOR_I3C_SLAVE
 +	int buf_size = i;
-+	uint8_t pec, addr = 0x08 << 1;
++	uint8_t pec, addr = ((0x08 << 1) | 0x01);
 +
 +	if (cal_pec)
 +		buf_size++;
