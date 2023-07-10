@@ -20,7 +20,7 @@ Reference:
 
 ## Target the machine
 ```
-source setup <machine> [build_dir]
+. setup <machine> [build_dir]
 Target machine must be specified. Use one of:
 ast2500-default
 ast2500-default-54
@@ -78,13 +78,13 @@ ast2600-a1-secure-rsa4096-sha512-o2-pub
 1. AST2600
 
 ```
-source setup ast2600-default [build_dir]
+. setup ast2600-default [build_dir]
 ```
 
 2. AST2500
 
 ```
-source setup ast2500-default [build_dir]
+. setup ast2500-default [build_dir]
 ```
 
 ## Build OpenBMC firmware

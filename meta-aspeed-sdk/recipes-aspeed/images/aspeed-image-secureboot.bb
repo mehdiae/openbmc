@@ -128,7 +128,7 @@ do_deploy () {
     fi
 
     if [ -f ${ASPEED_SECURE_BOOT_CONFIG} ]; then
-        source ${ASPEED_SECURE_BOOT_CONFIG}
+        . ${ASPEED_SECURE_BOOT_CONFIG}
     else
         bbwarn "User secure boot config not found!, ${ASPEED_SECURE_BOOT_CONFIG}"
 
@@ -137,7 +137,7 @@ do_deploy () {
             exit 1
         fi
 
-        source ${STAGING_DATADIR_NATIVE}/aspeed-secure-config/${ASPEED_SECURE_BOOT_TARGET}/${ASPEED_SECURE_BOOT_CONFIG}
+        . ${STAGING_DATADIR_NATIVE}/aspeed-secure-config/${ASPEED_SECURE_BOOT_TARGET}/${ASPEED_SECURE_BOOT_CONFIG}
         bbwarn "Using an aspeed insecure config signing key!, ${STAGING_DATADIR_NATIVE}/aspeed-secure-config/${ASPEED_SECURE_BOOT_TARGET}/${ASPEED_SECURE_BOOT_CONFIG}"
     fi
 
