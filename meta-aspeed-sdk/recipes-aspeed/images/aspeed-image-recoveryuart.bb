@@ -47,7 +47,7 @@ do_deploy () {
     # Install recovery input image into source directory
     # Generate recovery image via UART
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${RECOVERY_INPUT_IMAGE} ${SOURCE_IMAGE_DIR}
-    sh ${STAGING_BINDIR_NATIVE}/gen_uart_booting_image.sh ${SOURCE_IMAGE_DIR}/${RECOVERY_INPUT_IMAGE} ${OUTPUT_IMAGE_DIR}/${RECOVERY_OUTPUT_IMAGE}
+    python3 ${STAGING_BINDIR_NATIVE}/gen_uart_booting_image.py ${SOURCE_IMAGE_DIR}/${RECOVERY_INPUT_IMAGE} ${OUTPUT_IMAGE_DIR}/${RECOVERY_OUTPUT_IMAGE}
 
     # Deploy recovery image via UART
     install -d ${DEPLOYDIR}
