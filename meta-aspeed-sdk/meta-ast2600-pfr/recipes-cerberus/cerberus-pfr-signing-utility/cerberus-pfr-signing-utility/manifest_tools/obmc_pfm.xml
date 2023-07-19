@@ -15,7 +15,7 @@
       </Region>
       <Region>
           <StartAddr>0x08000000</StartAddr> <!-- staging -->
-          <EndAddr>0x0E4FFFFF</EndAddr>
+          <EndAddr>0x0C4FFFFF</EndAddr>
           <OperationOnFailure>Nothing</OperationOnFailure>
       </Region>
   </ReadWrite>

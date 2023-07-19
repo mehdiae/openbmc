@@ -74,7 +74,7 @@
 			"name": "image-stg",
 			"index": 7,
 			"offset": "0x8000000",
-			"size": "0x5300000",
+			"size": "0x4300000",
 			"prot_mask": 3,
 			"pfm": 1,
 			"hash": 0,
@@ -83,7 +83,7 @@
 		{
 			"name": "afm-rcv",
 			"index": 8,
-			"offset": "0xd300000",
+			"offset": "0xc300000",
 			"size": "0x20000",
 			"prot_mask": 0,
 			"pfm": 1,
