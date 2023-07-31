@@ -1,0 +1,13 @@
+diff --git a/plat/aspeed/ast2700/include/platform_def.h b/plat/aspeed/ast2700/include/platform_def.h
+index 3f2468f3b..45c594dda 100644
+--- a/plat/aspeed/ast2700/include/platform_def.h
++++ b/plat/aspeed/ast2700/include/platform_def.h
+@@ -22,7 +22,7 @@
+ 					 PLATFORM_CORE_COUNT_PER_CLUSTER)
+ 
+ /* arch timer */
+-#define PLAT_SYSCNT_CLKIN_HZ		U(1600000000)
++#define PLAT_SYSCNT_CLKIN_HZ		U(24000000)
+ 
+ /* power domain */
+ #define PLAT_MAX_PWR_LVL		U(1)
