@@ -1,5 +1,3 @@
-GCCVERSION = "11.%"
-
 SOC_FAMILY = "aspeed-g7"
 include conf/machine/include/soc-family.inc
 require conf/machine/include/aspeed-sdk.inc
