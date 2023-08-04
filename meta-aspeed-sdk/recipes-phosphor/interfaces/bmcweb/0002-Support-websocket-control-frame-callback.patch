@@ -11,33 +11,33 @@ v2-v3: Fix coding style issue
 
 Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
 ---
- http/routing.hpp   | 20 ++++++++++++++++++--
- http/websocket.hpp | 45 +++++++++++++++++++++++++++++++++++++++++++--
+ http/routing/websocketrule.hpp | 20 +++++++++++++--
+ http/websocket.hpp             | 45 ++++++++++++++++++++++++++++++++--
  2 files changed, 61 insertions(+), 4 deletions(-)
 
-diff --git a/http/routing.hpp b/http/routing.hpp
-index eb87e72b..4ee3eaff 100644
---- a/http/routing.hpp
-+++ b/http/routing.hpp
-@@ -305,7 +305,7 @@ class WebSocketRule : public BaseRule
+diff --git a/http/routing/websocketrule.hpp b/http/routing/websocketrule.hpp
+index 5e558f2edb..e941ad7de4 100644
+--- a/http/routing/websocketrule.hpp
++++ b/http/routing/websocketrule.hpp
+@@ -38,7 +38,7 @@ class WebSocketRule : public BaseRule
              myConnection = std::make_shared<
                  crow::websocket::ConnectionImpl<boost::asio::ip::tcp::socket>>(
-                 req, std::move(adaptor), openHandler, messageHandler,
+                 req, req.url(), std::move(adaptor), openHandler, messageHandler,
 -                messageExHandler, closeHandler, errorHandler);
 +                messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
          myConnection->start();
      }
  #else
-@@ -320,7 +320,7 @@ class WebSocketRule : public BaseRule
+@@ -53,7 +53,7 @@ class WebSocketRule : public BaseRule
              myConnection = std::make_shared<crow::websocket::ConnectionImpl<
                  boost::beast::ssl_stream<boost::asio::ip::tcp::socket>>>(
-                 req, std::move(adaptor), openHandler, messageHandler,
+                 req, req.url(), std::move(adaptor), openHandler, messageHandler,
 -                messageExHandler, closeHandler, errorHandler);
 +                messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
          myConnection->start();
      }
  #endif
-@@ -360,6 +360,20 @@ class WebSocketRule : public BaseRule
+@@ -93,6 +93,20 @@ class WebSocketRule : public BaseRule
          return *this;
      }
  
@@ -58,17 +58,16 @@ index eb87e72b..4ee3eaff 100644
    protected:
      std::function<void(crow::websocket::Connection&)> openHandler;
      std::function<void(crow::websocket::Connection&, const std::string&, bool)>
-@@ -371,6 +385,8 @@ class WebSocketRule : public BaseRule
+@@ -104,5 +118,7 @@ class WebSocketRule : public BaseRule
      std::function<void(crow::websocket::Connection&, const std::string&)>
          closeHandler;
      std::function<void(crow::websocket::Connection&)> errorHandler;
 +    std::function<void(crow::websocket::Connection&, const std::string&)> pingHandler;
 +    std::function<void(crow::websocket::Connection&, const std::string&)> pongHandler;
  };
- 
- template <typename T>
+ } // namespace crow
 diff --git a/http/websocket.hpp b/http/websocket.hpp
-index e61f58b0..efe2cf0e 100644
+index 216c4131db..882b6e5cf6 100644
 --- a/http/websocket.hpp
 +++ b/http/websocket.hpp
 @@ -63,14 +63,18 @@ class ConnectionImpl : public Connection
@@ -80,7 +79,7 @@ index e61f58b0..efe2cf0e 100644
 +        std::function<void(Connection&, const std::string&)> pingHandlerIn,
 +        std::function<void(Connection&, const std::string&)> pongHandlerIn) :
          Connection(reqIn),
-         ws(std::move(adaptorIn)), inBuffer(inString, 131088),
+         uri(urlViewIn), ws(std::move(adaptorIn)), inBuffer(inString, 131088),
          openHandler(std::move(openHandlerIn)),
          messageHandler(std::move(messageHandlerIn)),
          messageExHandler(std::move(messageExHandlerIn)),
@@ -92,7 +91,7 @@ index e61f58b0..efe2cf0e 100644
      {
          /* Turn on the timeouts on websocket stream to server role */
          ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(
-@@ -135,6 +139,41 @@ class ConnectionImpl : public Connection
+@@ -136,6 +140,41 @@ class ConnectionImpl : public Connection
              }
              acceptDone();
          });
@@ -104,7 +103,7 @@ index e61f58b0..efe2cf0e 100644
 +            {
 +                case boost::beast::websocket::frame_type::close:
 +                {
-+                    BMCWEB_LOG_DEBUG << "Control frame [CLOSE]: " << payload;
++                    BMCWEB_LOG_DEBUG("Control frame [CLOSE]: {}", payload);
 +                    if (closeHandler)
 +                    {
 +                        closeHandler(*this, std::string(payload));
@@ -113,7 +112,7 @@ index e61f58b0..efe2cf0e 100644
 +                }
 +                case boost::beast::websocket::frame_type::ping:
 +                {
-+                    BMCWEB_LOG_DEBUG << "Control frame [PING]: " << payload;
++                    BMCWEB_LOG_DEBUG("Control frame [PING]: {}", payload);
 +                    if (pingHandler)
 +                    {
 +                        pingHandler(*this, std::string(payload));
@@ -122,7 +121,7 @@ index e61f58b0..efe2cf0e 100644
 +                }
 +                case boost::beast::websocket::frame_type::pong:
 +                {
-+                    BMCWEB_LOG_DEBUG << "Control frame [PONG]: " << payload;
++                    BMCWEB_LOG_DEBUG("Control frame [PONG]: {}", payload);
 +                    if (pongHandler)
 +                    {
 +                        pongHandler(*this, std::string(payload));
@@ -134,7 +133,7 @@ index e61f58b0..efe2cf0e 100644
      }
  
      void sendBinary(std::string_view msg) override
-@@ -358,6 +397,8 @@ class ConnectionImpl : public Connection
+@@ -366,6 +405,8 @@ class ConnectionImpl : public Connection
          messageExHandler;
      std::function<void(Connection&, const std::string&)> closeHandler;
      std::function<void(Connection&)> errorHandler;
@@ -143,3 +142,6 @@ index e61f58b0..efe2cf0e 100644
      std::shared_ptr<persistent_data::UserSession> session;
  
      std::shared_ptr<Connection> selfOwned;
+-- 
+2.25.1
+
