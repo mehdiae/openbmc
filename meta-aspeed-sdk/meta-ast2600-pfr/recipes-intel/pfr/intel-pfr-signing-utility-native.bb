@@ -1,7 +1,7 @@
 SUMMARY = "Intel(R) Platform Firmware Resilience Signing Utility"
 DESCRIPTION = "Image signing tool for building Intel(R) PFR image"
 
-inherit cmake native
+inherit pkgconfig cmake native
 
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://COPYING.apache-2.0;md5=34400b68072d710fecd0a2940a0d1658"
