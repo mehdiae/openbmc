@@ -22,7 +22,6 @@ RDEPENDS:${PN}-apps = " \
     pciutils \
     ethtool \
     mmc-utils \
-    memtester \
     i3c-tools \
     i2c-tools \
     xdma-test \
@@ -44,6 +43,8 @@ RDEPENDS:${PN}-intel-pmci = " \
     libmctp-intel-test \
     "
 
+# The size of fio is very large because its dependencies
+# includes python3-core
 RDEPENDS:${PN}-apps:append:aspeed-g6 = " \
     fio \
     freeipmi \

@@ -20,11 +20,16 @@ LIC_FILES_CHKSUM = "file://COPYING.ipmi-fru;md5=d32239bcb673463ab874e80d47fae504
                     file://COPYING.ipmiconsole;md5=d32239bcb673463ab874e80d47fae504"
 
 SRC_URI = "https://ftp.gnu.org/gnu/freeipmi/freeipmi-${PV}.tar.gz"
-SRC_URI[sha256sum] = "4aa46a269ecc1bbff9412451f17b5408f64395e7dc45b713edf5eb5362700a71"
+SRC_URI[sha256sum] = "65fbd6910fc010457748695414f27c5755b4e8d75734221221f3858c6230a897"
 
 inherit autotools pkgconfig
 
-EXTRA_OECONF = " --without-encryption --without-random-device --with-dont-check-for-root --enable-rawdumps "
+EXTRA_OECONF = " --without-encryption \
+                 --without-random-device \
+                 --disable-init-scripts \
+                 --with-dont-check-for-root \
+                 --enable-rawdumps \
+               "
 
 PACKAGES =+ " \
     ${PN}-ipmi-raw \
