@@ -1,6 +1,8 @@
 SUMMARY = "Turn On USB gadget"
 DESCRIPTION = "Script to turn on usb gadget after BMC is ready"
 
+RDEPENDS:${PN} = "aspeed-app"
+
 S = "${WORKDIR}"
 SRC_URI = "file://usbA-net.sh \
            file://usbB-net.sh \
@@ -13,7 +15,6 @@ SRC_URI = "file://usbA-net.sh \
            file://netusb.service \
            file://keyboard.sh \
            file://mouse.sh \
-	   file://hid_gadget_app \
           "
 
 LICENSE = "Apache-2.0"
@@ -35,9 +36,6 @@ do_install() {
     install -m 0755 ${S}/usbB-uart.sh ${D}/${bindir}/usbB-uart.sh
     install -m 0755 ${S}/keyboard.sh ${D}/${bindir}/keyboard.sh
     install -m 0755 ${S}/mouse.sh ${D}/${bindir}/mouse.sh
-    if ${@bb.utils.contains('MACHINE', 'ast2700-fpga', 'false', 'true', d)}; then
-        install -m 0755 ${S}/hid_gadget_app ${D}/${bindir}/hid_gadget_app
-    fi
 }
 
 SYSTEMD_SERVICE:${PN} += " netusb.service"
