@@ -21,12 +21,13 @@ IMAGE_INSTALL:append = " \
         ${@bb.utils.contains('DISTRO_FEATURES', 'tpm', \
             bb.utils.contains('MACHINE_FEATURES', 'tpm2', 'packagegroup-security-tpm2', '', d), \
             '', d)} \
+        packagegroup-aspeed-ktools \
         "
 
-# Only install in AST26xx series rofs as the free space of AST2500 rofs is not enough.
-IMAGE_INSTALL:append:aspeed-g6 = " \
+# Only install in AST26xx and AST27xx series rofs as the free space of AST2500 rofs is not enough.
+IMAGE_INSTALL:remove:aspeed-g5 = " \
         packagegroup-aspeed-ktools \
-       "
+        "
 
 EXTRA_IMAGE_FEATURES:append = " \
         nfs-client \

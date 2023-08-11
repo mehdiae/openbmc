@@ -60,6 +60,7 @@ RRECOMMENDS:${PN}-mtdtest= " \
     kernel-module-mtd-stresstest \
     "
 
+# The size of perf is 6MB
 SUMMARY:${PN}-ktools = "kernel tools"
 RDEPENDS:${PN}-ktools = " \
     "
