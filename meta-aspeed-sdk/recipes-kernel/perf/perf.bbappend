@@ -4,4 +4,5 @@
 #To save the code size, add RDEPENDS:${PN}:remove to remove perl package.
 #It is a work around solution.
 RDEPENDS:${PN}:remove = "perl"
-PACKAGECONFIG:remove = "scripting"
+#PACKAGECONFIG:remove = "scripting"
+#EXTRA_OEMAKE:append = " PYTHON=python3 PYTHON_CONFIG=python3-config "
