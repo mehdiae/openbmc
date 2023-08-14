@@ -49,30 +49,8 @@ ast2600-secure-rsa4096-sha512-o2-pub
 ast2600-a2
 ast2600-a2-54
 ast2600-a2-emmc
-ast2600-a2-emmc-secure-rsa2048-sha256
-ast2600-a2-emmc-secure-rsa4096-sha512
-ast2600-a2-secure-rsa2048-sha256
-ast2600-a2-secure-rsa2048-sha256-ncot
-ast2600-a2-secure-rsa2048-sha256-o1
-ast2600-a2-secure-rsa2048-sha256-o2-pub
-ast2600-a2-secure-rsa3072-sha384
-ast2600-a2-secure-rsa3072-sha384-o1
-ast2600-a2-secure-rsa3072-sha384-o2-pub
-ast2600-a2-secure-rsa4096-sha512
-ast2600-a2-secure-rsa4096-sha512-o1
-ast2600-a2-secure-rsa4096-sha512-o2-pub
 ast2600-a1
 ast2600-a1-54
-ast2600-a1-secure-rsa2048-sha256
-ast2600-a1-secure-rsa2048-sha256-ncot
-ast2600-a1-secure-rsa2048-sha256-o1
-ast2600-a1-secure-rsa2048-sha256-o2-pub
-ast2600-a1-secure-rsa3072-sha384
-ast2600-a1-secure-rsa3072-sha384-o1
-ast2600-a1-secure-rsa3072-sha384-o2-pub
-ast2600-a1-secure-rsa4096-sha512
-ast2600-a1-secure-rsa4096-sha512-o1
-ast2600-a1-secure-rsa4096-sha512-o2-pub
 ```
 
 1. AST2600
