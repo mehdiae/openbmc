@@ -16,8 +16,8 @@ PACKAGES = " \
 
 # The size of fio is very large because its dependencies
 # includes python3-core
-# The size of fio and python3-core is 10MB.
-# The size of freeipmi is 5MB.
+# The size of fio and python3-core are 10MB.
+# The size of freeipmi and freeipmi-ipmi-raw are 5MB.
 SUMMARY:${PN}-apps = "Open Source Applications"
 RDEPENDS:${PN}-apps = " \
     mdio-tool \
@@ -50,8 +50,11 @@ RDEPENDS:${PN}-intel-pmci = " \
     libmctp-intel-test \
     "
 
-# Only install in AST26xx and AST27xx series rofs as the free space of AST2500 rofs is not enough.
+# Only install in AST26xx and AST27xx series rofs as the free space of AST25xx rofs is not enough.
 RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
+    i3c-tools \
+    iozone3 \
+    hdparm \
     fio \
     freeipmi \
     freeipmi-ipmi-raw \

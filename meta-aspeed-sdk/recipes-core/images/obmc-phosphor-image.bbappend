@@ -24,7 +24,7 @@ IMAGE_INSTALL:append = " \
         packagegroup-aspeed-ktools \
         "
 
-# Only install in AST26xx and AST27xx series rofs as the free space of AST2500 rofs is not enough.
+# Only install in AST26xx and AST27xx series rofs as the free space of AST25xx rofs is not enough.
 IMAGE_INSTALL:remove:aspeed-g5 = " \
         packagegroup-aspeed-ktools \
         "
