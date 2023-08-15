@@ -1,5 +1,5 @@
 KBRANCH = "aspeed-dev-v5.4"
-LINUX_VERSION ?= "5.4.62"
+LINUX_VERSION ?= "5.4.173"
 
 SRCREV = "${AUTOREV}"
 

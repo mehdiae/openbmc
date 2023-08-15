@@ -1,5 +1,5 @@
-KBRANCH = "aspeed-dev-v6.1"
-LINUX_VERSION ?= "6.1.34"
+KBRANCH = "aspeed-dev-v5.15"
+LINUX_VERSION ?= "5.15.41"
 
 SRCREV = "${AUTOREV}"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
