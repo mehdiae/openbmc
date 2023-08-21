@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-#PACKAGECONFIG:remove = "\
-#    networkd \
-#    resolved \
-#    timesyncd \
-#    "
+PACKAGECONFIG:remove = "\
+    networkd \
+    resolved \
+    timesyncd \
+    "
