@@ -23,13 +23,14 @@ python do_generate_static:append() {
     spl_binary = d.getVar('SPL_BINARY', True)
 
     if spl_binary:
+        uboot_spl_end_offset = uboot_offset + int(d.getVar('FLASH_UBOOT_SPL_SIZE', True))
         _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                    '%s.%s' % (
                                     d.getVar('FLASH_UBOOT_SPL_IMAGE', True),
                                     d.getVar('UBOOT_SUFFIX', True))),
                       int(d.getVar('FLASH_UBOOT_OFFSET', True)),
-                      int(d.getVar('FLASH_UBOOT_SPL_SIZE', True)))
-        uboot_offset += int(d.getVar('FLASH_UBOOT_SPL_SIZE', True))
+                      uboot_spl_end_offset)
+        uboot_offset = uboot_spl_end_offset
 
     _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                '%s.%s' % (
@@ -60,3 +61,4 @@ do_generate_ubi_tar[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-s
 do_generate_static_tar[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)}"
 do_generate_ext4_tar[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)}"
 do_generate_static[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)}"
+do_generate_static[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)}"
