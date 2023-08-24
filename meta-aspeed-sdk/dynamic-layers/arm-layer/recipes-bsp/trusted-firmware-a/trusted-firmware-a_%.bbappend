@@ -4,3 +4,4 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 # However, ast2700 fpga PLAT_SYSCNT_CLKIN_HZ is 24MHZ.
 # Update PLAT_SYSCNT_CLKIN_HZ for AST2700 FPGA.
 SRC_URI:append:ast2700-fpga = " file://fpga_clk.patch "
+SRC_URI:append:ast2700-fpga-tee = " file://fpga_clk.patch "

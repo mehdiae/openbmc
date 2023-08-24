@@ -1,4 +1,5 @@
 MACHINE ??= "ast2700-fpga"
+#MACHINE ??= "ast2700-fpga-tee"
 
 DISTRO ?= "openbmc-phosphor"
 PACKAGE_CLASSES ?= "package_ipk"
