@@ -11,6 +11,7 @@ DEPENDS = "openssl-native libxml2-native "
 SRC_URI = "git://github.com/Intel-BMC/intel-pfr-signing-utility;protocol=https;branch=master \
            file://0001-support-openssl-3.0.patch \
            file://0002-fix-verify-error-if-block1-b0sig-hashalg-set-to-sha384.patch \
+           file://0003-Fix-signature-RS-extration-error.patch \
           "
 
 SRCREV = "2c6f15434db57e5f51e3b1a4817f0e621a5bad25"
