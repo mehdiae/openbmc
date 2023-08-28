@@ -26,12 +26,6 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
 DEPENDS = "openssl i2c-tools"
 RDEPENDS:${PN} = "openssl i2c-tools"
 
-EXTRA_OEMESON:ast2600-pfr = " \
-    -Di2c_bus=14 \
-    -Dbmc_staging_offset=0x04a00000 \
-    -Dbmc_recovery_offset=0x02a00000 \
-    "
-
 EXTRA_OEMESON:ast2600-dcscm-avenue-city = " \
     -Dpch_active_pfm_offset=0x03fe0000 \
     -Dpch_staging_offset=0x04000000 \
