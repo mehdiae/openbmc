@@ -14,3 +14,6 @@ SRC_URI:append = " file://mtd_test.cfg "
 SRC_URI:append = " file://crpyto_manager.cfg "
 SRC_URI:append:cypress-s25hx = " file://jffs2_writebuffer.cfg "
 
+# Workaround
+SRC_URI:append = " file://compression_xz.cfg "
+

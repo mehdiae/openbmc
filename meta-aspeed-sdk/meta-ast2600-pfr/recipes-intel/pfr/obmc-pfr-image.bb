@@ -9,7 +9,6 @@ PFR_SHA ?= "1"
 
 SRC_URI = " \
            file://pfr_image.py \
-           file://pfr_manifest.json \
            file://pfr_manifest_ast2600_dcscm.json \
            file://pfm_config.xml \
            file://bmc_config.xml \
