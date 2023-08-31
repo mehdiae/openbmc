@@ -7,12 +7,12 @@ inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', 'deploy', d
 
 UBOOT_SUFFIX ?= "bin"
 
-ASPEED_IMAGE_BMCU_RAM_IMAGE ?= "bmcu_ram"
+ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "boot_mcu_ram"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE ?= "u-boot-spl"
 ASPEED_IMAGE_UBOOT_IMAGE ?= "u-boot"
 
-ASPEED_IMAGE_BMCU_RAM_OFFSET_KB ?= "0"
-ASPEED_IMAGE_BMCU_RAM_SIZE_KB ?= "88"
+ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB ?= "0"
+ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB ?= "88"
 ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB ?= "384"
 ASPEED_IMAGE_UBOOT_SPL_SIZE_KB ?= "128"
 ASPEED_IMAGE_UBOOT_OFFSET_KB ?= "576"
@@ -69,17 +69,17 @@ python do_compile() {
                                       'if=%s' % imgpath,
                                       'of=%s' % nor_image])
 
-    # bmcu ram
-    bmcu_ram_binary = d.getVar('BMCU_RAM_BINARY', True)
-    bmcu_ram_finish_kb = (int(d.getVar('ASPEED_IMAGE_BMCU_RAM_OFFSET_KB', True)) +
-                         int(d.getVar('ASPEED_IMAGE_BMCU_RAM_SIZE_KB', True)))
-    if bmcu_ram_binary:
+    # bootmcu
+    bootmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
+    bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
+                           int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
+    if bootmcu_fw_binary:
         _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                    '%s.%s' % (
-                                   d.getVar('ASPEED_IMAGE_BMCU_RAM_IMAGE', True),
+                                   d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True),
                                    d.getVar('UBOOT_SUFFIX', True))),
-                      int(d.getVar('ASPEED_IMAGE_BMCU_RAM_OFFSET_KB', True)),
-                      bmcu_ram_finish_kb)
+                      int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)),
+                      bootmcu_fw_finish_kb)
 
     # spl
     spl_binary = d.getVar('SPL_BINARY', True)
@@ -131,7 +131,7 @@ do_compile[depends] = " \
     virtual/kernel:do_deploy \
     u-boot:do_deploy \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
-    ${@bb.utils.contains('BMCU_RAM_BINARY', 'bmcu_ram.bin', 'bmcu-ram-image:do_deploy', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
     "
 do_fetch[noexec] = "1"
 do_unpack[noexec] = "1"
