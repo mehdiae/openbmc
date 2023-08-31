@@ -31,8 +31,8 @@ index 23dd7ecd7f..36be5e7dc3 100644
  #undef CONFIG_EXTRA_ENV_SETTINGS
  #define CONFIG_EXTRA_ENV_SETTINGS	\
  	"loadaddr=" STR(CONFIG_SYS_LOAD_ADDR) "\0"	\
--	"bootspi=fdt addr 20100000 && fdt header get fitsize totalsize && cp.b 20100000 ${loadaddr} ${fitsize} && bootm; echo Error loading kernel FIT image\0"	\
-+	"bootspi=fdt addr 20100000 && fdt header get fitsize totalsize && cp.b 20100000 ${loadaddr} ${fitsize} && bootm; echo Error loading kernel FIT image, boot alternative firmware; run bootalt\0"	\
+-	"bootspi=fdt addr 20160000 && fdt header get fitsize totalsize && cp.b 20160000 ${loadaddr} ${fitsize} && bootm; echo Error loading kernel FIT image\0"	\
++	"bootspi=fdt addr 20160000 && fdt header get fitsize totalsize && cp.b 20160000 ${loadaddr} ${fitsize} && bootm; echo Error loading kernel FIT image, boot alternative firmware; run bootalt\0"	\
 +	"wdt2bite=mw.l 0x1e620068 0x0a 1; mw.b 0x1e78500c 0x33 1; mw.b 0x1e620064 0x01\0" \
 +        "bootalt=run wdt2bite\0" \
  	"verify=yes\0"	\
