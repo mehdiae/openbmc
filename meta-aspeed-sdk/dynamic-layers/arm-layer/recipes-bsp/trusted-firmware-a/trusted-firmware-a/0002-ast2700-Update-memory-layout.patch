@@ -1,0 +1,36 @@
+From 84ceeefa69025d57b671617a7587162e46e250b7 Mon Sep 17 00:00:00 2001
+From: Chia-Wei Wang <chiawei_wang@aspeedtech.com>
+Date: Tue, 29 Aug 2023 17:19:43 +0800
+Subject: [PATCH 2/2] ast2700: Update memory layout
+
+Update memory layout based on the 1GB DRAM space of EVB.
+
+Signed-off-by: Chia-Wei Wang <chiawei_wang@aspeedtech.com>
+---
+ plat/aspeed/ast2700/include/platform_def.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/plat/aspeed/ast2700/include/platform_def.h b/plat/aspeed/ast2700/include/platform_def.h
+index 45c594dda..58f452041 100644
+--- a/plat/aspeed/ast2700/include/platform_def.h
++++ b/plat/aspeed/ast2700/include/platform_def.h
+@@ -41,13 +41,13 @@
+ #define MAX_MMAP_REGIONS		U(32)
+ 
+ /* BL31 region */
+-#define BL31_BASE			ULL(0x400000000)
+-#define BL31_SIZE			ULL(0x400000)
++#define BL31_BASE			ULL(0x430000000)
++#define BL31_SIZE			SZ_512K
+ #define BL31_LIMIT			(BL31_BASE + BL31_SIZE)
+ 
+ /* BL32 region */
+ #define BL32_BASE			BL31_LIMIT
+-#define BL32_SIZE			ULL(0x400000)
++#define BL32_SIZE			SZ_16M
+ #define BL32_LIMIT			(BL32_BASE + BL32_SIZE)
+ 
+ /* console */
+-- 
+2.25.1
+
