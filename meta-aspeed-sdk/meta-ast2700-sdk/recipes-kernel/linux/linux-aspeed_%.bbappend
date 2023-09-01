@@ -5,6 +5,9 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 # Set CONFIG_DEFAULT_HUNG_TASK_TIMEOUT 1200 seconds.
 
 SRC_URI:append:ast2700-fpga = " \
-	file://default-hung-task-timeout-1200s.cfg \
+    file://default-hung-task-timeout-1200s.cfg \
 "
 
+SRC_URI:append:ast2700-fpga-tee = " \
+    file://default-hung-task-timeout-1200s.cfg \
+"
