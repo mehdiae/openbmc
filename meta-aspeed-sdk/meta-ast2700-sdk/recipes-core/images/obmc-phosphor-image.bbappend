@@ -49,7 +49,7 @@ python do_generate_static() {
     _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                'u-boot.%s' % d.getVar('UBOOT_SUFFIX',True)),
                   uboot_offset,
-                  int(d.getVar('FLASH_KERNEL_OFFSET', True)))
+                  int(d.getVar('FLASH_UBOOT_ENV_OFFSET', True)))
 
     _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                d.getVar('FLASH_KERNEL_IMAGE', True)),
