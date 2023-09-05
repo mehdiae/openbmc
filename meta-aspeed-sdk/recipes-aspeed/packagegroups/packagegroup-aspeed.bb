@@ -9,7 +9,7 @@ inherit packagegroup
 PROVIDES = "${PACKAGES}"
 RPROVIDES:${PN} = "${PACKAGES}"
 
-PACKAGES:append = " \
+PACKAGES = " \
     ${PN}-apps \
     ${PN}-ssp \
     ${PN}-crypto \
