@@ -318,10 +318,22 @@ EOF
             load = <${UBOOT_FIT_ARM_TRUSTED_FIRMWARE_A_LOADADDRESS}>;
             entry = <${UBOOT_FIT_ARM_TRUSTED_FIRMWARE_A_ENTRYPOINT}>;
             compression = "none";
+EOF
+
+		if [ "${SPL_SIGN_ENABLE}" = "1" ] ; then
+			cat << EOF >> ${UBOOT_ITS}
+            signature {
+                algo = "${UBOOT_FIT_HASH_ALG},${UBOOT_FIT_SIGN_ALG}";
+                key-name-hint = "${SPL_SIGN_KEYNAME}";
+            };
+EOF
+		fi
+
+	cat << EOF >> ${UBOOT_ITS}
         };
 EOF
 	fi
-	
+
 	if [ "${UBOOT_FIT_OPTEE_OS}" = "1" ] ; then
 		cat << EOF >> ${UBOOT_ITS}
         optee {
@@ -333,6 +345,18 @@ EOF
             load = <${UBOOT_FIT_OPTEE_OS_LOADADDRESS}>;
             entry = <${UBOOT_FIT_OPTEE_OS_ENTRYPOINT}>;
             compression = "none";
+EOF
+
+		if [ "${SPL_SIGN_ENABLE}" = "1" ] ; then
+			cat << EOF >> ${UBOOT_ITS}
+            signature {
+                algo = "${UBOOT_FIT_HASH_ALG},${UBOOT_FIT_SIGN_ALG}";
+                key-name-hint = "${SPL_SIGN_KEYNAME}";
+            };
+EOF
+		fi
+
+	cat << EOF >> ${UBOOT_ITS}
         };
 EOF
 	fi
