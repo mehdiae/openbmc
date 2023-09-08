@@ -1,4 +1,4 @@
-# short-description: Create an image for AST2600 Boot from eMMC
+# short-description: Create an image for AST2700 Boot from eMMC
 # long-description: Creates an eMMC card image for the User Data Area that can
 # be used with the Aspeed SoC family.
 #
