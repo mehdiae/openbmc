@@ -5,11 +5,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 PR = "r0"
 
-DEPENDS = " \
-    aspeed-image-tools-native \
-    virtual/bootloader \
-    virtual/kernel \
-    "
+DEPENDS = "aspeed-image-tools-native"
 
 do_patch[noexec] = "1"
 do_configure[noexec] = "1"
@@ -20,71 +16,143 @@ inherit deploy
 
 # Image composition
 UBOOT_SUFFIX ?= "bin"
+
+ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "boot_mcu_ram"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE ?= "u-boot-spl"
-ASPEED_IMAGE_UBOOT_FIT_IMAGE ?= "u-boot-fitImage"
+ASPEED_IMAGE_UBOOT_IMAGE ?= "u-boot"
 ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE ?= "emmc_${ASPEED_IMAGE_UBOOT_SPL_IMAGE}"
-ASPEED_EMMC_IMAGE_UBOOT_IMAGE ?= "u-boot"
-ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB ?= "64"
-ASPEED_EMMC_IMAGE_MERGE_UBOOT_SIZE_KB ?= "1024"
-ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE ?= "emmc_image-u-boot"
+
+ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE ?= "emmc_image-boot"
+ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE:aspeed-g6 ?= "emmc_image-u-boot"
+
+ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB ?= "0"
+ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB ?= "384"
+ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB ?= "384"
+ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB ?= "128"
+ASPEED_EMMC_IMAGE_UBOOT_OFFSET_KB?= "512"
+ASPEED_EMMC_IMAGE_MERGE_BOOT_SIZE_KB ?= "2560"
+
+ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB:aspeed-g6 ?= "0"
+ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB:aspeed-g6 ?= "64"
+ASPEED_EMMC_IMAGE_UBOOT_OFFSET_KB:aspeed-g6 ?= "64"
+ASPEED_EMMC_IMAGE_MERGE_BOOT_SIZE_KB:aspeed-g6 ?= "1280"
+
 ASPEED_SECURE_BOOT ?= "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'yes', 'no', d)}"
+ASPEED_BOOT_EMMC ?= "${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'yes', 'no', d)}"
 
 OUTPUT_IMAGE_DIR ?= "${S}/output"
 SOURCE_IMAGE_DIR ?= "${S}/source"
 
-do_deploy () {
-    if [ -z ${SPL_BINARY} ]; then
-        echo "To support ASPEED boot from emmc, u-boot should support spl."
-        exit 1
-    fi
-
-    if [ -d ${SOURCE_IMAGE_DIR} ]; then
-        rm -rf ${SOURCE_IMAGE_DIR}
-    fi
-
-    if [ -d ${OUTPUT_IMAGE_DIR} ]; then
-        rm -rf ${OUTPUT_IMAGE_DIR}
-    fi
-
+do_mk_empty_image() {
+    rm -rf ${SOURCE_IMAGE_DIR}
+    rm -rf ${OUTPUT_IMAGE_DIR}
     install -d ${SOURCE_IMAGE_DIR}
     install -d ${OUTPUT_IMAGE_DIR}
 
+    # Assemble the flash image
+    dd if=/dev/zero bs=1k count=${ASPEED_EMMC_IMAGE_MERGE_BOOT_SIZE_KB} | \
+        tr '\000' '\377' > ${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE}
+}
+
+do_mk_emmc_boot_image_g6() {
     if [ "${ASPEED_SECURE_BOOT}" = "no" ]; then
         install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}
         python3 ${STAGING_BINDIR_NATIVE}/gen_emmc_boot_image.py ${SOURCE_IMAGE_DIR}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
-        install -m 0644 ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
+        install -m 0644 ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${OUTPUT_IMAGE_DIR}
     else
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
     fi
+}
 
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_EMMC_IMAGE_UBOOT_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}
-    if [ "${UBOOT_FITIMAGE_ENABLE}" = "1" ]; then
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_FIT_IMAGE} ${SOURCE_IMAGE_DIR}
-    fi
+do_mk_emmc_boot_image_g7() {
+    # To Do
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
+}
 
-    # Generate emmc_image-u-boot for boot from eMMC
-    dd bs=1k count=${ASPEED_EMMC_IMAGE_MERGE_UBOOT_SIZE_KB} \
-        if=/dev/zero of=${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE}
-    dd bs=1k count=${ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB} conv=notrunc \
-        if=${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} of=${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE}
-
-    if [ "${UBOOT_FITIMAGE_ENABLE}" = "1" ]; then
-        dd bs=1k seek=${ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB} conv=notrunc \
-            if=${SOURCE_IMAGE_DIR}/${ASPEED_IMAGE_UBOOT_FIT_IMAGE}  of=${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE}
-    else
-        dd bs=1k seek=${ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB} conv=notrunc \
-            if=${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_IMAGE}.${UBOOT_SUFFIX}  of=${OUTPUT_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE}
-    fi
-
+do_deploy_emmc_image() {
     # Deploy image for boot from emmc
     install -d ${DEPLOYDIR}
     install -m 644 ${OUTPUT_IMAGE_DIR}/* ${DEPLOYDIR}/.
+}
+
+python do_deploy() {
+    import subprocess
+
+    if d.getVar('ASPEED_BOOT_EMMC', True) != "yes":
+        bb.fatal("Only support Boot from EMMC mode run this task")
+
+    spl_binary = d.getVar('SPL_BINARY', True)
+    if not spl_binary:
+        bb.fatal("Boot from EMMC only support SPL")
+
+    bb.build.exec_func("do_mk_empty_image", d)
+
+    machine_overrides = d.getVar('MACHINEOVERRIDES', True)
+    if "aspeed-g7" in machine_overrides:
+        bb.build.exec_func("do_mk_emmc_boot_image_g7", d)
+    elif "aspeed-g6" in machine_overrides:
+        bb.build.exec_func("do_mk_emmc_boot_image_g6", d)
+    else:
+        bb.fatal("Unsupport Machine")
+
+    emmc_boot_image = os.path.join(d.getVar('OUTPUT_IMAGE_DIR', True),
+                                   d.getVar('ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE', True))
+
+
+    def _append_image(imgpath, start_kb, finish_kb):
+        imgsize = os.path.getsize(imgpath)
+        maxsize = (finish_kb - start_kb) * 1024
+        bb.debug(1, 'Considering file size=' + str(imgsize) + ' name=' + imgpath)
+        bb.debug(1, 'Spanning start=' + str(start_kb) + 'K end=' + str(finish_kb) + 'K')
+        bb.debug(1, 'Compare needed=' + str(imgsize) + ' available=' + str(maxsize) + ' margin=' + str(maxsize - imgsize))
+        if imgsize > maxsize:
+            bb.fatal("Image '%s' is too large!" % imgpath)
+
+        subprocess.check_call(['dd', 'bs=1k', 'conv=notrunc',
+                              'seek=%d' % start_kb,
+                              'if=%s' % imgpath,
+                              'of=%s' % emmc_boot_image])
+
+
+    # bootmcu
+    bootmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
+    bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
+                           int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
+    if bootmcu_fw_binary:
+        _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                                   '%s.%s' % (
+                                   d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True),
+                                   d.getVar('UBOOT_SUFFIX', True))),
+                      int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB', True)),
+                      bootmcu_fw_finish_kb)
+
+    # spl
+    spl_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
+                    int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB', True)))
+    _append_image(os.path.join(d.getVar('SOURCE_IMAGE_DIR', True),
+                                '%s.%s' % (
+                                d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE', True),
+                                d.getVar('UBOOT_SUFFIX', True))),
+                      int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB', True)),
+                      spl_finish_kb)
+
+    # uboot
+    _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                  '%s.%s' % (
+                  d.getVar('ASPEED_IMAGE_UBOOT_IMAGE', True),
+                  d.getVar('UBOOT_SUFFIX', True))),
+                  int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_OFFSET_KB', True)),
+                  int(d.getVar('ASPEED_EMMC_IMAGE_MERGE_BOOT_SIZE_KB', True)))
+
+    bb.build.exec_func("do_deploy_emmc_image", d)
 }
 
 do_deploy[depends] += " \
     virtual/kernel:do_deploy \
     virtual/bootloader:do_deploy \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
     "
 
 addtask deploy before do_build after do_compile
+

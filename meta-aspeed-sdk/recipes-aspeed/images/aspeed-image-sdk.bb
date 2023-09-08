@@ -1,4 +1,4 @@
-SUMMARY = "Two partition MTD image with u-boot and kernel"
+SUMMARY = "Three partition MTD image with u-boot, kernel and bootmcu"
 HOMEPAGE = "https://github.com/openbmc/meta-aspeed"
 LICENSE = "MIT"
 PACKAGE_ARCH = "${MACHINE_ARCH}"

@@ -5,11 +5,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 PR = "r0"
 
-DEPENDS = " \
-    aspeed-image-tools-native \
-    virtual/bootloader \
-    virtual/kernel \
-    "
+DEPENDS = "aspeed-image-tools-native"
 
 do_patch[noexec] = "1"
 do_configure[noexec] = "1"

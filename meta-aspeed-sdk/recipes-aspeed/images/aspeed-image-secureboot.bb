@@ -8,8 +8,6 @@ PR = "r0"
 DEPENDS = " \
     socsec-native \
     aspeed-secure-config-native \
-    virtual/bootloader \
-    virtual/kernel \
     "
 
 do_patch[noexec] = "1"

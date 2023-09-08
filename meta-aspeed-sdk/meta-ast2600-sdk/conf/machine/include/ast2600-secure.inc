@@ -10,6 +10,5 @@ FLASH_UBOOT_SPL_IMAGE = "s_u-boot-spl"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE = "s_u-boot-spl"
 
 # ASPEED EMMC Settings
-ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE = "s_u-boot-spl"
-ASPEED_EMMC_IMAGE_MERGE_UBOOT_IMAGE = "s_emmc_image-u-boot"
+ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE:aspeed-g6 = "s_emmc_image-u-boot"
 
