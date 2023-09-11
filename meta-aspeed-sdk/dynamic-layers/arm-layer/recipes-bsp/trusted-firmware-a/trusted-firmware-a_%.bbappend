@@ -5,6 +5,6 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 # Update PLAT_SYSCNT_CLKIN_HZ for AST2700 FPGA.
 SRC_URI:append:ast2700-fpga = " file://0001-ast2700-fpga-Update-counter-clock-frequency.patch "
 SRC_URI:append:ast2700-fpga-tee = " file://0001-ast2700-fpga-Update-counter-clock-frequency.patch "
+SRC_URI:append:ast2700-fpga-emmc = " file://0001-ast2700-fpga-Update-counter-clock-frequency.patch "
+SRC_URI:append:ast2700-fpga-emmc-tee = " file://0001-ast2700-fpga-Update-counter-clock-frequency.patch "
 
-# Workaround
-SRC_URI:append = " file://0002-ast2700-Update-memory-layout.patch "

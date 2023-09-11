@@ -2,7 +2,7 @@ require recipes-bsp/trusted-firmware-a/trusted-firmware-a.inc
 
 # ASPEED upstream and it should fetch since 2.10.0
 # TF-A
-SRCREV_tfa = "2503c8f3204c60013de8caa2e165b2875ad735e5"
+SRCREV_tfa = "88b2d81345dfd84902aae586a743d00ac5df2f48"
 LIC_FILES_CHKSUM += "file://docs/license.rst;md5=b2c740efedc159745b9b31f88ff03dde"
 
 # mbed TLS v2.28.2
