@@ -3,7 +3,8 @@ HOMEPAGE = "https://github.com/openbmc/meta-aspeed"
 LICENSE = "MIT"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', 'deploy', d)}
+inherit deploy
+inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', '', d)}
 
 UBOOT_SUFFIX ?= "bin"
 
@@ -45,11 +46,15 @@ do_mk_empty_image() {
         tr '\000' '\377' > ${B}/aspeed-sdk.bin
 }
 
-python do_compile() {
+python do_deploy() {
     import subprocess
 
     if d.getVar('ASPEED_BOOT_EMMC', True) == "yes":
         bb.fatal("MMC mode should not run this task")
+
+    initramfs_image = d.getVar('INITRAMFS_IMAGE', True)
+    if initramfs_image != "aspeed-image-initramfs":
+         bb.fatal('Not support ' + str(initramfs_image) + ' INITRAMFS_IMAGE')
 
     bb.build.exec_func("do_mk_empty_image", d)
 
@@ -109,27 +114,26 @@ python do_compile() {
                   d.getVar('ASPEED_IMAGE_KERNEL_IMAGE',True)),
                   int(d.getVar('ASPEED_IMAGE_KERNEL_OFFSET_KB', True)),
                   int(d.getVar('ASPEED_IMAGE_SIZE_KB', True)))
+
+    dest_image = os.path.join(d.getVar('DEPLOYDIR', True), d.getVar('ASPEED_IMAGE_NAME', True))
+    subprocess.check_call(['install',
+                           '-m644',
+                           '-D',
+                           '%s' % nor_image,
+                           '%s' % dest_image])
 }
 
-python do_compile:ast-mmc() {
+python do_deploy:ast-mmc() {
+    initramfs_image = d.getVar('INITRAMFS_IMAGE', True)
+    if initramfs_image != "aspeed-image-initramfs":
+         bb.fatal('Not support ' + str(initramfs_image) + ' INITRAMFS_IMAGE')
+
     bb.debug(1, "MMC mode do nothing")
 }
 
-do_deploy() {
-    if test "x${ASPEED_BOOT_EMMC}" = "xyes"; then
-        bbfatal "MMC mode should not run this task"
-    fi
-
-    install -m644 -D ${B}/aspeed-sdk.bin ${DEPLOYDIR}/${ASPEED_IMAGE_NAME}
-}
-
-do_deploy:ast-mmc() {
-    :
-}
-
-do_compile[depends] = " \
+do_deploy[depends] = " \
     virtual/kernel:do_deploy \
-    u-boot:do_deploy \
+    virtual/bootloader:do_deploy \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
     "
@@ -137,6 +141,7 @@ do_fetch[noexec] = "1"
 do_unpack[noexec] = "1"
 do_patch[noexec] = "1"
 do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 do_install[noexec] = "1"
 deltask do_populate_sysroot
 do_package[noexec] = "1"
