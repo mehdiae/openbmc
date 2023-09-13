@@ -23,41 +23,79 @@ Reference:
 . setup <machine> [build_dir]
 Target machine must be specified. Use one of:
 ast2500-default
+ast2500-default-515
 ast2500-default-54
-ast2600-dcscm
-ast2600-dcscm-amd
-ast2600-default
-ast2600-default-54
-ast2600-ecc
-ast2600-emmc
-ast2600-emmc-secure-rsa2048-sha256
-ast2600-emmc-secure-rsa4096-sha512
-ast2600-ncsi
-ast2600-usbadp
-ast2600-secure-rsa2048-sha256
-ast2600-secure-rsa2048-sha256-ncot
-ast2600-secure-rsa2048-sha256-o1
-ast2600-secure-rsa2048-sha256-o2-pub
-ast2600-secure-rsa3072-sha384
-ast2600-secure-rsa3072-sha384-o1
-ast2600-secure-rsa3072-sha384-o2-pub
-ast2600-secure-rsa4096-sha512
-ast2600-secure-rsa4096-sha512-o1
-ast2600-secure-rsa4096-sha512-o2-pub
+ast2600-a1
+ast2600-a1-515
+ast2600-a1-54
 ast2600-a2
+ast2600-a2-515
 ast2600-a2-54
 ast2600-a2-emmc
-ast2600-a1
-ast2600-a1-54
+ast2600-dcscm
+ast2600-dcscm-amd
+ast2600-dcscm-avenue-city
+ast2600-default
+ast2600-default-515
+ast2600-default-515-tee
+ast2600-default-54
+ast2600-default-54-tee
+ast2600-default-tee
+ast2600-ecc
+ast2600-ecc-tee
+ast2600-emmc
+ast2600-emmc-secure-rsa2048-sha256
+ast2600-emmc-secure-rsa2048-sha256-tee
+ast2600-emmc-secure-rsa4096-sha512
+ast2600-emmc-secure-rsa4096-sha512-tee
+ast2600-emmc-tee
+ast2600-ncsi
+ast2600-ncsi-tee
+ast2600-secure-rsa2048-sha256
+ast2600-secure-rsa2048-sha256-ncot
+ast2600-secure-rsa2048-sha256-ncot-tee
+ast2600-secure-rsa2048-sha256-o1
+ast2600-secure-rsa2048-sha256-o1-tee
+ast2600-secure-rsa2048-sha256-o2-pub
+ast2600-secure-rsa2048-sha256-o2-pub-tee
+ast2600-secure-rsa2048-sha256-tee
+ast2600-secure-rsa3072-sha384
+ast2600-secure-rsa3072-sha384-o1
+ast2600-secure-rsa3072-sha384-o1-tee
+ast2600-secure-rsa3072-sha384-o2-pub
+ast2600-secure-rsa3072-sha384-o2-pub-tee
+ast2600-secure-rsa3072-sha384-tee
+ast2600-secure-rsa4096-sha512
+ast2600-secure-rsa4096-sha512-o1
+ast2600-secure-rsa4096-sha512-o1-tee
+ast2600-secure-rsa4096-sha512-o2-pub
+ast2600-secure-rsa4096-sha512-o2-pub-tee
+ast2600-secure-rsa4096-sha512-tee
+ast2600-usbadp
+ast2600-usbadp-tee
+ast2700-default
+ast2700-default-tee
+ast2700-emmc
+ast2700-emmc-tee
 ```
 
-1. AST2600
+- The default kernel version is 6.1. machine with '-515' postfix for kernel v5.15 and machine with '54' postfix for kernel v5.04
+- The optee-os is disabled by default. machine with 'tee' postfix for optee-os enable.
+- The default revision for AST2600 is 'A3'. machine with 'a2' for AST2600 A2. machine with 'a1' for AST2600 A1. machine without 'a1 and a2' for AST2600 A3.
+
+1. AST2700
+
+```
+. setup ast2700-default [build_dir]
+```
+
+2. AST2600
 
 ```
 . setup ast2600-default [build_dir]
 ```
 
-2. AST2500
+3. AST2500
 
 ```
 . setup ast2500-default [build_dir]
