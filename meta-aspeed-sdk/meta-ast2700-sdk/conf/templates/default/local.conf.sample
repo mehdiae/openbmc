@@ -1,11 +1,5 @@
 MACHINE ??= "ast2700-default"
-#MACHINE ??= "ast2700-default-tee"
 #MACHINE ??= "ast2700-emmc"
-#MACHINE ??= "ast2700-emmc-tee"
-#MACHINE ??= "ast2700-fpga"
-#MACHINE ??= "ast2700-fpga-tee"
-#MACHINE ??= "ast2700-fpga-emmc"
-#MACHINE ??= "ast2700-fpga-emmc-tee"
 
 DISTRO ?= "openbmc-phosphor"
 PACKAGE_CLASSES ?= "package_ipk"

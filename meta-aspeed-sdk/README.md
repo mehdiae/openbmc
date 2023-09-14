@@ -74,14 +74,16 @@ ast2600-secure-rsa4096-sha512-tee
 ast2600-usbadp
 ast2600-usbadp-tee
 ast2700-default
-ast2700-default-tee
 ast2700-emmc
-ast2700-emmc-tee
 ```
 
-- The default kernel version is 6.1. machine with '-515' postfix for kernel v5.15 and machine with '54' postfix for kernel v5.04
-- The optee-os is disabled by default. machine with 'tee' postfix for optee-os enable.
-- The default revision for AST2600 is 'A3'. machine with 'a2' for AST2600 A2. machine with 'a1' for AST2600 A1. machine without 'a1 and a2' for AST2600 A3.
+- Linux kernel version is `6.1` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4 and machine without `515 and 54` for kernel v6.1.
+- AST2600 revision is `A3` by default. machine with `a2` for AST2600 A2, machine with `a1` for AST2600 A1 and machine without `a1 and a2` for AST2600 A3.
+- OPTEE-OS
+  - AST2600
+    - OPTEE-OS is disabled by default. machine with `tee` postfix for OPTEE-OS enable.
+  - AST2700
+    - OPTEE-OS is enabled by default.
 
 1. AST2700
 
