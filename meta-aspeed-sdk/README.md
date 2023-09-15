@@ -25,13 +25,6 @@ Target machine must be specified. Use one of:
 ast2500-default
 ast2500-default-515
 ast2500-default-54
-ast2600-a1
-ast2600-a1-515
-ast2600-a1-54
-ast2600-a2
-ast2600-a2-515
-ast2600-a2-54
-ast2600-a2-emmc
 ast2600-dcscm
 ast2600-dcscm-amd
 ast2600-dcscm-avenue-city
@@ -39,10 +32,8 @@ ast2600-default
 ast2600-default-515
 ast2600-default-515-tee
 ast2600-default-54
-ast2600-default-54-tee
 ast2600-default-tee
 ast2600-ecc
-ast2600-ecc-tee
 ast2600-emmc
 ast2600-emmc-secure-rsa2048-sha256
 ast2600-emmc-secure-rsa2048-sha256-tee
@@ -50,10 +41,7 @@ ast2600-emmc-secure-rsa4096-sha512
 ast2600-emmc-secure-rsa4096-sha512-tee
 ast2600-emmc-tee
 ast2600-ncsi
-ast2600-ncsi-tee
 ast2600-secure-rsa2048-sha256
-ast2600-secure-rsa2048-sha256-ncot
-ast2600-secure-rsa2048-sha256-ncot-tee
 ast2600-secure-rsa2048-sha256-o1
 ast2600-secure-rsa2048-sha256-o1-tee
 ast2600-secure-rsa2048-sha256-o2-pub
@@ -71,8 +59,6 @@ ast2600-secure-rsa4096-sha512-o1-tee
 ast2600-secure-rsa4096-sha512-o2-pub
 ast2600-secure-rsa4096-sha512-o2-pub-tee
 ast2600-secure-rsa4096-sha512-tee
-ast2600-usbadp
-ast2600-usbadp-tee
 ast2700-default
 ast2700-emmc
 ```
