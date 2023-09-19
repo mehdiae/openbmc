@@ -1,9 +1,9 @@
-SPL_SIGN_ENABLE = "1"
-SPL_SIGN_KEYDIR ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/ast2600/security/key"
+SPL_SIGN_ENABLE ?= "1"
+SPL_SIGN_KEYDIR ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/keys"
 SPL_SIGN_KEYNAME ?= "test_bl2_3072"
 
-UBOOT_SIGN_ENABLE = "1"
-UBOOT_SIGN_KEYDIR ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/ast2600/security/key"
+UBOOT_SIGN_ENABLE ?= "1"
+UBOOT_SIGN_KEYDIR ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/keys"
 UBOOT_SIGN_KEYNAME ?= "test_bl3_3072"
 
 # Kernel / U-Boot fitImage Hash Algo
