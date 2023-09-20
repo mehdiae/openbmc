@@ -87,10 +87,10 @@ python do_deploy() {
 
     bb.build.exec_func("do_mk_empty_image", d)
 
-    machine_overrides = d.getVar('MACHINEOVERRIDES', True)
-    if "aspeed-g7" in machine_overrides:
+    soc_family = d.getVar('SOC_FAMILY', True)
+    if soc_family == "aspeed-g7":
         bb.build.exec_func("do_mk_emmc_boot_image_g7", d)
-    elif "aspeed-g6" in machine_overrides:
+    elif soc_family == "aspeed-g6":
         bb.build.exec_func("do_mk_emmc_boot_image_g6", d)
     else:
         bb.fatal("Unsupport Machine")
@@ -150,7 +150,6 @@ python do_deploy() {
 do_deploy[depends] += " \
     virtual/kernel:do_deploy \
     virtual/bootloader:do_deploy \
-    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
     "
 

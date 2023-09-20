@@ -30,41 +30,29 @@ ast2600-dcscm-amd
 ast2600-dcscm-avenue-city
 ast2600-default
 ast2600-default-515
-ast2600-default-515-tee
 ast2600-default-54
+ast2600-default-ecc
+ast2600-default-ncsi
+ast2600-default-secure
+ast2600-default-secure-515
+ast2600-default-secure-tee
+ast2600-default-secure-tee-515
 ast2600-default-tee
-ast2600-ecc
+ast2600-default-tee-515
 ast2600-emmc
-ast2600-emmc-secure-rsa2048-sha256
-ast2600-emmc-secure-rsa2048-sha256-tee
-ast2600-emmc-secure-rsa4096-sha512
-ast2600-emmc-secure-rsa4096-sha512-tee
+ast2600-emmc-515
+ast2600-emmc-secure
+ast2600-emmc-secure-515
+ast2600-emmc-secure-tee
+ast2600-emmc-secure-tee-515
 ast2600-emmc-tee
-ast2600-ncsi
-ast2600-secure-rsa2048-sha256
-ast2600-secure-rsa2048-sha256-o1
-ast2600-secure-rsa2048-sha256-o1-tee
-ast2600-secure-rsa2048-sha256-o2-pub
-ast2600-secure-rsa2048-sha256-o2-pub-tee
-ast2600-secure-rsa2048-sha256-tee
-ast2600-secure-rsa3072-sha384
-ast2600-secure-rsa3072-sha384-o1
-ast2600-secure-rsa3072-sha384-o1-tee
-ast2600-secure-rsa3072-sha384-o2-pub
-ast2600-secure-rsa3072-sha384-o2-pub-tee
-ast2600-secure-rsa3072-sha384-tee
-ast2600-secure-rsa4096-sha512
-ast2600-secure-rsa4096-sha512-o1
-ast2600-secure-rsa4096-sha512-o1-tee
-ast2600-secure-rsa4096-sha512-o2-pub
-ast2600-secure-rsa4096-sha512-o2-pub-tee
-ast2600-secure-rsa4096-sha512-tee
+ast2600-emmc-tee-515
 ast2700-default
 ast2700-emmc
 ```
 
 - Linux kernel version is `6.1` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4 and machine without `515 and 54` for kernel v6.1.
-- AST2600 revision is `A3` by default. machine with `a2` for AST2600 A2, machine with `a1` for AST2600 A1 and machine without `a1 and a2` for AST2600 A3.
+- AST2600 revision is `A3` by default.
 - OPTEE-OS
   - AST2600
     - OPTEE-OS is disabled by default. machine with `tee` postfix for OPTEE-OS enable.
@@ -108,10 +96,10 @@ After you successfully built the image, the image file can be found in: `[build_
 
 ### Boot from SPI with secure boot image
 - `image-bmc`: whole flash image
-- `image-u-boot`: s_u-boot-spl.bin(RoT) + u-boot.bin (CoT1)
+- `image-u-boot`: u-boot-spl.bin(RoT) + u-boot.bin (CoT1)
 - `image-kernel`: Linux Kernel FIT Image the same as fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} (CoT2)
 - `image-rofs`: read-only root file system
-- `s_u-boot-spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
+- `u-boot-spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
 - `u-boot`: u-boot.bin processed with verified boot signing for CoT1 image
 - `fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}`: fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} processed with verified boot signing for CoT2 image
 - `otp_image`: OTP image
@@ -121,16 +109,15 @@ After you successfully built the image, the image file can be found in: `[build_
 - `obmc-phosphor-image-${MACHINE}.wic.xz`: compressed emmc flash image for user data partition
 
 ### Boot from eMMC with secure boot image
-- `s_emmc_image-u-boot`: s_u-boot-spl.bin(RoT) + u-boot.bin(CoT1) for boot partition
+- `emmc_image-u-boot`: u-boot-spl.bin(RoT) + u-boot.bin(CoT1) for boot partition
 - `obmc-phosphor-image-${MACHINE}.wic.xz`: compressed emmc flash image for user data partition
-- `s_u-boot_spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
+- `u-boot_spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
 - `u-boot`: u-boot.bin processed with verified boot signing for CoT1 image
 - `fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}`: fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} processed with verified boot signing for CoT2 image
 - `otp_image`: OTP image
 
 ### Recovery Image via UART
 - `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART
-- `recovery_s_u-boot-spl` : s_u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART with secure boot
 
 # Free Open Source Software (FOSS)
 The Yocto/OpenBMC build system supports to provide the following things to meet the FOSS requirement.

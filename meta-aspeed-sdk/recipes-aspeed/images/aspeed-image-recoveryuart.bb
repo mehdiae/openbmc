@@ -15,9 +15,7 @@ do_install[noexec] = "1"
 inherit deploy
 
 # Image composition
-UBOOT_SPL_IMAGE ?= "u-boot-spl.bin"
-SUBOOT_SPL_IMAGE ?= "s_${UBOOT_SPL_IMAGE}"
-RECOVERY_INPUT_IMAGE ?= "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', '${SUBOOT_SPL_IMAGE}', '${UBOOT_SPL_IMAGE}', d)}"
+RECOVERY_INPUT_IMAGE ?= "u-boot-spl.bin"
 RECOVERY_OUTPUT_IMAGE ?=  "recovery_${RECOVERY_INPUT_IMAGE}"
 
 OUTPUT_IMAGE_DIR ?= "${S}/output"
@@ -25,8 +23,7 @@ SOURCE_IMAGE_DIR ?= "${S}/source"
 
 do_deploy () {
     if [ -z ${SPL_BINARY} ]; then
-        echo "To support ASPEED recovery image via uart, u-boot should support spl."
-        exit 1
+        bbfatal "Boot from UART mode only support SPL"
     fi
 
     if [ -d ${SOURCE_IMAGE_DIR} ]; then
@@ -53,7 +50,6 @@ do_deploy () {
 do_deploy[depends] += " \
     virtual/kernel:do_deploy \
     virtual/bootloader:do_deploy \
-    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
     "
 
 addtask deploy before do_build after do_compile
