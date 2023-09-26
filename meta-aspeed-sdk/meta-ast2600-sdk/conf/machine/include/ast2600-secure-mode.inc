@@ -1,16 +1,8 @@
 require conf/machine/include/ast-secure.inc
-
-# Secure Boot Settings for u-boot verified boot
-#
-# By default, algorithm is "sha512,rsa4096"
-#
-
-#require conf/machine/include/security/aspeed-secure-rsa2048-sha256-cot.inc
-#require conf/machine/include/security/aspeed-secure-rsa3073-sha384-cot.inc
-require conf/machine/include/security/aspeed-secure-rsa4096-sha512-cot.inc
-
+require conf/machine/include/security/aspeed-secure-cot.inc
 
 # Secure Boot Settings for OTP and SOCSEC
+# The following variables can be overridden in local.conf
 SOCSEC_SIGN_ENABLE ?= "1"
 SOCSEC_SIGN_SOC ?= "2600"
 SOCSEC_SIGN_HELPER ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/signing_helper.sh"
