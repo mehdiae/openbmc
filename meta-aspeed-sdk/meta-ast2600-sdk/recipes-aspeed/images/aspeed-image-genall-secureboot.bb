@@ -23,8 +23,8 @@ do_install[noexec] = "1"
 
 inherit python3native deploy
 
-GEN_SECURE_IMAGE_ENABLE ?= "0"
-GEN_SECURE_IMAGE ?= "\
+ASPEED_CUSTOMIZE_GEN_SECURE_IMAGE_ENABLE ?= "0"
+ASPEED_CUSTOMIZE_GEN_SECURE_IMAGE ?= "\
     rsa2048-sha256 \
     rsa2048-sha256-o1 \
     rsa2048-sha256-o2-pub \
@@ -149,11 +149,21 @@ make_uboot_kernel_fitimage_and_sign() {
     uboot-mkimage -f ${KERNEL_FITIMAGE_ITS_NAME} ${KERNEL_FITIMAGE_NAME}
     # Sign the Kernel FIT image and add public key to U-boot dtb
     uboot-mkimage -F -k ${UBOOT_SIGN_KEYDIR} -K "u-boot.dtb" -r ${KERNEL_FITIMAGE_NAME}
+    # Verify kernel fitImage
+    uboot-fit_check_sign -f ${KERNEL_FITIMAGE_NAME}  -k u-boot.dtb
+    if [ $? -ne 0 ]; then
+        bbfatal "Verified kernel fitImage failed."
+    fi
 
     # Assemble the uboot image
     uboot-mkimage -f ${UBOOT_FITIMAGE_ITS_NAME} ${UBOOT_FITIMAGE_NAME}
     # Sign the U-boot FIT image and add public key to SPL dtb
     uboot-mkimage -F -k ${SPL_SIGN_KEYDIR} -K "u-boot-spl.dtb" -r ${UBOOT_FITIMAGE_NAME}
+    # Verify U-boot fitImage
+    uboot-fit_check_sign -f ${UBOOT_FITIMAGE_NAME}  -k u-boot-spl.dtb
+    if [ $? -ne 0 ]; then
+        bbfatal "Verified uboot fitImage failed."
+    fi
 
     # concat spl dtb
     cat u-boot-spl-nodtb.bin u-boot-spl.dtb > ${SPL_IMAGE_NAME}
@@ -173,6 +183,9 @@ deploy_static_image_helper() {
 
     install -d ${DEPLOYDIR}
     install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/image-rofs ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/image-rwfs ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/*.* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/fitImage* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/${otptool_config_slug}/otp-all.image ${DEPLOYDIR}/${GEN_IMAGE_MODE}/${otptool_config_slug}-otp-all.image
@@ -236,12 +249,12 @@ def deploy_static_image(d):
                  int(d.getVar('FLASH_KERNEL_OFFSET', True)),
                  int(d.getVar('FLASH_ROFS_OFFSET', True)))
 
-    append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), "image-rofs"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "image-rofs"),
                  nor_img,
                  int(d.getVar('FLASH_ROFS_OFFSET', True)),
                  int(d.getVar('FLASH_RWFS_OFFSET', True)))
 
-    append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), "image-rwfs"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "image-rwfs"),
                  nor_img,
                  int(d.getVar('FLASH_RWFS_OFFSET', True)),
                  int(d.getVar('FLASH_SIZE', True)))
@@ -404,7 +417,7 @@ python do_deploy() {
 
 
     verify_uboot_kernel_image_status(d)
-    gen_secure_image_enable = d.getVar('GEN_SECURE_IMAGE_ENABLE', True)
+    gen_secure_image_enable = d.getVar('ASPEED_CUSTOMIZE_GEN_SECURE_IMAGE_ENABLE', True)
     if gen_secure_image_enable != "1":
         print("Disable gen secure image. Do nothing.")
         return
@@ -413,8 +426,7 @@ python do_deploy() {
     kernel_default_algo = d.getVar('FIT_HASH_ALG', True) + "," + d.getVar('FIT_SIGN_ALG', True)
     spl_default_sign_key_name = d.getVar('SPL_SIGN_KEYNAME', True)
     uboot_default_sign_key_name = d.getVar('UBOOT_SIGN_KEYNAME', True)
-    otptool_default_config = os.path.basename(d.getVar('OTPTOOL_CONFIGS', True))
-    gen_secure_image = d.getVar('GEN_SECURE_IMAGE', True)
+    gen_secure_image = d.getVar('ASPEED_CUSTOMIZE_GEN_SECURE_IMAGE', True)
 
     for gen_img in gen_secure_image.split():
         for sec_img in secure_image_list:
@@ -422,10 +434,6 @@ python do_deploy() {
                 break
         else:
           bb.fatal("%s mode not support" % gen_img)
-
-        if sec_img["otptool_json"] == otptool_default_config:
-            print("Default mode is %s. Do nothing" % sec_img["mode"])
-            continue
 
         print("Start %s image..." % gen_img)
         d.setVar('GEN_IMAGE_MODE', gen_img)
@@ -466,9 +474,19 @@ addtask deploy before do_build after do_compile
 
 python do_cleanall:prepend() {
     import subprocess
-    gen_secure_image = d.getVar('GEN_SECURE_IMAGE', True)
+    gen_secure_image = [
+        "rsa2048-sha256",
+        "rsa2048-sha256-o1",
+        "rsa2048-sha256-o2-pub",
+        "rsa3072-sha384",
+        "rsa3072-sha384-o1",
+        "rsa3072-sha384-o2-pub",
+        "rsa4096-sha512",
+        "rsa4096-sha512-o1",
+        "rsa4096-sha512-o2-pub"
+    ]
 
-    for gen_img in gen_secure_image.split():
+    for gen_img in gen_secure_image:
         path = os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), gen_img)
         if os.path.exists(path):
             cmd = "rm -rf %s" % (path)

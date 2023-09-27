@@ -1,4 +1,3 @@
-require conf/machine/include/ast-secure.inc
 require conf/machine/include/security/aspeed-secure-cot.inc
 
 # Secure Boot Settings for OTP and SOCSEC
