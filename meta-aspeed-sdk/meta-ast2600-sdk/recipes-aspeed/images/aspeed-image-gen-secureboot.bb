@@ -1,4 +1,4 @@
-DESCRIPTION = "Generate all secureboot images for AST2600. \
+DESCRIPTION = "Generate aspeed customize secure boot images for AST2600. \
 It is used for testing. Users should not use these generated images for production."
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${ASPEEDSDKBASE}/LICENSE;md5=a3740bd0a194cd6dcafdc482a200a56f"
@@ -12,6 +12,9 @@ DEPENDS = " \
     aspeed-secure-config-native \
     u-boot-tools-native \
     dtc-native \
+    xz-native \
+    e2fsprogs-native \
+    gptfdisk-native \
     virtual/kernel \
     virtual/bootloader \
     "
@@ -42,6 +45,17 @@ KERNEL_FITIMAGE_ITS_NAME = "fitImage-its-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE
 UBOOT_FITIMAGE_NAME = "u-boot.bin"
 UBOOT_FITIMAGE_ITS_NAME = "u-boot.its"
 SPL_IMAGE_NAME = "u-boot-spl.bin"
+ASPEED_SECURE_BOOT = "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'yes', 'no', d)}"
+ASPEED_BOOT_EMMC = "${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'yes', 'no', d)}"
+IMAGE_BASE_NAME = "obmc-phosphor-image"
+INITRAMFS_IMAGE_NAME = "${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES}"
+
+# EMMC
+MMC_UBOOT_SPL_SIZE = "64"
+MMC_UBOOT_OFFSET = "0"
+WIC_IMAGE_NAME = "${IMAGE_BASE_NAME}-${MACHINE}.wic.xz"
+USER_DATA_IMAGE_NAME = "${IMAGE_BASE_NAME}-${MACHINE}.bin"
+USER_DATA_BOOTPART_IMAGE_NAME = "boot-image.ext4"
 
 install_unsigned_image() {
     install -d ${S}/${GEN_IMAGE_MODE}
@@ -150,7 +164,7 @@ make_uboot_kernel_fitimage_and_sign() {
     # Sign the Kernel FIT image and add public key to U-boot dtb
     uboot-mkimage -F -k ${UBOOT_SIGN_KEYDIR} -K "u-boot.dtb" -r ${KERNEL_FITIMAGE_NAME}
     # Verify kernel fitImage
-    uboot-fit_check_sign -f ${KERNEL_FITIMAGE_NAME}  -k u-boot.dtb
+    uboot-fit_check_sign -f ${KERNEL_FITIMAGE_NAME} -k u-boot.dtb
     if [ $? -ne 0 ]; then
         bbfatal "Verified kernel fitImage failed."
     fi
@@ -160,7 +174,7 @@ make_uboot_kernel_fitimage_and_sign() {
     # Sign the U-boot FIT image and add public key to SPL dtb
     uboot-mkimage -F -k ${SPL_SIGN_KEYDIR} -K "u-boot-spl.dtb" -r ${UBOOT_FITIMAGE_NAME}
     # Verify U-boot fitImage
-    uboot-fit_check_sign -f ${UBOOT_FITIMAGE_NAME}  -k u-boot-spl.dtb
+    uboot-fit_check_sign -f ${UBOOT_FITIMAGE_NAME} -k u-boot-spl.dtb
     if [ $? -ne 0 ]; then
         bbfatal "Verified uboot fitImage failed."
     fi
@@ -178,6 +192,20 @@ make_recovery_image() {
     python3 ${STAGING_BINDIR_NATIVE}/gen_uart_booting_image.py ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME} ${S}/${GEN_IMAGE_MODE}/recovery_${SPL_IMAGE_NAME}
 }
 
+make_boot_partition_ext4() {
+    # Generate a compressed ext4 filesystem with the fitImage file in it to be
+    # flashed to the user data area at boot partition of the eMMC
+
+    cd ${S}/${GEN_IMAGE_MODE}
+    install -d boot-image
+    install -m 0644 ${KERNEL_FITIMAGE_NAME} boot-image/fitImage
+
+    mkfs.ext4 -F -i 4096 -d boot-image ${USER_DATA_BOOTPART_IMAGE_NAME}
+    # Error codes 0-3 indicate successfull operation of fsck
+    fsck.ext4 -pvfD ${USER_DATA_BOOTPART_IMAGE_NAME} || [ $? -le 3 ]
+    cd ${S}
+}
+
 deploy_static_image_helper() {
     otptool_config_slug="$(basename ${OTPTOOL_JSON} .json)"
 
@@ -186,11 +214,58 @@ deploy_static_image_helper() {
 
     install -m 0644 ${DEPLOY_DIR_IMAGE}/image-rofs ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/image-rwfs ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE_NAME} ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/*.* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/fitImage* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     install -m 0644 ${S}/${GEN_IMAGE_MODE}/${otptool_config_slug}/otp-all.image ${DEPLOYDIR}/${GEN_IMAGE_MODE}/${otptool_config_slug}-otp-all.image
     install -m 0644 ${DEPLOYDIR}/${GEN_IMAGE_MODE}/${KERNEL_FITIMAGE_NAME} ${DEPLOYDIR}/${GEN_IMAGE_MODE}/image-kernel
+
+    # u-boot-env
+    if [ -f ${DEPLOY_DIR_IMAGE}/u-boot-env.bin ]; then
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/u-boot-env.bin ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    fi
+
+    # optee-os
+    if [ -f ${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin ]; then
+        install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/optee/* ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+    fi
 }
+
+deploy_mmc_image_helper() {
+    otptool_config_slug="$(basename ${OTPTOOL_JSON} .json)"
+
+    install -d ${DEPLOYDIR}
+    install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/${IMAGE_BASE_NAME}-${MACHINE}.ext4 ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/${IMAGE_BASE_NAME}-${MACHINE}.rwfs.ext4 ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE_NAME} ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${S}/${GEN_IMAGE_MODE}/*.* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${S}/${GEN_IMAGE_MODE}/fitImage* ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    install -m 0644 ${S}/${GEN_IMAGE_MODE}/${otptool_config_slug}/otp-all.image ${DEPLOYDIR}/${GEN_IMAGE_MODE}/${otptool_config_slug}-otp-all.image
+
+    # u-boot-env
+    if [ -f ${DEPLOY_DIR_IMAGE}/u-boot-env.bin ]; then
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/u-boot-env.bin ${DEPLOYDIR}/${GEN_IMAGE_MODE}
+    fi
+
+    # optee-os
+    if [ -f ${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin ]; then
+        install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/optee/* ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+    fi
+
+    # decompress wic image for user data area boot partition update
+    xz -cd ${DEPLOY_DIR_IMAGE}/${WIC_IMAGE_NAME} > ${S}/${GEN_IMAGE_MODE}/${USER_DATA_IMAGE_NAME}
+}
+
+
+def make_empty_image_zeros(img, size_kb):
+    size = int(size_kb) * 1024
+    with open(img, "wb+") as fp:
+        fp.seek(0)
+        fp.write(b'\x00'*size)
 
 
 def make_empty_image(img, size_kb):
@@ -233,13 +308,13 @@ def deploy_static_image(d):
 
     uboot_offset = int(d.getVar('FLASH_UBOOT_OFFSET', True))
     uboot_spl_end_offset = uboot_offset + int(d.getVar('FLASH_UBOOT_SPL_SIZE', True))
-    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "u-boot-spl.bin"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('SPL_IMAGE_NAME', True)),
                  nor_img,
                  uboot_offset,
                  uboot_spl_end_offset)
 
     uboot_offset = uboot_spl_end_offset
-    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "u-boot.bin"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('UBOOT_FITIMAGE_NAME', True)),
                  nor_img,
                  uboot_offset,
                  int(d.getVar('FLASH_UBOOT_ENV_OFFSET', True)))
@@ -265,19 +340,96 @@ def deploy_static_image(d):
 
     uboot_offset = int(d.getVar('FLASH_UBOOT_OFFSET', True))
     uboot_spl_end_offset = uboot_offset + int(d.getVar('FLASH_UBOOT_SPL_SIZE', True))
-    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "u-boot-spl.bin"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('SPL_IMAGE_NAME', True)),
                  uboot_img,
                  uboot_offset,
                  uboot_spl_end_offset)
 
     uboot_offset = uboot_spl_end_offset
-    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "u-boot.bin"),
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('UBOOT_FITIMAGE_NAME', True)),
                  uboot_img,
                  uboot_offset,
                  int(d.getVar('FLASH_UBOOT_ENV_OFFSET', True)))
 
 
+def deploy_mmc_image(d):
+    import subprocess
+
+    gen_img = d.getVar('GEN_IMAGE_MODE', True)
+    user_data_image = os.path.join(d.getVar('S', True), gen_img, d.getVar('USER_DATA_IMAGE_NAME', True))
+    user_data_bootpart_image = os.path.join(d.getVar('S', True), gen_img, d.getVar('USER_DATA_BOOTPART_IMAGE_NAME', True))
+    make_empty_image_zeros(user_data_bootpart_image, d.getVar('MMC_BOOT_PARTITION_SIZE', True))
+    bb.build.exec_func("make_boot_partition_ext4", d)
+    bb.build.exec_func("deploy_mmc_image_helper", d)
+
+    # get partition offset from user data area image
+    # sector size is 512 bytes
+    # offset_kb = (start_sector*512)/1024 = start_sector/2
+    # boot-a
+    cmd = "sgdisk -p  %s | grep 'boot-a'" % user_data_image
+    print("Get boot-a partition information...")
+    print(cmd)
+    boot_a_out = subprocess.check_output(cmd, shell=True)
+    print(boot_a_out)
+    boot_a_start_sector = int(boot_a_out.split()[1])
+    boot_a_offset_kb = int(boot_a_start_sector // 2)
+    print("boot_a_start_sector=%d, boot_a_offset_kb=%d" % (boot_a_start_sector, boot_a_offset_kb))
+
+    # boot-b
+    cmd = "sgdisk -p  %s | grep 'boot-b'" % user_data_image
+    print("Get boot-b partition information...")
+    print(cmd)
+    boot_b_out = subprocess.check_output(cmd, shell=True)
+    print(boot_b_out)
+    boot_b_start_sector = int(boot_b_out.split()[1])
+    boot_b_offset_kb = int(boot_b_start_sector // 2)
+    print("boot_b_start_sector=%d, boot_b_offset_kb=%d" % (boot_b_start_sector, boot_b_offset_kb))
+
+    # rofs-a
+    cmd = "sgdisk -p  %s | grep 'rofs-a'" % user_data_image
+    print("Get rofs-a partition information...")
+    print(cmd)
+    rofs_a_out = subprocess.check_output(cmd, shell=True)
+    print(rofs_a_out)
+    rofs_a_start_sector = int(rofs_a_out.split()[1])
+    rofs_a_offset_kb = int(rofs_a_start_sector // 2)
+    print("rofs_a_start_sector=%d, rofs_a_offset_kb=%d" % (rofs_a_start_sector, rofs_a_offset_kb))
+
+    # update boot partition in user data area image
+    append_image(user_data_bootpart_image, user_data_image, boot_a_offset_kb, boot_b_offset_kb)
+    append_image(user_data_bootpart_image, user_data_image, boot_b_offset_kb, rofs_a_offset_kb)
+
+    # compress user data image and deploy
+    deploy_wic_image = os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('WIC_IMAGE_NAME', True))
+    cmd = "xz -f -k -c -9 {} --check=crc32 {} > {}".format(d.getVar('XZ_DEFAULTS', True),
+                                                           user_data_image,
+                                                           deploy_wic_image)
+    print(cmd)
+    subprocess.check_call(cmd, shell=True)
+
+    # emmc_image-boot for Boot Area Partition 1 and 2
+    emmc_boot_img = os.path.join(d.getVar('DEPLOYDIR', True), gen_img, "emmc_image-u-boot")
+    make_empty_image(emmc_boot_img, d.getVar('MMC_UBOOT_SIZE', True))
+
+    uboot_offset = int(d.getVar('MMC_UBOOT_OFFSET', True))
+    uboot_spl_end_offset = uboot_offset + int(d.getVar('MMC_UBOOT_SPL_SIZE', True))
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('SPL_IMAGE_NAME', True)),
+                 emmc_boot_img,
+                 uboot_offset,
+                 uboot_spl_end_offset)
+
+    uboot_offset = uboot_spl_end_offset
+    append_image(os.path.join(d.getVar('DEPLOYDIR', True), gen_img, d.getVar('UBOOT_FITIMAGE_NAME', True)),
+                 emmc_boot_img,
+                 uboot_offset,
+                 int(d.getVar('MMC_UBOOT_SIZE', True)))
+
+
 def verify_uboot_kernel_image_status(d):
+    aspeed_secure_boot = d.getVar('ASPEED_SECURE_BOOT', True)
+    if aspeed_secure_boot != "yes":
+        bb.fatal("Only support secure boot enable")
+
     spl_binary = d.getVar('SPL_BINARY', True)
     if not spl_binary:
         bb.fatal("Only support SPL")
@@ -427,6 +579,7 @@ python do_deploy() {
     spl_default_sign_key_name = d.getVar('SPL_SIGN_KEYNAME', True)
     uboot_default_sign_key_name = d.getVar('UBOOT_SIGN_KEYNAME', True)
     gen_secure_image = d.getVar('ASPEED_CUSTOMIZE_GEN_SECURE_IMAGE', True)
+    aspeed_boot_emmc = d.getVar('ASPEED_BOOT_EMMC', True)
 
     for gen_img in gen_secure_image.split():
         for sec_img in secure_image_list:
@@ -461,8 +614,14 @@ python do_deploy() {
         bb.build.exec_func("socsec_sign_spl_and_verify", d)
         print("Make recovery image")
         bb.build.exec_func("make_recovery_image", d)
-        print("Deploy static image")
-        deploy_static_image(d)
+
+        if aspeed_boot_emmc == "yes":
+            print("Deploy mmc image...")
+            deploy_mmc_image(d)
+        else:
+            print("Deploy static image...")
+            deploy_static_image(d)
+
         print("Started %s image" % gen_img)
 }
 
