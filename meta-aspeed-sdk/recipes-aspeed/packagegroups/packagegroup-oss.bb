@@ -12,6 +12,7 @@ PACKAGES = " \
     ${PN}-apps \
     ${PN}-libs \
     ${PN}-intel-pmci \
+    ${PN}-extended \
     "
 
 # The size of fio is very large because its dependencies
@@ -43,6 +44,11 @@ RDEPENDS:${PN}-apps = " \
     fio \
     freeipmi \
     freeipmi-ipmi-raw \
+    "
+
+SUMMARY:${PN}-extended = "Open Source Extended Applications"
+RDEPENDS:${PN}-extended = " \
+    can-utils \
     "
 
 SUMMARY:${PN}-intel-pmci = "Open Source Intel PMCI Applications"

@@ -4,6 +4,7 @@ require recipes-core/images/core-image-minimal.bb
 
 IMAGE_INSTALL:append = " \
         packagegroup-oss-apps \
+        packagegroup-oss-extended \
         packagegroup-oss-libs \
         packagegroup-oss-intel-pmci \
         packagegroup-aspeed-apps \
