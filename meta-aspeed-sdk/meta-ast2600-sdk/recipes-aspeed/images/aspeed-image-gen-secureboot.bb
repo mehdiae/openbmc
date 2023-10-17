@@ -169,14 +169,14 @@ make_uboot_kernel_fitimage_and_sign() {
         bbfatal "Verified kernel fitImage failed."
     fi
 
-    # Assemble the uboot image
+    # Assemble the bootloader image
     uboot-mkimage -f ${UBOOT_FITIMAGE_ITS_NAME} ${UBOOT_FITIMAGE_NAME}
-    # Sign the U-boot FIT image and add public key to SPL dtb
+    # Sign the Bootloader FIT image and add public key to SPL dtb
     uboot-mkimage -F -k ${SPL_SIGN_KEYDIR} -K "u-boot-spl.dtb" -r ${UBOOT_FITIMAGE_NAME}
-    # Verify U-boot fitImage
+    # Verify bootloader fitImage
     uboot-fit_check_sign -f ${UBOOT_FITIMAGE_NAME} -k u-boot-spl.dtb
     if [ $? -ne 0 ]; then
-        bbfatal "Verified uboot fitImage failed."
+        bbfatal "Verified bootloader fitImage failed."
     fi
 
     # concat spl dtb
@@ -440,7 +440,7 @@ def verify_uboot_kernel_image_status(d):
 
     uboot_fitimage_enable = d.getVar('UBOOT_FITIMAGE_ENABLE', True)
     if uboot_fitimage_enable != "1":
-        bb.fatal("Only support UBoot fit image")
+        bb.fatal("Only support Bootloader fit image")
 
     spl_sign_enable = d.getVar('SPL_SIGN_ENABLE', True)
     if spl_sign_enable != "1":
@@ -606,7 +606,7 @@ python do_deploy() {
         update_its_file(uboot_its, uboot_default_algo, sec_img["cot_uboot_algo"])
         update_its_file(uboot_its, spl_default_sign_key_name, sec_img["cot_spl_sign_key_name"])
 
-        print("Make uboot kernel fitimage and sign")
+        print("Make bootloader, kernel fitimage and sign")
         bb.build.exec_func("make_uboot_kernel_fitimage_and_sign", d)
         print("Make otp image")
         bb.build.exec_func("make_otp_image", d)

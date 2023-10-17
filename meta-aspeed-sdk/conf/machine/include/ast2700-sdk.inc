@@ -12,7 +12,7 @@ SERIAL_CONSOLES ?= "115200;ttyS12"
 UBOOT_FIT_ADDRESS_CELLS ?= "2"
 FIT_ADDRESS_CELLS ?= "2"
 
-# kernel and uboot fitimage
+# kernel and bootloader fitimage
 UBOOT_ENTRYPOINT ?= "0x4 0x00040000"
 UBOOT_LOADADDRESS ?= "0x4 0x00040000"
 

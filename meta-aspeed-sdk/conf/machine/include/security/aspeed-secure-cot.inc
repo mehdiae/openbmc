@@ -16,11 +16,11 @@ UBOOT_SIGN_KEYDIR ?= "${STAGING_DATADIR_NATIVE}/aspeed-secure-config/keys"
 SPL_SIGN_KEYNAME ?= "test_bl2_4096"
 UBOOT_SIGN_KEYNAME ?= "test_bl3_4096"
 
-# Kernel / U-Boot fitImage Hash Algo
+# Kernel / Bootloader fitImage Hash Algo
 FIT_HASH_ALG ?= "sha512"
 UBOOT_FIT_HASH_ALG ?= "sha512"
 
-# Kernel / U-Boot fitImage Signature Algo
+# Kernel / Bootloader fitImage Signature Algo
 FIT_SIGN_ALG ?= "rsa4096"
 UBOOT_FIT_SIGN_ALG ?= "rsa4096"
 
@@ -33,11 +33,11 @@ UBOOT_FIT_SIGN_NUMBITS ?= "4096"
 #SPL_SIGN_KEYNAME ?= "test_bl2_3072"
 #UBOOT_SIGN_KEYNAME ?= "test_bl3_3072"
 
-# Kernel / U-Boot fitImage Hash Algo
+# Kernel / Bootloader fitImage Hash Algo
 #FIT_HASH_ALG ?= "sha384"
 #UBOOT_FIT_HASH_ALG ?= "sha384"
 
-# Kernel / U-Boot fitImage Signature Algo
+# Kernel / Bootloader fitImage Signature Algo
 #FIT_SIGN_ALG ?= "rsa3072"
 #UBOOT_FIT_SIGN_ALG ?= "rsa3072"
 
@@ -50,11 +50,11 @@ UBOOT_FIT_SIGN_NUMBITS ?= "4096"
 #SPL_SIGN_KEYNAME ?= "test_bl2_2048"
 #UBOOT_SIGN_KEYNAME ?= "test_bl3_2048"
 
-# Kernel / U-Boot fitImage Hash Algo
+# Kernel / Bootloader fitImage Hash Algo
 #FIT_HASH_ALG ?= "sha256"
 #UBOOT_FIT_HASH_ALG ?= "sha256"
 
-# Kernel / U-Boot fitImage Signature Algo
+# Kernel / Bootloader fitImage Signature Algo
 #FIT_SIGN_ALG ?= "rsa2048"
 #UBOOT_FIT_SIGN_ALG ?= "rsa2048"
 
