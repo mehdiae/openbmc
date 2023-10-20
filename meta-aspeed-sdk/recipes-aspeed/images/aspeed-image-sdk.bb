@@ -1,17 +1,38 @@
-SUMMARY = "Two partition MTD image with u-boot and kernel"
+SUMMARY = "Three partition MTD image with u-boot, kernel and bootmcu"
 HOMEPAGE = "https://github.com/openbmc/meta-aspeed"
 LICENSE = "MIT"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', 'deploy', d)}
+inherit deploy
+inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', '', d)}
 
 UBOOT_SUFFIX ?= "bin"
+
+ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "boot_mcu_ram"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE ?= "u-boot-spl"
 ASPEED_IMAGE_UBOOT_IMAGE ?= "u-boot"
-ASPEED_IMAGE_UBOOT_OFFSET_KB ?= "0"
-ASPEED_IMAGE_UBOOT_SPL_SIZE_KB ?= "64"
-ASPEED_IMAGE_KERNEL_OFFSET_KB ?= "1024"
-ASPEED_IMAGE_SIZE_KB ?= "24576"
+
+ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB ?= "0"
+ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB ?= "384"
+ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB ?= "384"
+ASPEED_IMAGE_UBOOT_SPL_SIZE_KB ?= "128"
+ASPEED_IMAGE_UBOOT_OFFSET_KB ?= "512"
+ASPEED_IMAGE_UBOOT_SIZE_KB ?= "2048"
+ASPEED_IMAGE_KERNEL_OFFSET_KB ?= "2688"
+
+ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB:aspeed-g6 ?= "0"
+ASPEED_IMAGE_UBOOT_SPL_SIZE_KB:aspeed-g6 ?= "64"
+ASPEED_IMAGE_UBOOT_OFFSET_KB:aspeed-g6 ?= "64"
+ASPEED_IMAGE_UBOOT_SIZE_KB:aspeed-g6 ?= "1216"
+ASPEED_IMAGE_KERNEL_OFFSET_KB:aspeed-g6 ?= "1408"
+
+ASPEED_IMAGE_UBOOT_OFFSET_KB:aspeed-g5 ?= "0"
+ASPEED_IMAGE_UBOOT_SIZE_KB:aspeed-g5 ?= "960"
+ASPEED_IMAGE_KERNEL_OFFSET_KB:aspeed-g5 ?= "1024"
+
+ASPEED_IMAGE_SIZE_KB = "32768"
+ASPEED_IMAGE_SIZE_KB:aspeed-g5 ?= "24576"
+
 ASPEED_IMAGE_KERNEL_IMAGE ?= "fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}"
 ASPEED_IMAGE_NAME ?= "all.bin"
 ASPEED_BOOT_EMMC ?= "${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'yes', 'no', d)}"
@@ -19,67 +40,107 @@ ASPEED_BOOT_EMMC ?= "${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'yes', 
 IMAGE_FSTYPES:ast-mmc += "wic.xz mmc-ext4-tar"
 IMAGE_FEATURES:ast-mmc += "read-only-rootfs-delayed-postinsts"
 
-do_compile() {
-    if [ ${ASPEED_BOOT_EMMC} == "yes" ] ; then
-        echo "MMC mode should not run this task to generate aspeed-sdk.bin"
-        exit 1
-    fi
-
-    uboot_offset=${ASPEED_IMAGE_UBOOT_OFFSET_KB}
-
+do_mk_empty_image() {
+    # Assemble the flash image
     dd if=/dev/zero bs=1k count=${ASPEED_IMAGE_SIZE_KB} | \
         tr '\000' '\377' > ${B}/aspeed-sdk.bin
-
-    if [ ! -z ${SPL_BINARY} ] ; then
-        dd bs=1k conv=notrunc seek=${ASPEED_IMAGE_UBOOT_OFFSET_KB} \
-            if=${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} \
-            of=${B}/aspeed-sdk.bin
-        uboot_offset=${ASPEED_IMAGE_UBOOT_SPL_SIZE_KB}
-    fi
-
-    dd bs=1k conv=notrunc seek=${uboot_offset} \
-        if=${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_IMAGE}.${UBOOT_SUFFIX} \
-        of=${B}/aspeed-sdk.bin \
-
-    dd bs=1k conv=notrunc seek=${ASPEED_IMAGE_KERNEL_OFFSET_KB} \
-        if=${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_KERNEL_IMAGE} \
-        of=${B}/aspeed-sdk.bin
 }
 
-do_compile:ast-mmc() {
-    :
+python do_deploy() {
+    import subprocess
+
+    if d.getVar('ASPEED_BOOT_EMMC', True) == "yes":
+        bb.fatal("MMC mode should not run this task")
+
+    initramfs_image = d.getVar('INITRAMFS_IMAGE', True)
+    if initramfs_image != "aspeed-image-initramfs":
+         bb.fatal('Not support ' + str(initramfs_image) + ' INITRAMFS_IMAGE')
+
+    bb.build.exec_func("do_mk_empty_image", d)
+
+    nor_image = os.path.join(d.getVar('B', True), "aspeed-sdk.bin")
+
+    def _append_image(imgpath, start_kb, finish_kb):
+        imgsize = os.path.getsize(imgpath)
+        maxsize = (finish_kb - start_kb) * 1024
+        bb.debug(1, 'Considering file size=' + str(imgsize) + ' name=' + imgpath)
+        bb.debug(1, 'Spanning start=' + str(start_kb) + 'K end=' + str(finish_kb) + 'K')
+        bb.debug(1, 'Compare needed=' + str(imgsize) + ' available=' + str(maxsize) + ' margin=' + str(maxsize - imgsize))
+        if imgsize > maxsize:
+            bb.fatal("Image '%s' is too large!" % imgpath)
+
+        subprocess.check_call(['dd', 'bs=1k', 'conv=notrunc',
+                                      'seek=%d' % start_kb,
+                                      'if=%s' % imgpath,
+                                      'of=%s' % nor_image])
+
+    # bootmcu
+    bootmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
+    bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
+                           int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
+    if bootmcu_fw_binary:
+        _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                                   '%s.%s' % (
+                                   d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True),
+                                   d.getVar('UBOOT_SUFFIX', True))),
+                      int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)),
+                      bootmcu_fw_finish_kb)
+
+    # spl
+    spl_binary = d.getVar('SPL_BINARY', True)
+    spl_finish_kb = (int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
+                    int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_SIZE_KB', True)))
+    if spl_binary:
+        _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                                   '%s.%s' % (
+                                   d.getVar('ASPEED_IMAGE_UBOOT_SPL_IMAGE', True),
+                                   d.getVar('UBOOT_SUFFIX', True))),
+                      int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB', True)),
+                      spl_finish_kb)
+
+    # uboot fit
+    uboot_finish_kb = (int(d.getVar('ASPEED_IMAGE_UBOOT_OFFSET_KB', True)) +
+                      int(d.getVar('ASPEED_IMAGE_UBOOT_SIZE_KB', True)))
+    _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                  '%s.%s' % (
+                  d.getVar('ASPEED_IMAGE_UBOOT_IMAGE', True),
+                  d.getVar('UBOOT_SUFFIX', True))),
+                  int(d.getVar('ASPEED_IMAGE_UBOOT_OFFSET_KB', True)),
+                  uboot_finish_kb)
+
+    # kernel fit
+    _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
+                  '%s' %
+                  d.getVar('ASPEED_IMAGE_KERNEL_IMAGE',True)),
+                  int(d.getVar('ASPEED_IMAGE_KERNEL_OFFSET_KB', True)),
+                  int(d.getVar('ASPEED_IMAGE_SIZE_KB', True)))
+
+    dest_image = os.path.join(d.getVar('DEPLOYDIR', True), d.getVar('ASPEED_IMAGE_NAME', True))
+    subprocess.check_call(['install',
+                           '-m644',
+                           '-D',
+                           '%s' % nor_image,
+                           '%s' % dest_image])
 }
 
-do_deploy() {
-    if [ ${ASPEED_BOOT_EMMC} == "yes" ] ; then
-        echo "MMC mode should not run this task to generate ${ASPEED_IMAGE_NAME}"
-        exit 1
-    fi
+python do_deploy:ast-mmc() {
+    initramfs_image = d.getVar('INITRAMFS_IMAGE', True)
+    if initramfs_image != "aspeed-image-initramfs":
+         bb.fatal('Not support ' + str(initramfs_image) + ' INITRAMFS_IMAGE')
 
-    sdk_image_size="$(wc -c ${B}/aspeed-sdk.bin | awk '{print $1}')"
-    let sdk_image_size/=1024
-
-    if [ ${sdk_image_size} -gt ${ASPEED_IMAGE_SIZE_KB} ] ; then
-        echo "Actual SDK image size (${sdk_image_size}kb) is larger than allowed size ${ASPEED_IMAGE_SIZE_KB}kb"
-        exit 1
-    fi
-
-    install -m644 -D ${B}/aspeed-sdk.bin ${DEPLOYDIR}/${ASPEED_IMAGE_NAME}
+    bb.debug(1, "MMC mode do nothing")
 }
 
-do_deploy:ast-mmc() {
-    :
-}
-
-do_compile[depends] = " \
+do_deploy[depends] = " \
     virtual/kernel:do_deploy \
-    u-boot:do_deploy \
-    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-image-secureboot:do_deploy', '', d)} \
+    virtual/bootloader:do_deploy \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
     "
 do_fetch[noexec] = "1"
 do_unpack[noexec] = "1"
 do_patch[noexec] = "1"
 do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 do_install[noexec] = "1"
 deltask do_populate_sysroot
 do_package[noexec] = "1"

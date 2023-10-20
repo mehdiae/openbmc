@@ -8,6 +8,7 @@ inherit allarch
 
 SRC_URI = " \
     file://configs;subdir=${S} \
+    file://keys;subdir=${S} \
     "
 
 do_patch[noexec] = "1"
@@ -17,22 +18,19 @@ do_compile[noexec] = "1"
 do_install() {
     install -d ${D}${datadir}
     install -d ${D}${datadir}/aspeed-secure-config
+    install -d ${D}${datadir}/aspeed-secure-config/keys
     install -d ${D}${datadir}/aspeed-secure-config/ast2600
-    install -d ${D}${datadir}/aspeed-secure-config/ast2600/security
-    install -d ${D}${datadir}/aspeed-secure-config/ast2600/security/otp
-    install -d ${D}${datadir}/aspeed-secure-config/ast2600/security/key
-    install -d ${D}${datadir}/aspeed-secure-config/ast2600/security/data
+    install -d ${D}${datadir}/aspeed-secure-config/ast2600/otp
+    install -d ${D}${datadir}/aspeed-secure-config/ast2600/data
 
     install -m 0755 ${S}/configs/*.sh \
         ${D}${datadir}/aspeed-secure-config
-    install -m 0644 ${S}/configs/ast2600/*.cfg \
-        ${D}${datadir}/aspeed-secure-config/ast2600
-    install -m 0644 ${S}/configs/ast2600/security/otp/* \
-        ${D}${datadir}/aspeed-secure-config/ast2600/security/otp
-    install -m 0644 ${S}/configs/ast2600/security/key/* \
-        ${D}${datadir}/aspeed-secure-config/ast2600/security/key
-    install -m 0644 ${S}/configs/ast2600/security/data/* \
-        ${D}${datadir}/aspeed-secure-config/ast2600/security/data
+    install -m 0644 ${S}/keys/* \
+        ${D}${datadir}/aspeed-secure-config/keys
+    install -m 0644 ${S}/configs/ast2600/otp/* \
+        ${D}${datadir}/aspeed-secure-config/ast2600/otp
+    install -m 0644 ${S}/configs/ast2600/data/* \
+        ${D}${datadir}/aspeed-secure-config/ast2600/data
 }
 
 BBCLASSEXTEND = "native"

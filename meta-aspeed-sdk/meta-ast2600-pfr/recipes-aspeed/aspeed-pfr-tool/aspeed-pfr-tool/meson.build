@@ -40,6 +40,7 @@ executable(
       'checkpoint.c',
       'status.c',
       'info.c',
+      'spdm.c',
       'main.c'
     ],
     include_directories : incdir,

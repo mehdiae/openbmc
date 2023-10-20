@@ -8,6 +8,7 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append = " \
         packagegroup-oss-apps \
+        packagegroup-oss-extended \
         packagegroup-oss-libs \
         packagegroup-oss-intel-pmci \
         packagegroup-aspeed-obmc-apps \
@@ -21,12 +22,19 @@ IMAGE_INSTALL:append = " \
         ${@bb.utils.contains('DISTRO_FEATURES', 'tpm', \
             bb.utils.contains('MACHINE_FEATURES', 'tpm2', 'packagegroup-security-tpm2', '', d), \
             '', d)} \
+        packagegroup-aspeed-ktools \
         "
 
-# Only install in AST26xx series rofs as the free space of AST2500 rofs is not enough.
-IMAGE_INSTALL:append:aspeed-g6 = " \
+# remove from AST25xx series rofs as the free space of AST25xx rofs is not enough.
+IMAGE_INSTALL:remove:aspeed-g5 = " \
         packagegroup-aspeed-ktools \
-       "
+        packagegroup-oss-extended \
+        "
+
+# remove from AST26xx series rofs as the free space of AST26xx rofs is not enough.
+IMAGE_INSTALL:remove:aspeed-g6 = " \
+        packagegroup-oss-extended \
+        "
 
 EXTRA_IMAGE_FEATURES:append = " \
         nfs-client \

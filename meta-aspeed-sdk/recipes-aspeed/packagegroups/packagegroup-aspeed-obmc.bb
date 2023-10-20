@@ -7,7 +7,7 @@ inherit packagegroup
 PROVIDES = "${PACKAGES}"
 RPROVIDES:${PN} = "${PACKAGES}"
 
-PACKAGES:append = " \
+PACKAGES = " \
     ${PN}-chassis \
     ${PN}-extras \
     ${PN}-fans \

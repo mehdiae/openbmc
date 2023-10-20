@@ -14,10 +14,10 @@ Signed-off-by: Jammy Huang <jammy_huang@aspeedtech.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/security_headers.hpp b/include/security_headers.hpp
-index 9877bb0b..3e6a033c 100644
+index 9615f6548c..0a57d8f054 100644
 --- a/include/security_headers.hpp
 +++ b/include/security_headers.hpp
-@@ -32,7 +32,7 @@ inline void addSecurityHeaders(const crow::Request& req [[maybe_unused]],
+@@ -69,7 +69,7 @@ inline void addSecurityHeaders(const crow::Request& req [[maybe_unused]],
                                                   "img-src 'self' data:; "
                                                   "font-src 'self'; "
                                                   "style-src 'self'; "
@@ -26,3 +26,6 @@ index 9877bb0b..3e6a033c 100644
                                                   "connect-src 'self' wss:; "
                                                   "form-action 'none'; "
                                                   "frame-ancestors 'none'; "
+-- 
+2.25.1
+

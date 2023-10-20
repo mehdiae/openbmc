@@ -38,7 +38,7 @@
         },
         {
             "Name": "PowerOut",
-            "LineName": "POWER_OUT",
+            "LineName": "FM_BMC_PWRBTN_OUT_R_N",
             "Type": "GPIO",
             "Polarity": "ActiveLow"
         },

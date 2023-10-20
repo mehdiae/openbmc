@@ -80,7 +80,7 @@ void rx_response_handler(uint8_t eid, void *data, void *msg, size_t len,
 	struct test_mctp_ctx *p = (struct test_mctp_ctx *)data;
 
 	mctp_prinfo("%s: Received a response", __func__);
-	mctp_prinfo("Received length = %d", len);
+	mctp_prinfo("Received length = %zd", len);
 
 	// notify test_mctp_astpcie_recv_data_timeout_raw
 	p->len = len;
@@ -126,7 +126,7 @@ void rx_request_handler(mctp_eid_t src, void *data, void *msg, size_t len,
 
 	mctp_prinfo("Received Message Type: %d", mctp_type);
 	mctp_prinfo("Received Command: %d", cmd);
-	mctp_prinfo("Received Message length: %d", len);
+	mctp_prinfo("Received Message length: %zd", len);
 
 	if (mctp_type != MCTP_MESSAGE_TYPE_ASPEED_ECHO_TEST) {
 		mctp_prwarn("%s: Not support message type 0x%X\n", __func__, mctp_type);
@@ -196,7 +196,7 @@ void rx_request_control_handler(mctp_eid_t src, void *data, void *msg, size_t le
 
 	cmd = req->hdr.command_code;
 	mctp_prinfo("Received Control Command: %d", cmd);
-	mctp_prinfo("Received Message length: %d", len);
+	mctp_prinfo("Received Message length: %zd", len);
 
 	memcpy(&resp.hdr, &req->hdr, sizeof(struct mctp_ctrl_msg_hdr));
 	resp.hdr.rq_dgram_inst &= ~(MCTP_CTRL_HDR_FLAG_REQUEST);
@@ -629,7 +629,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (data_len > (TEST_TX_BUFF_SIZE - msg_hdr_len)) {
-		mctp_prerr("length exceeds max payload length %d\n", (TEST_TX_BUFF_SIZE - msg_hdr_len));
+		mctp_prerr("length exceeds max payload length %zd\n", (TEST_TX_BUFF_SIZE - msg_hdr_len));
 		usage(stdout, argc, argv);
 		exit(EXIT_FAILURE);
 	}

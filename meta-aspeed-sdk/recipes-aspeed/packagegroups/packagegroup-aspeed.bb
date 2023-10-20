@@ -9,7 +9,7 @@ inherit packagegroup
 PROVIDES = "${PACKAGES}"
 RPROVIDES:${PN} = "${PACKAGES}"
 
-PACKAGES:append = " \
+PACKAGES = " \
     ${PN}-apps \
     ${PN}-ssp \
     ${PN}-crypto \
@@ -60,6 +60,7 @@ RRECOMMENDS:${PN}-mtdtest= " \
     kernel-module-mtd-stresstest \
     "
 
+# The size of perf is 6MB
 SUMMARY:${PN}-ktools = "kernel tools"
 RDEPENDS:${PN}-ktools = " \
     "

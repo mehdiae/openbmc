@@ -15,7 +15,7 @@ option(
 option(
     'bmc_active_pfm_offset',
     type: 'string',
-    value: '0x000e0000',
+    value: '0x04000000',
     description: 'BMC Active PFM Offset'
 )
 

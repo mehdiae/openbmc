@@ -6,6 +6,7 @@ PROVIDES += "virtual/kernel"
 
 KCONFIG_MODE="--alldefconfig"
 KERNEL_VERSION_SANITY_SKIP="1"
+KERNEL_EXTRA_ARGS = "V=1"
 
 KSRC = "git://gerrit.aspeed.com:29418/linux.git;protocol=ssh;branch=${KBRANCH}"
 
