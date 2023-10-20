@@ -1,0 +1,18 @@
+baudrate=115200
+bootargs=console=ttyS4,115200n8 root=/dev/ram rw
+boota=setenv bootpart 2; setenv rootfs rofs-a; run setmmcargs; ext4load mmc 0:${bootpart} ${loadaddr} fitImage && bootm; echo Error loading kernel FIT image
+bootb=setenv bootpart 3; setenv rootfs rofs-b; run setmmcargs; ext4load mmc 0:${bootpart} ${loadaddr} fitImage && bootm; echo Error loading kernel FIT image
+bootcmd=run bootmmc
+bootdelay=2
+bootfile=all.bin
+bootmmc=if test "${bootside}" = "b"; then run bootb; run boota; else run boota; run bootb; fi
+bootside=a
+bootspi=fdt addr 20160000 && fdt header get fitsize totalsize && cp.b 20160000 ${loadaddr} ${fitsize} && bootm; echo Error loading kernel FIT image
+gatewayip=192.168.0.1
+ipaddr=192.168.0.45
+loadaddr=0x83000000
+netmask=255.255.255.0
+rootfs=rofs-a
+serverip=192.168.0.81
+setmmcargs=setenv bootargs ${bootargs} rootwait root=PARTLABEL=${rootfs}
+verify=yes
