@@ -15,8 +15,9 @@ do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
 do_install () {
-    install -d ${D}/${baselib}/firmware
-    install -m 644 ${S}/${SSP_FIRMWARE} ${D}/${baselib}/firmware
+
+    install -d ${D}/${base_libdir}/firmware
+    install -m 644 ${S}/${SSP_FIRMWARE} ${D}/${base_libdir}/firmware
 }
 
-FILES:${PN} += "${baselib}/firmware/*"
+FILES:${PN} += "${base_libdir}/firmware/*"

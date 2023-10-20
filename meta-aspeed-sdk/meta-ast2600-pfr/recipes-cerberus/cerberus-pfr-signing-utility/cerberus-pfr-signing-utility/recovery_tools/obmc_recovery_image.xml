@@ -3,30 +3,30 @@
     <WriteAddress>0x00000000</WriteAddress> <!-- u-boot -->
     <Region>
       <StartAddr>0x00000000</StartAddr>
-      <EndAddr>0x000DFFFF</EndAddr>
+      <EndAddr>0x0013FFFF</EndAddr>
     </Region>
   </RecoverySection>
 
   <RecoverySection>
-    <WriteAddress>0x000E0000</WriteAddress> <!-- pfm -->
+    <WriteAddress>0x00140000</WriteAddress> <!-- u-boot-env -->
     <Region>
-      <StartAddr>0x000E0000</StartAddr>
-      <EndAddr>0x000FFFFF</EndAddr>
+      <StartAddr>0x00140000</StartAddr>
+      <EndAddr>0x0015FFFF</EndAddr>
     </Region>
   </RecoverySection>
 
   <RecoverySection>
-    <WriteAddress>0x00100000</WriteAddress> <!-- u-boot-env -->
+    <WriteAddress>0x00160000</WriteAddress> <!-- fit-image -->
     <Region>
-      <StartAddr>0x00100000</StartAddr>
-      <EndAddr>0x0011FFFF</EndAddr>
+      <StartAddr>0x00160000</StartAddr>
+      <EndAddr>0x02DFFFFF</EndAddr>
     </Region>
   </RecoverySection>
 
   <RecoverySection>
-    <WriteAddress>0x01100000</WriteAddress> <!-- fit-image -->
+    <WriteAddress>0x03DE0000</WriteAddress> <!-- pfm -->
     <Region>
-      <StartAddr>0x01100000</StartAddr>
+      <StartAddr>0x03DE0000</StartAddr>
       <EndAddr>0x03DFFFFF</EndAddr>
     </Region>
   </RecoverySection>

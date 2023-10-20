@@ -8,6 +8,7 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
             file://include/i2c_utils.h;subdir=${S} \
             file://include/status.h;subdir=${S} \
             file://include/info.h;subdir=${S} \
+            file://include/spdm.h;subdir=${S} \
             file://include/mailbox_enums.h;subdir=${S} \
             file://include/arguments.h;subdir=${S} \
             file://include/config.h;subdir=${S} \
@@ -16,6 +17,7 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
             file://i2c_utils.c;subdir=${S} \
             file://status.c;subdir=${S} \
             file://info.c;subdir=${S} \
+            file://spdm.c;subdir=${S} \
             file://main.c;subdir=${S} \
             file://meson.build;subdir=${S} \
             file://meson_options.txt;subdir=${S} \
@@ -25,12 +27,6 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
 
 DEPENDS = "openssl i2c-tools"
 RDEPENDS:${PN} = "openssl i2c-tools"
-
-EXTRA_OEMESON:ast2600-pfr = " \
-    -Di2c_bus=14 \
-    -Dbmc_staging_offset=0x04a00000 \
-    -Dbmc_recovery_offset=0x02a00000 \
-    "
 
 EXTRA_OEMESON:ast2600-dcscm-avenue-city = " \
     -Dpch_active_pfm_offset=0x03fe0000 \

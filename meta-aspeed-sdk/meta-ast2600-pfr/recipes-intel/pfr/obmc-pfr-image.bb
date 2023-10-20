@@ -9,7 +9,6 @@ PFR_SHA ?= "1"
 
 SRC_URI = " \
            file://pfr_image.py \
-           file://pfr_manifest.json \
            file://pfr_manifest_ast2600_dcscm.json \
            file://pfm_config.xml \
            file://bmc_config.xml \
@@ -49,7 +48,7 @@ do_install () {
 do_install:class-target () {
         install -d ${D}/${datadir}/pfrconfig
 
-        if [ "${PFR_SHA}" == "1" ]; then
+        if [ "${PFR_SHA}" = "1" ]; then
                 install -m 400 ${WORKDIR}/rk_pub.pem ${D}/${datadir}/pfrconfig/rk_pub.pem
         else
                 install -m 400 ${WORKDIR}/rk384_pub.pem ${D}/${datadir}/pfrconfig/rk384_pub.pem

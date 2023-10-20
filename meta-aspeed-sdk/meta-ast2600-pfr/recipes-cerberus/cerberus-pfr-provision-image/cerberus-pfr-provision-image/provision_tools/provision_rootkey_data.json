@@ -1,6 +1,6 @@
 {
     "Flag": "0x01",
-    "BMCPFMOffset":"0x000E0000",
+    "BMCPFMOffset":"0x03DE0000",
     "BMCActiveSize":"0x04000000",
     "BMCRecoveryOffset":"0x04000000",
     "BMCRecoverySize":"0x04000000",

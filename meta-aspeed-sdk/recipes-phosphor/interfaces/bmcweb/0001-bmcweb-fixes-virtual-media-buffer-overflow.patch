@@ -23,7 +23,7 @@ index fed36815..4a2e2f8c 100644
 +            proxy.wait(ec);
 +            if (ec)
 +            {
-+                BMCWEB_LOG_ERROR << "Error on proxy.wait():" << ec;
++                BMCWEB_LOG_ERROR("Error on proxy.wait(): {}", ec.message());
 +            }
 +        } while (ec == std::errc::interrupted);
      }

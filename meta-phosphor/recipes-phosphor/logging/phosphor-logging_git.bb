@@ -16,7 +16,7 @@ DEPENDS += "libcereal"
 DEPENDS += "sdeventplus"
 DEPENDS += "packagegroup-obmc-yaml-providers"
 DEPENDS += "dbus"
-SRCREV = "757c0ef3d507678f53ea73c8fcf7182aee8d39fc"
+SRCREV = "230f9f94b8d6e37c4c1fb65bfd9dab76851a8d71"
 PACKAGECONFIG ??= ""
 PACKAGECONFIG[openpower-pels] = " \
         -Dopenpower-pel-extension=enabled, \
@@ -38,10 +38,23 @@ inherit obmc-phosphor-dbus-service
 inherit phosphor-logging
 inherit phosphor-dbus-yaml
 
+def get_info_cap(d):
+    flash_size = int(d.getVar('FLASH_SIZE') or 0)
+    if flash_size <= 32768:
+        return "10"
+    elif flash_size <= 65536:
+        return "128"
+    else:
+        return "256"
+
+ERR_INFO_CAP ??= "${@get_info_cap(d)}"
+ERR_INFO_CAP:df-phosphor-mmc ?= "256"
+
 EXTRA_OEMESON = " \
         -Dtests=disabled \
         -Dyamldir=${STAGING_DIR_TARGET}${yaml_dir} \
         -Dcallout_yaml=${STAGING_DIR_NATIVE}${callouts_datadir}/callouts.yaml \
+        -Derror_info_cap=${ERR_INFO_CAP} \
         "
 
 FILES:${PN}-test = "${bindir}/*-test"

@@ -1,7 +1,7 @@
-From 7c9ce812efadef491dfbc6799985c44112655646 Mon Sep 17 00:00:00 2001
+From a74749fe8783885d20bcac670679a1df93183de7 Mon Sep 17 00:00:00 2001
 From: Troy Lee <troy_lee@aspeedtech.com>
 Date: Thu, 25 May 2023 14:58:55 +0800
-Subject: [PATCH] Add control for aspeed format
+Subject: [PATCH 1/3] Add control for aspeed format
 
 Add '-m' to assign jpeg compression format
   0: standard jpeg, 1: aspeed jpeg
@@ -16,13 +16,13 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  ikvm_args.cpp    | 11 +++++++++--
  ikvm_args.hpp    |  7 +++++++
  ikvm_manager.cpp |  2 +-
- ikvm_server.cpp  | 20 ++++++++++++++++++--
- ikvm_video.cpp   | 28 ++++++++++++++++++++++++++--
- ikvm_video.hpp   | 25 ++++++++++++++++++++++++-
- 6 files changed, 85 insertions(+), 8 deletions(-)
+ ikvm_server.cpp  | 26 ++++++++++++++++++++++++++
+ ikvm_video.cpp   | 36 +++++++++++++++++++++++++++++++++---
+ ikvm_video.hpp   |  7 ++++++-
+ 6 files changed, 82 insertions(+), 7 deletions(-)
 
 diff --git a/ikvm_args.cpp b/ikvm_args.cpp
-index 681a9f8..085a7e1 100644
+index 681a9f8..6377f65 100644
 --- a/ikvm_args.cpp
 +++ b/ikvm_args.cpp
 @@ -8,12 +8,13 @@
@@ -47,7 +47,7 @@ index 681a9f8..085a7e1 100644
                  break;
 +            case 'm':
 +                format = (int)strtol(optarg, NULL, 0);
-+                if (format < 0 || format > 1)
++                if (format < 0 || format > 2)
 +                    format = 0;
 +                break;
              case 'h':
@@ -100,7 +100,7 @@ index 2f66fd5..3a0b815 100644
  {}
  
 diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index 6a6cd06..22ca6ff 100644
+index 6a6cd06..d50379b 100644
 --- a/ikvm_server.cpp
 +++ b/ikvm_server.cpp
 @@ -9,6 +9,8 @@
@@ -120,46 +120,41 @@ index 6a6cd06..22ca6ff 100644
      rfbClientIteratorPtr it;
      rfbClientPtr cl;
      int64_t frame_crc = -1;
-@@ -169,10 +172,23 @@ void Server::sendFrame()
-                 fu->type = rfbFramebufferUpdate;
-                 cl->ublen = sz_rfbFramebufferUpdateMsg;
+@@ -181,6 +184,29 @@ void Server::sendFrame()
                  rfbSendUpdateBuf(cl);
--                cl->tightEncoding = rfbEncodingTight;
+                 break;
+ 
++            case V4L2_PIX_FMT_AJPG:
++                fu->type = rfbFramebufferUpdate;
++                cl->ublen = sz_rfbFramebufferUpdateMsg;
++                rfbSendUpdateBuf(cl);
 +                cl->tightEncoding = rfbEncodingAspeed;
-                 rfbSendTightHeader(cl, 0, 0, video.getWidth(),
-                                    video.getHeight());
--                cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
-+                if (video.getFormat() == 1)
++                rfbSendTightHeader(cl, 0, 0, video.getWidth(), video.getHeight());
++
++                cl->updateBuf[cl->ublen++] = (char)(0);
++                cl->updateBuf[cl->ublen++] = (char)(frameCount >> 24 & 0xff);
++                cl->updateBuf[cl->ublen++] = (char)(frameCount >> 16 & 0xff);
++                cl->updateBuf[cl->ublen++] = (char)(frameCount >> 8 & 0xff);
++                cl->updateBuf[cl->ublen++] = (char)(frameCount & 0xff);
++                cl->updateBuf[cl->ublen++] = (char)(video.getSubsampling());
++                cl->updateBuf[cl->ublen++] = (char)(0x00); // the value of quality if changed
++
++                rfbSendCompressedDataTight(cl, data, video.getFrameSize());
++                if (cl->enableLastRectEncoding)
 +                {
-+                    cl->updateBuf[cl->ublen++] = (char)(0);
-+                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 24 & 0xff);
-+                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 16 & 0xff);
-+                    cl->updateBuf[cl->ublen++] = (char)(frameCount >> 8 & 0xff);
-+                    cl->updateBuf[cl->ublen++] = (char)(frameCount & 0xff);
-+                    cl->updateBuf[cl->ublen++] = (char)(video.getSubsampling());
-+                    cl->updateBuf[cl->ublen++] = (char)(0x00); // the value of quality if changed
++                    rfbSendLastRectMarker(cl);
 +                }
-+                else if (video.getFormat() == 0)
-+                {
-+                    cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
-+                }
-                 rfbSendCompressedDataTight(cl, data, video.getFrameSize());
-                 if (cl->enableLastRectEncoding)
-                 {
++                rfbSendUpdateBuf(cl);
++                break;
++
+             default:
+                 break;
+         }
 diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index 3445715..ee18d9c 100644
+index 3445715..72e7631 100644
 --- a/ikvm_video.cpp
 +++ b/ikvm_video.cpp
-@@ -19,6 +19,8 @@
- #include <xyz/openbmc_project/Common/Device/error.hpp>
- #include <xyz/openbmc_project/Common/File/error.hpp>
- 
-+#define V4L2_PIX_FMT_AJPG     v4l2_fourcc('A', 'J', 'P', 'G')
-+
- namespace ikvm
- {
- 
-@@ -30,10 +32,10 @@ using namespace phosphor::logging;
+@@ -30,11 +30,26 @@ using namespace phosphor::logging;
  using namespace sdbusplus::xyz::openbmc_project::Common::File::Error;
  using namespace sdbusplus::xyz::openbmc_project::Common::Device::Error;
  
@@ -167,24 +162,32 @@ index 3445715..ee18d9c 100644
 +Video::Video(const std::string& p, Input& input, int fr, int sub, int fmt) :
      resizeAfterOpen(false), timingsError(false), fd(-1), frameRate(fr),
      lastFrameIndex(-1), height(600), width(800), subSampling(sub), input(input),
--    path(p), pixelformat(V4L2_PIX_FMT_JPEG)
-+    format(fmt), path(p), pixelformat(V4L2_PIX_FMT_JPEG)
- {}
+     path(p), pixelformat(V4L2_PIX_FMT_JPEG)
+-{}
++{
++    switch (fmt)
++    {
++        case 1:
++            pixelformat = V4L2_PIX_FMT_RGB24;
++            break;
++
++        case 2:
++            pixelformat = V4L2_PIX_FMT_AJPG;
++            break;
++        case 0:
++        default:
++            pixelformat = V4L2_PIX_FMT_JPEG;
++            break;
++    }
++}
  
  Video::~Video()
-@@ -434,6 +436,28 @@ void Video::start()
+ {
+@@ -434,6 +449,20 @@ void Video::start()
                  CALLOUT_DEVICE_PATH(path.c_str()));
      }
  
-+    switch (format) {
-+        default:
-+        case 0:
-+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_JPEG;
-+            break;
-+        case 1:
-+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_AJPG;
-+            break;
-+    }
++    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_JPEG;
 +    rc = ioctl(fd, VIDIOC_S_FMT, &fmt);
 +    if (rc < 0)
 +    {
@@ -201,11 +204,33 @@ index 3445715..ee18d9c 100644
      memset(&sparm, 0, sizeof(v4l2_streamparm));
      sparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
      sparm.parm.capture.timeperframe.numerator = 1;
+@@ -459,7 +488,8 @@ void Video::start()
+     width = fmt.fmt.pix.width;
+     pixelformat = fmt.fmt.pix.pixelformat;
+ 
+-    if (pixelformat != V4L2_PIX_FMT_RGB24 && pixelformat != V4L2_PIX_FMT_JPEG)
++    if (pixelformat != V4L2_PIX_FMT_RGB24 && pixelformat != V4L2_PIX_FMT_JPEG
++	&& pixelformat != V4L2_PIX_FMT_AJPG)
+     {
+         log<level::ERR>("Pixel Format not supported",
+                         entry("PIXELFORMAT=%d", pixelformat));
 diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index 15bbb0b..6dac969 100644
+index 15bbb0b..119764f 100644
 --- a/ikvm_video.hpp
 +++ b/ikvm_video.hpp
-@@ -23,7 +23,7 @@ class Video
+@@ -6,6 +6,11 @@
+ #include <string>
+ #include <vector>
+ 
++#ifndef V4L2_PIX_FMT_AJPG
++#define V4L2_PIX_FMT_AJPG     v4l2_fourcc('A', 'J', 'P', 'G')
++#define V4L2_PIX_FMT_FLAG_PARTIAL_JPG   0x00000004
++#endif
++
+ namespace ikvm
+ {
+ 
+@@ -23,7 +28,7 @@ class Video
       * @param[in] input - Reference to the Input object
       * @param[in] fr    - desired frame rate of the video
       */
@@ -214,40 +239,6 @@ index 15bbb0b..6dac969 100644
      ~Video();
      Video(const Video&) = default;
      Video& operator=(const Video&) = default;
-@@ -120,6 +120,27 @@ class Video
-         subSampling = _sub;
-     }
- 
-+    /*
-+     * @brief Gets the jpeg format of the video frame
-+     *
-+     * @return Value of the jpeg format of video frame
-+     *         0:standard jpeg, 1:aspeed
-+     */
-+    inline int getFormat() const
-+    {
-+        return format;
-+    }
-+    /*
-+     * @brief Sets the jpeg format of the video frame
-+     *
-+     * @return Value of the jpeg format of video frame
-+     *         0:standard jpeg, 1:aspeed
-+     */
-+    inline void setFormat(int _fmt)
-+    {
-+        format = _fmt;
-+    }
-+
-     /* @brief Number of bits per component of a pixel */
-     static const int bitsPerSample;
-     /* @brief Number of bytes of storage for a pixel */
-@@ -169,6 +190,8 @@ class Video
-     int subSampling;
-     /* @brief Reference to the Input object */
-     Input& input;
-+    /* @brief jpeg format */
-+    int format;
-     /* @brief Path to the V4L2 video device */
-     const std::string path;
-     /* @brief Streaming buffer storage */
+-- 
+2.34.1
+

@@ -20,71 +20,48 @@ Reference:
 
 ## Target the machine
 ```
-source setup <machine> [build_dir]
+. setup <machine> [build_dir]
 Target machine must be specified. Use one of:
 ast2500-default
 ast2500-default-54
 ast2600-dcscm
 ast2600-dcscm-amd
+ast2600-dcscm-avenue-city
 ast2600-default
-ast2600-default-510
 ast2600-default-54
-ast2600-ecc
+ast2600-default-ecc
+ast2600-default-ncsi
+ast2600-default-secure
+ast2600-default-secure-tee
+ast2600-default-tee
 ast2600-emmc
-ast2600-emmc-secure-rsa2048-sha256
-ast2600-emmc-secure-rsa4096-sha512
-ast2600-ncsi
-ast2600-pfr
-ast2600-usbadp
-ast2600-secure-rsa2048-sha256
-ast2600-secure-rsa2048-sha256-ncot
-ast2600-secure-rsa2048-sha256-o1
-ast2600-secure-rsa2048-sha256-o2-pub
-ast2600-secure-rsa3072-sha384
-ast2600-secure-rsa3072-sha384-o1
-ast2600-secure-rsa3072-sha384-o2-pub
-ast2600-secure-rsa4096-sha512
-ast2600-secure-rsa4096-sha512-o1
-ast2600-secure-rsa4096-sha512-o2-pub
-ast2600-a2
-ast2600-a2-54
-ast2600-a2-emmc
-ast2600-a2-emmc-secure-rsa2048-sha256
-ast2600-a2-emmc-secure-rsa4096-sha512
-ast2600-a2-secure-rsa2048-sha256
-ast2600-a2-secure-rsa2048-sha256-ncot
-ast2600-a2-secure-rsa2048-sha256-o1
-ast2600-a2-secure-rsa2048-sha256-o2-pub
-ast2600-a2-secure-rsa3072-sha384
-ast2600-a2-secure-rsa3072-sha384-o1
-ast2600-a2-secure-rsa3072-sha384-o2-pub
-ast2600-a2-secure-rsa4096-sha512
-ast2600-a2-secure-rsa4096-sha512-o1
-ast2600-a2-secure-rsa4096-sha512-o2-pub
-ast2600-a1
-ast2600-a1-54
-ast2600-a1-secure-rsa2048-sha256
-ast2600-a1-secure-rsa2048-sha256-ncot
-ast2600-a1-secure-rsa2048-sha256-o1
-ast2600-a1-secure-rsa2048-sha256-o2-pub
-ast2600-a1-secure-rsa3072-sha384
-ast2600-a1-secure-rsa3072-sha384-o1
-ast2600-a1-secure-rsa3072-sha384-o2-pub
-ast2600-a1-secure-rsa4096-sha512
-ast2600-a1-secure-rsa4096-sha512-o1
-ast2600-a1-secure-rsa4096-sha512-o2-pub
+ast2600-emmc-secure
+ast2600-emmc-secure-tee
+ast2600-emmc-tee
 ```
 
-1. AST2600
+- Linux kernel version is `5.15` by default. machine with `54` postfix for kernel v5.4.
+- AST2600 revision is `A3` by default.
+- OPTEE-OS
+  - AST2600
+    - OPTEE-OS is disabled by default. machine with `tee` postfix for OPTEE-OS enable.
+
+1. AST2700 (**Not support yet**)
 
 ```
-source setup ast2600-default [build_dir]
+. setup ast2700-default [build_dir]
 ```
 
-2. AST2500
+2. AST2600
 
 ```
-source setup ast2500-default [build_dir]
+. setup ast2600-default [build_dir]
+```
+
+3. AST2500
+
+```
+. setup ast2500-default [build_dir]
 ```
 
 ## Build OpenBMC firmware
@@ -106,10 +83,10 @@ After you successfully built the image, the image file can be found in: `[build_
 
 ### Boot from SPI with secure boot image
 - `image-bmc`: whole flash image
-- `image-u-boot`: s_u-boot-spl.bin(RoT) + u-boot.bin (CoT1)
+- `image-u-boot`: u-boot-spl.bin(RoT) + u-boot.bin (CoT1)
 - `image-kernel`: Linux Kernel FIT Image the same as fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} (CoT2)
 - `image-rofs`: read-only root file system
-- `s_u-boot-spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
+- `u-boot-spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
 - `u-boot`: u-boot.bin processed with verified boot signing for CoT1 image
 - `fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}`: fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} processed with verified boot signing for CoT2 image
 - `otp_image`: OTP image
@@ -119,16 +96,15 @@ After you successfully built the image, the image file can be found in: `[build_
 - `obmc-phosphor-image-${MACHINE}.wic.xz`: compressed emmc flash image for user data partition
 
 ### Boot from eMMC with secure boot image
-- `s_emmc_image-u-boot`: s_u-boot-spl.bin(RoT) + u-boot.bin(CoT1) for boot partition
+- `emmc_image-u-boot`: u-boot-spl.bin(RoT) + u-boot.bin(CoT1) for boot partition
 - `obmc-phosphor-image-${MACHINE}.wic.xz`: compressed emmc flash image for user data partition
-- `s_u-boot_spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
+- `u-boot_spl`: u-boot-spl.bin processed with socsec tool signing for RoT image
 - `u-boot`: u-boot.bin processed with verified boot signing for CoT1 image
 - `fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}`: fitImage-${INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} processed with verified boot signing for CoT2 image
 - `otp_image`: OTP image
 
 ### Recovery Image via UART
 - `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART
-- `recovery_s_u-boot-spl` : s_u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART with secure boot
 
 # Free Open Source Software (FOSS)
 The Yocto/OpenBMC build system supports to provide the following things to meet the FOSS requirement.

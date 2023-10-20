@@ -4,18 +4,18 @@
   <RuntimeUpdate>false</RuntimeUpdate>
   <ReadWrite>
       <Region>
-          <StartAddr>0x00100000</StartAddr> <!-- u-boot env -->
-          <EndAddr>0x0011FFFF</EndAddr>
+          <StartAddr>0x00140000</StartAddr> <!-- u-boot env -->
+          <EndAddr>0x0015FFFF</EndAddr>
           <OperationOnFailure>Restore</OperationOnFailure>
       </Region>
       <Region>
-          <StartAddr>0x00120000</StartAddr> <!-- rwfs -->
-          <EndAddr>0x010FFFFF</EndAddr>
+          <StartAddr>0x02E00000</StartAddr> <!-- rwfs -->
+          <EndAddr>0x03DDFFFF</EndAddr>
           <OperationOnFailure>Erase</OperationOnFailure>
       </Region>
       <Region>
           <StartAddr>0x08000000</StartAddr> <!-- staging -->
-          <EndAddr>0x0E4FFFFF</EndAddr>
+          <EndAddr>0x0C4FFFFF</EndAddr>
           <OperationOnFailure>Nothing</OperationOnFailure>
       </Region>
   </ReadWrite>
@@ -26,11 +26,11 @@
       <HashType>SHA256</HashType>
       <Region>
           <StartAddr>0x00000000</StartAddr> <!-- u-boot -->
-          <EndAddr>0x000DFFFF</EndAddr>
+          <EndAddr>0x0013FFFF</EndAddr>
       </Region>
       <Region>
-          <StartAddr>0x01100000</StartAddr> <!-- fit-image -->
-          <EndAddr>0x03DFFFFF</EndAddr>
+          <StartAddr>0x00160000</StartAddr> <!-- fit-image -->
+          <EndAddr>0x02DFFFFF</EndAddr>
       </Region>
       <ValidateOnBoot>true</ValidateOnBoot>
   </SignedImage>

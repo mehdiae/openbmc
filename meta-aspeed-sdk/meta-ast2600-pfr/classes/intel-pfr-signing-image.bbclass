@@ -42,7 +42,7 @@ do_generate_signed_pfr_image(){
     local output_bin="image-mtd-pfr"
     local SIGN_UTILITY=${PFR_SCRIPT_DIR}/intel-pfr-signing-utility
 
-    if [ "${PFR_SHA}" == "1" ]; then
+    if [ "${PFR_SHA}" = "1" ]; then
         pfmconfig_xml="pfm_config.xml"
         bmcconfig_xml="bmc_config.xml"
     else

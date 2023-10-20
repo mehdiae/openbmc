@@ -36,7 +36,7 @@ int verify_mctp_echo_cmd(uint8_t *tbuf, int tlen, uint8_t *rbuf, int rlen)
 	struct mctp_ctrl_req *req;
 
 	if (tlen < sizeof(struct mctp_ctrl_msg_hdr)) {
-		printf("verify request length failed...expected(%d), req(%d)\n",
+		printf("verify request length failed...expected(%zd), req(%d)\n",
 			sizeof(struct mctp_ctrl_msg_hdr), tlen);
 		goto dump_msg;
 	}
