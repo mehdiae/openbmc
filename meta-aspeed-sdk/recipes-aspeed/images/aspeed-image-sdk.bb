@@ -8,17 +8,15 @@ inherit ${@bb.utils.contains('MACHINE_FEATURES', 'ast-mmc', 'image', '', d)}
 
 UBOOT_SUFFIX ?= "bin"
 
-ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "boot_mcu_ram"
+ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "${BOOTMCU_FW_BINARY}"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE ?= "u-boot-spl"
 ASPEED_IMAGE_UBOOT_IMAGE ?= "u-boot"
 
 ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB ?= "0"
-ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB ?= "384"
-ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB ?= "384"
-ASPEED_IMAGE_UBOOT_SPL_SIZE_KB ?= "128"
-ASPEED_IMAGE_UBOOT_OFFSET_KB ?= "512"
-ASPEED_IMAGE_UBOOT_SIZE_KB ?= "2048"
-ASPEED_IMAGE_KERNEL_OFFSET_KB ?= "2688"
+ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB ?= "768"
+ASPEED_IMAGE_UBOOT_OFFSET_KB ?= "768"
+ASPEED_IMAGE_UBOOT_SIZE_KB ?= "1280"
+ASPEED_IMAGE_KERNEL_OFFSET_KB ?= "2176"
 
 ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB:aspeed-g6 ?= "0"
 ASPEED_IMAGE_UBOOT_SPL_SIZE_KB:aspeed-g6 ?= "64"
@@ -57,8 +55,8 @@ python do_deploy() {
          bb.fatal('Not support ' + str(initramfs_image) + ' INITRAMFS_IMAGE')
 
     bb.build.exec_func("do_mk_empty_image", d)
-
     nor_image = os.path.join(d.getVar('B', True), "aspeed-sdk.bin")
+
 
     def _append_image(imgpath, start_kb, finish_kb):
         imgsize = os.path.getsize(imgpath)
@@ -74,23 +72,22 @@ python do_deploy() {
                                       'if=%s' % imgpath,
                                       'of=%s' % nor_image])
 
+
     # bootmcu
     bootmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
-    bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
-                           int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
     if bootmcu_fw_binary:
+        bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
+                                int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
         _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
-                                   '%s.%s' % (
-                                   d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True),
-                                   d.getVar('UBOOT_SUFFIX', True))),
+                                   '%s' % (d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True))),
                       int(d.getVar('ASPEED_IMAGE_BOOTMCU_FW_OFFSET_KB', True)),
                       bootmcu_fw_finish_kb)
 
     # spl
     spl_binary = d.getVar('SPL_BINARY', True)
-    spl_finish_kb = (int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
-                    int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_SIZE_KB', True)))
     if spl_binary:
+        spl_finish_kb = (int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
+                         int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_SIZE_KB', True)))
         _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                                    '%s.%s' % (
                                    d.getVar('ASPEED_IMAGE_UBOOT_SPL_IMAGE', True),
@@ -98,9 +95,9 @@ python do_deploy() {
                       int(d.getVar('ASPEED_IMAGE_UBOOT_SPL_OFFSET_KB', True)),
                       spl_finish_kb)
 
-    # uboot fit
+    # u-boot
     uboot_finish_kb = (int(d.getVar('ASPEED_IMAGE_UBOOT_OFFSET_KB', True)) +
-                      int(d.getVar('ASPEED_IMAGE_UBOOT_SIZE_KB', True)))
+                       int(d.getVar('ASPEED_IMAGE_UBOOT_SIZE_KB', True)))
     _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                   '%s.%s' % (
                   d.getVar('ASPEED_IMAGE_UBOOT_IMAGE', True),
@@ -108,7 +105,7 @@ python do_deploy() {
                   int(d.getVar('ASPEED_IMAGE_UBOOT_OFFSET_KB', True)),
                   uboot_finish_kb)
 
-    # kernel fit
+    # kernel
     _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
                   '%s' %
                   d.getVar('ASPEED_IMAGE_KERNEL_IMAGE',True)),
