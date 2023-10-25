@@ -3,6 +3,10 @@ FLASH_UBOOT_SPL_IMAGE ?= "u-boot-spl"
 # image_types_phosphor uses FLASH_UBOOT_OFFSET(384kb) as start offset of uboot-spl and
 # FLASH_UBOOT_SPL_SIZE(128kb) as the end offset of uboot-spl
 # The start offset is larger than the end offset which causes the "image too large" error.
+# According to the design of AST2700, bootmuc(riscv-32) execute SPL and CPU(coretax-a35) execute u-boot.
+# To successfully build ast2700, SPL should no be built in u-boot recipe for CPU(coretax-a35),
+# so the value of SPL_BINARY should be empty.
+# However, it only checks SPL_BINARY to update SPL in image files.
 # Therefore,creates do_generate_static task to overwrite the default setting which is from
 # image_types_phosphor.bbclass
 python do_generate_static() {
@@ -127,19 +131,30 @@ do_generate_ext4_tar() {
 }
 
 do_generate_image_uboot_file() {
-   image_dst="$1"
-   uboot_offset="0"
+    image_dst="$1"
+    uboot_offset="0"
 
-   if [ ! -z ${SPL_BINARY} ]; then
-      dd bs=1k conv=notrunc seek=0 \
-         if=${DEPLOY_DIR_IMAGE}/${FLASH_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} \
-         of=${image_dst}
-      uboot_offset=${FLASH_UBOOT_SPL_SIZE}
-   fi
+    if [ -n "${SPL_BINARY}" -a -n "${BOOTMCU_FW_BINARY}" ]; then
+        bbfatal "SPL_BINARY and BOOTMCU_FW_BINARY should not be set at the same time."
+    fi
 
-   dd bs=1k conv=notrunc seek=${uboot_offset} \
-      if=${DEPLOY_DIR_IMAGE}/u-boot.${UBOOT_SUFFIX} \
-      of=${image_dst}
+    if [ ! -z ${BOOTMCU_FW_BINARY} ]; then
+        dd bs=1k conv=notrunc seek=0 \
+            if=${DEPLOY_DIR_IMAGE}/${BOOTMCU_FW_BINARY} \
+            of=${image_dst}
+        uboot_offset=${FLASH_BMCU_SIZE}
+    fi
+
+    if [ ! -z ${SPL_BINARY} ]; then
+        dd bs=1k conv=notrunc seek=0 \
+            if=${DEPLOY_DIR_IMAGE}/${FLASH_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} \
+            of=${image_dst}
+        uboot_offset=${FLASH_UBOOT_SPL_SIZE}
+    fi
+
+    dd bs=1k conv=notrunc seek=${uboot_offset} \
+        if=${DEPLOY_DIR_IMAGE}/u-boot.${UBOOT_SUFFIX} \
+        of=${image_dst}
 }
 
 do_generate_image_bmcu_ram_file() {
