@@ -117,7 +117,7 @@ After you successfully built the image, the image file can be found in: `[build_
 - `otp_image`: OTP image
 
 ### Recovery Image via UART
-- `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART
+- `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.py for recovery image via UART
 
 # Free Open Source Software (FOSS)
 The Yocto/OpenBMC build system supports to provide the following things to meet the FOSS requirement.
