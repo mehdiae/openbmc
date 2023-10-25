@@ -9,5 +9,5 @@ PV = "v2023.10+git${SRCPV}"
 
 BRANCH="aspeed-dev-v2023.10"
 SRC_URI = "git://gerrit.aspeed.com:29418/u-boot.git;protocol=ssh;branch=${BRANCH}"
-#SRCREV = "${AUTOREV}"
-SRCREV = "aa4ed4b3bb699cbc0f0596bee9b342fa2e5113b7"
+SRCREV = "${AUTOREV}"
+
