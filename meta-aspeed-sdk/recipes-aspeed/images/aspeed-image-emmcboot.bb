@@ -17,7 +17,7 @@ inherit deploy
 # Image composition
 UBOOT_SUFFIX ?= "bin"
 
-ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "boot_mcu_ram"
+ASPEED_IMAGE_BOOTMCU_FW_IMAGE ?= "${BOOTMCU_FW_BINARY}"
 ASPEED_IMAGE_UBOOT_SPL_IMAGE ?= "u-boot-spl"
 ASPEED_IMAGE_UBOOT_IMAGE ?= "u-boot"
 ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE ?= "emmc_${ASPEED_IMAGE_UBOOT_SPL_IMAGE}"
@@ -26,10 +26,8 @@ ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE ?= "emmc_image-boot"
 ASPEED_EMMC_IMAGE_MERGE_BOOT_IMAGE:aspeed-g6 ?= "emmc_image-u-boot"
 
 ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB ?= "0"
-ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB ?= "384"
-ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB ?= "384"
-ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB ?= "128"
-ASPEED_EMMC_IMAGE_UBOOT_OFFSET_KB?= "512"
+ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB ?= "768"
+ASPEED_EMMC_IMAGE_UBOOT_OFFSET_KB?= "768"
 ASPEED_EMMC_IMAGE_MERGE_BOOT_SIZE_KB ?= "2048"
 
 ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB:aspeed-g6 ?= "0"
@@ -55,6 +53,8 @@ do_mk_empty_image() {
 }
 
 do_mk_emmc_boot_image_g6() {
+    do_mk_empty_image
+
     if [ "${ASPEED_SECURE_BOOT}" = "no" ]; then
         install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}
         python3 ${STAGING_BINDIR_NATIVE}/gen_emmc_boot_image.py ${SOURCE_IMAGE_DIR}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
@@ -65,8 +65,7 @@ do_mk_emmc_boot_image_g6() {
 }
 
 do_mk_emmc_boot_image_g7() {
-    # To Do
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${ASPEED_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX} ${SOURCE_IMAGE_DIR}/${ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE}.${UBOOT_SUFFIX}
+    do_mk_empty_image
 }
 
 do_deploy_emmc_image() {
@@ -81,16 +80,17 @@ python do_deploy() {
     if d.getVar('ASPEED_BOOT_EMMC', True) != "yes":
         bb.fatal("Only support Boot from EMMC mode run this task")
 
+    bmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
     spl_binary = d.getVar('SPL_BINARY', True)
-    if not spl_binary:
-        bb.fatal("Boot from EMMC only support SPL")
-
-    bb.build.exec_func("do_mk_empty_image", d)
-
     soc_family = d.getVar('SOC_FAMILY', True)
+
     if soc_family == "aspeed-g7":
+        if not bmcu_fw_binary:
+            bb.fatal("Boot from EMMC only support BootMCU SPL")
         bb.build.exec_func("do_mk_emmc_boot_image_g7", d)
     elif soc_family == "aspeed-g6":
+        if not spl_binary:
+            bb.fatal("Boot from EMMC only support SPL")
         bb.build.exec_func("do_mk_emmc_boot_image_g6", d)
     else:
         bb.fatal("Unsupport Machine")
@@ -115,21 +115,19 @@ python do_deploy() {
 
 
     # bootmcu
-    bootmcu_fw_binary = d.getVar('BOOTMCU_FW_BINARY', True)
-    bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
-                           int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
-    if bootmcu_fw_binary:
+    if bmcu_fw_binary:
+        bootmcu_fw_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB', True)) +
+                                int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_SIZE_KB', True)))
         _append_image(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True),
-                                   '%s.%s' % (
-                                   d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True),
-                                   d.getVar('UBOOT_SUFFIX', True))),
+                                   '%s' % (d.getVar('ASPEED_IMAGE_BOOTMCU_FW_IMAGE', True))),
                       int(d.getVar('ASPEED_EMMC_IMAGE_BOOTMCU_FW_OFFSET_KB', True)),
                       bootmcu_fw_finish_kb)
 
     # spl
-    spl_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
-                    int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB', True)))
-    _append_image(os.path.join(d.getVar('SOURCE_IMAGE_DIR', True),
+    if spl_binary:
+        spl_finish_kb = (int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_OFFSET_KB', True)) +
+                         int(d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_SIZE_KB', True)))
+        _append_image(os.path.join(d.getVar('SOURCE_IMAGE_DIR', True),
                                 '%s.%s' % (
                                 d.getVar('ASPEED_EMMC_IMAGE_UBOOT_SPL_IMAGE', True),
                                 d.getVar('UBOOT_SUFFIX', True))),

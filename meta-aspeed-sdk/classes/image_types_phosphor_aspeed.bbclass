@@ -81,55 +81,6 @@ python do_generate_static() {
     bb.build.exec_func("do_mk_static_symlinks", d)
 }
 
-do_generate_ext4_tar() {
-    # Generate the U-Boot image
-    mk_empty_image_zeros image-u-boot ${MMC_UBOOT_SIZE}
-    do_generate_image_uboot_file image-u-boot
-
-    if [[ ${BOOTMCU_FW_BINARY} ]]; then
-        mk_empty_image_zeros image-bmcu-ram 384
-        do_generate_image_bmcu_ram_file image-bmcu-ram
-    fi
-
-    # Generate a compressed ext4 filesystem with the fitImage file in it to be
-    # flashed to the boot partition of the eMMC
-    install -d boot-image
-    install -m 644 ${DEPLOY_DIR_IMAGE}/${FLASH_KERNEL_IMAGE} boot-image/fitImage
-    mk_empty_image_zeros boot-image.${FLASH_EXT4_BASETYPE} ${MMC_BOOT_PARTITION_SIZE}
-    mkfs.ext4 -F -i 4096 -d boot-image boot-image.${FLASH_EXT4_BASETYPE}
-    # Error codes 0-3 indicate successfull operation of fsck
-    fsck.ext4 -pvfD boot-image.${FLASH_EXT4_BASETYPE} || [ $? -le 3 ]
-    zstd -f -k -T0 -c ${ZSTD_COMPRESSION_LEVEL} boot-image.${FLASH_EXT4_BASETYPE} > boot-image.${FLASH_EXT4_BASETYPE}.zst
-
-    # Generate the compressed ext4 rootfs
-    zstd -f -k -T0 -c ${ZSTD_COMPRESSION_LEVEL} ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.${FLASH_EXT4_BASETYPE} > ${IMAGE_LINK_NAME}.${FLASH_EXT4_BASETYPE}.zst
-
-    ln -sf boot-image.${FLASH_EXT4_BASETYPE}.zst image-kernel
-    ln -sf ${IMAGE_LINK_NAME}.${FLASH_EXT4_BASETYPE}.zst image-rofs
-    ln -sf ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.rwfs.${FLASH_EXT4_OVERLAY_BASETYPE} image-rwfs
-    ln -sf ${S}/MANIFEST MANIFEST
-    ln -sf ${S}/publickey publickey
-
-    hostfw_update_file="${DEPLOY_DIR_IMAGE}/hostfw/update/image-hostfw"
-    if [ -e "${hostfw_update_file}" ]; then
-        ln -sf "${hostfw_update_file}" image-hostfw
-        if [[ ${BOOTMCU_FW_BINARY} ]]; then
-            make_signatures image-bmcu-ram image-u-boot image-kernel image-rofs image-rwfs MANIFEST publickey image-hostfw
-        else
-            make_signatures image-u-boot image-kernel image-rofs image-rwfs MANIFEST publickey image-hostfw
-        fi
-        make_tar_of_images ext4.mmc MANIFEST publickey ${signature_files} image-hostfw
-    else
-        if [[ ${BOOTMCU_FW_BINARY} ]]; then
-            make_signatures image-bmcu-ram image-u-boot image-kernel image-rofs image-rwfs MANIFEST publickey
-        else
-            make_signatures image-u-boot image-kernel image-rofs image-rwfs MANIFEST publickey
-        fi
-
-        make_tar_of_images ext4.mmc MANIFEST publickey ${signature_files}
-    fi
-}
-
 do_generate_image_uboot_file() {
     image_dst="$1"
     uboot_offset="0"
@@ -155,13 +106,6 @@ do_generate_image_uboot_file() {
     dd bs=1k conv=notrunc seek=${uboot_offset} \
         if=${DEPLOY_DIR_IMAGE}/u-boot.${UBOOT_SUFFIX} \
         of=${image_dst}
-}
-
-do_generate_image_bmcu_ram_file() {
-   image_dst="$1"
-   dd bs=1K conv=notrunc seek=0 \
-      if=${DEPLOY_DIR_IMAGE}/${BOOTMCU_FW_BINARY} \
-      of=${image_dst}
 }
 
 do_generate_static[depends] += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)}"
