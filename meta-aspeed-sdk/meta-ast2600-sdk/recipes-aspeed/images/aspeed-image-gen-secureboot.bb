@@ -142,7 +142,8 @@ socsec_sign_spl_and_verify() {
         $signing_extra_opts \
         --output ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.staged
 
-    rm -f ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}
+    # install unsigned image
+    install -m 0644 ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME} ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned
     mv ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.staged ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}
 
     # verify spl and otp
