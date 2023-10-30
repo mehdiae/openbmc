@@ -193,6 +193,12 @@ make_recovery_image() {
     python3 ${STAGING_BINDIR_NATIVE}/gen_uart_booting_image.py ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME} ${S}/${GEN_IMAGE_MODE}/recovery_${SPL_IMAGE_NAME}
 }
 
+make_emmc_unsigned_rot_image() {
+    if [ -f ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned ]; then
+        python3 ${STAGING_BINDIR_NATIVE}/gen_emmc_boot_image.py ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned ${S}/${GEN_IMAGE_MODE}/emmc_${SPL_IMAGE_NAME}.unsigned
+    fi
+}
+
 make_boot_partition_ext4() {
     # Generate a compressed ext4 filesystem with the fitImage file in it to be
     # flashed to the user data area at boot partition of the eMMC
@@ -617,6 +623,8 @@ python do_deploy() {
         bb.build.exec_func("make_recovery_image", d)
 
         if aspeed_boot_emmc == "yes":
+            print("Make emmc unsigned rot image")
+            bb.build.exec_func("make_emmc_unsigned_rot_image", d)
             print("Deploy mmc image...")
             deploy_mmc_image(d)
         else:
