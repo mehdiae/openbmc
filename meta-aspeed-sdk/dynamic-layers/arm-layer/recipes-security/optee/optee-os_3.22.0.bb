@@ -3,4 +3,4 @@ require recipes-security/optee/optee-os.inc
 DEPENDS += "dtc-native"
 
 # 3.22.0 +
-SRCREV = "7d3ac18616709c7c33a8f5115c0285a81b2923de"
+SRCREV = "76438b80e5689d526037fe9b80430a858f5be0ff"
