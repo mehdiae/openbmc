@@ -1,13 +1,9 @@
 SUMMARY = "BootMCU firmware and execute SPL"
 DESCRIPTION = "BootMCU is designated to load the first, verified image for the main processor"
-HOMEPAGE = "https://github.com/AspeedTech-BMC/u-boot"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 DEPENDS = "ast2700-riscv-linux-gnu-native kern-tools-native swig-native"
 
-S = "${WORKDIR}/git"
-B = "${WORKDIR}/build"
-do_configure[cleandirs] = "${B}"
 do_install[noexec] = "1"
 
 inherit deploy cml1
@@ -75,34 +71,3 @@ do_deploy() {
 
 addtask deploy before do_build after do_compile
 
-python do_set_local_version() {
-    import os
-    s = d.getVar("S")
-    b = d.getVar("B")
-    try:
-        os.remove('%s/.scmversion' % s)
-        os.remove('%s/.scmversion' % b)
-    except:
-        pass
-
-    scm_ver = ""
-
-    try:
-        res=bb.process.run("git -C %s describe --tags --exact-match" %  s)[0].strip("\n")
-
-        if res.find("devtool") != -1:
-            version_ext = bb.process.run("git -C %s rev-parse --verify --short HEAD" % s)[0].strip("\n")
-            scm_ver = ('-%s-%s' % res, version_ext)
-        else:
-            scm_ver = ('-%s' % res)
-    except Exception as e:
-        version=bb.process.run("git -C %s rev-parse --verify --short HEAD" % s)[0].strip("\n")
-        scm_ver = ('-dirty-%s' % version)
-
-    with open("%s/.scmversion" % s, "a") as f:
-        f.write(scm_ver)
-    with open("%s/.scmversion" % b, "a") as f:
-        f.write(scm_ver)
-}
-
-addtask set_local_version before do_compile after do_configure
