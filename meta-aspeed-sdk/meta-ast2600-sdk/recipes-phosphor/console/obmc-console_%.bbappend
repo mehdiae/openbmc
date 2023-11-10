@@ -1,14 +1,29 @@
 FILESEXTRAPATHS:append := ":${THISDIR}/${PN}"
-OBMC_CONSOLE_HOST_TTY = "ttyS2"
-SRC_URI += "file://obmc-console@.service \
-           "
-inherit obmc-phosphor-systemd
+SRCREV = "3453084b579970cd368357bf091f173924ecba5e"
 
-SYSTEMD_SERVICE:${PN} += " \
-        ${PN}@${OBMC_CONSOLE_HOST_TTY}.service \
-        "
+# Declare port spcific config files
+OBMC_CONSOLE_TTYS = "ttyS2"
+CONSOLE_CLIENT = "2200"
+
+CONSOLE_SERVER_CONF_FMT = "file://server.{0}.conf"
+CONSOLE_CLIENT_CONF_FMT = "file://client.{0}.conf"
+CONSOLE_CLIENT_SERVICE_FMT = "obmc-console-ssh@{0}.service"
+
+SRC_URI += " \
+             ${@compose_list(d, 'CONSOLE_SERVER_CONF_FMT', 'OBMC_CONSOLE_TTYS')} \
+             ${@compose_list(d, 'CONSOLE_CLIENT_CONF_FMT', 'CONSOLE_CLIENT')} \
+           "
+
+SYSTEMD_SERVICE:${PN}:append = " \
+                                  ${@compose_list(d, 'CONSOLE_CLIENT_SERVICE_FMT', 'CONSOLE_CLIENT')} \
+                                "
+SYSTEMD_SERVICE:${PN}:remove = "obmc-console-ssh.socket"
+
+FILES:${PN}:remove = "${systemd_system_unitdir}/obmc-console-ssh@.service.d/use-socket.conf"
+
+PACKAGECONFIG:append = " concurrent-servers"
 
 do_install:append() {
-        rm -rf ${D}${nonarch_base_libdir}/udev/rules.d/80-obmc-console-uart.rules
-        install -m 0644 ${WORKDIR}/${PN}@.service ${D}${systemd_system_unitdir}
+    # Install the console client configurations
+    install -m 0644 ${WORKDIR}/client.*.conf ${D}${sysconfdir}/${BPN}/
 }
