@@ -72,8 +72,10 @@ install_unsigned_image() {
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_FITIMAGE_ITS_NAME} ${S}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}/linux.bin
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_DEVICETREE} ${S}/${GEN_IMAGE_MODE}
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_DEVICETREE} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+    for kernel_dtb in ${KERNEL_DEVICETREE}; do
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb} ${S}/${GEN_IMAGE_MODE}
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+    done
 }
 
 make_otp_image() {
