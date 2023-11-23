@@ -49,7 +49,12 @@ start)
     echo 1 > functions/mass_storage.usb0/lun.0/cdrom
     echo 0 > functions/mass_storage.usb0/lun.0/nofua
     echo $nbd_device > functions/mass_storage.usb0/lun.0/file
-    echo "1e6a0000.usb-vhub:p4" > UDC
+
+    if [ -e "/sys/bus/platform/devices/1e6a0000.usb-vhub/" ]; then
+        echo "1e6a0000.usb-vhub:p4" > UDC   # For AST2600
+    else
+        echo "12011000.usb-vhub:p4" > UDC   # For AST2700
+    fi
     )
     ;;
 stop)
