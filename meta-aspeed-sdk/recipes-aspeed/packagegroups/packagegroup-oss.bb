@@ -13,12 +13,12 @@ PACKAGES = " \
     ${PN}-libs \
     ${PN}-intel-pmci \
     ${PN}-extended \
+    ${PN}-extra \
     "
 
 # The size of fio is very large because its dependencies
 # includes python3-core
 # The size of fio and python3-core are 10MB.
-# The size of freeipmi and freeipmi-ipmi-raw are 5MB.
 SUMMARY:${PN}-apps = "Open Source Applications"
 RDEPENDS:${PN}-apps = " \
     mdio-tool \
@@ -42,13 +42,17 @@ RDEPENDS:${PN}-apps = " \
     ${@d.getVar('PREFERRED_PROVIDER_u-boot-fw-utils', True) or 'u-boot-fw-utils'} \
     aer-inject \
     fio \
-    freeipmi \
-    freeipmi-ipmi-raw \
     "
 
 SUMMARY:${PN}-extended = "Open Source Extended Applications"
 RDEPENDS:${PN}-extended = " \
     can-utils \
+    "
+
+SUMMARY:${PN}-extra = "Open Source Extra Applications"
+RDEPENDS:${PN}-extra = " \
+    freeipmi \
+    freeipmi-ipmi-raw \
     "
 
 SUMMARY:${PN}-intel-pmci = "Open Source Intel PMCI Applications"
@@ -62,8 +66,6 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     iozone3 \
     hdparm \
     fio \
-    freeipmi \
-    freeipmi-ipmi-raw \
     "
 
 RDEPENDS:${PN}-apps:append:cypress-s25hx = " \

@@ -8,7 +8,6 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append = " \
         packagegroup-oss-apps \
-        packagegroup-oss-extended \
         packagegroup-oss-libs \
         packagegroup-oss-intel-pmci \
         packagegroup-aspeed-obmc-apps \
@@ -25,14 +24,17 @@ IMAGE_INSTALL:append = " \
         packagegroup-aspeed-ktools \
         "
 
+# uninstall packagegroup-oss-extra by default.
+# IMAGE_INSTALL:append = " packagegroup-oss-extra "
+
 # remove from AST25xx series rofs as the free space of AST25xx rofs is not enough.
 IMAGE_INSTALL:remove:aspeed-g5 = " \
         packagegroup-aspeed-ktools \
-        packagegroup-oss-extended \
+        packagegroup-oss-extra \
         "
 
-# remove from AST26xx series rofs as the free space of AST26xx rofs is not enough.
-IMAGE_INSTALL:remove:aspeed-g6 = " \
+# packagegroup for ast2700
+IMAGE_INSTALL:append:aspeed-g7 = " \
         packagegroup-oss-extended \
         "
 
