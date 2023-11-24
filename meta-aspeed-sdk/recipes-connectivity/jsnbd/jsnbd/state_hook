@@ -12,6 +12,13 @@ config=$2
 gadget_name=mass-storage
 gadget_dir=/sys/kernel/config/usb_gadget/$gadget_name
 
+#  Assign different dev_name to find AST2750 node1 device in which_dev() 
+if [ -e "/sys/bus/platform/devices/1e6a0000.usb-vhub/" ]; then
+    dev_name="1e6a0000.usb-vhub"  # For AST2600
+else
+    dev_name="12011000.usb-vhub"  # For AST2700
+fi
+
 case "$config" in
 0)
     nbd_device=/dev/nbd0
@@ -19,13 +26,35 @@ case "$config" in
 1)
     nbd_device=/dev/nbd1
     ;;
+8)
+    #For AST2750 dual nodes
+    nbd_device=/dev/nbd8
+    gadget_name=mass-storage1
+    gadget_dir=/sys/kernel/config/usb_gadget/$gadget_name
+    dev_name="12021000.usb-vhub" 
+    ;;
 *)
     echo "invalid config $config" >&2
     exit 1
     ;;
 esac
 
-set -ex
+set -e
+
+GADGET_BASE=/sys/kernel/config/usb_gadget
+
+which_dev()
+{
+       in_use="$(cat $GADGET_BASE/*/UDC)"
+       cd /sys/class/udc
+       for dev in $dev_name*; do
+               case "$in_use" in
+                       *"$dev"*) ;;
+                       *) echo "$dev"; return 0;;
+               esac
+       done
+       return 1
+}
 
 case "$action" in
 start)
@@ -49,12 +78,9 @@ start)
     echo 1 > functions/mass_storage.usb0/lun.0/cdrom
     echo 0 > functions/mass_storage.usb0/lun.0/nofua
     echo $nbd_device > functions/mass_storage.usb0/lun.0/file
-
-    if [ -e "/sys/bus/platform/devices/1e6a0000.usb-vhub/" ]; then
-        echo "1e6a0000.usb-vhub:p4" > UDC   # For AST2600
-    else
-        echo "12011000.usb-vhub:p4" > UDC   # For AST2700
-    fi
+    device=$(which_dev)
+    echo "$device" > UDC
+    echo "Assign $device to $gadget_name/UDC" 
     )
     ;;
 stop)
