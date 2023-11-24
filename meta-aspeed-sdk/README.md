@@ -33,6 +33,7 @@ ast2600-default-515
 ast2600-default-54
 ast2600-default-ecc
 ast2600-default-ncsi
+ast2600-default-raw
 ast2600-default-secure
 ast2600-default-secure-515
 ast2600-default-secure-tee
