@@ -1,4 +1,4 @@
-From 528aeb42652a3159c1bfd51d6c1442c3ff27b84c Mon Sep 17 00:00:00 2001
+From d94ad6c6efb71f683b183e84919122bb6f3ac65d Mon Sep 17 00:00:00 2001
 From: Ross Burton <ross.burton@arm.com>
 Date: Tue, 26 May 2020 14:38:02 -0500
 Subject: [PATCH] allow setting sysroot for libgcc lookup
@@ -15,7 +15,7 @@ Signed-off-by: Ross Burton <ross.burton@arm.com>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/mk/gcc.mk b/mk/gcc.mk
-index adc77a24..81bfa78a 100644
+index adc77a24f..81bfa78ad 100644
 --- a/mk/gcc.mk
 +++ b/mk/gcc.mk
 @@ -13,11 +13,11 @@ nostdinc$(sm)	:= -nostdinc -isystem $(shell $(CC$(sm)) \
