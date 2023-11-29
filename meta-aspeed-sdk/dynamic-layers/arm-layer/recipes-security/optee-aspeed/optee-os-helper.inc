@@ -1,0 +1,8 @@
+SRCREV = "08278885852f32adf58750d0241b543218249f95"
+
+# Enable for debugging
+#EXTRA_OEMAKE += " \
+#    CFG_TEE_CORE_LOG_LEVEL=3 \
+#    CFG_TEE_TA_LOG_LEVEL=3 \
+#    CFG_TEE_CORE_DEBUG=y \
+#"
