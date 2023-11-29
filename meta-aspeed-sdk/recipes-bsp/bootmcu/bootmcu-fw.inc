@@ -71,3 +71,4 @@ do_deploy() {
 
 addtask deploy before do_build after do_compile
 
+ALLOW_EMPTY:${PN} = "1"
