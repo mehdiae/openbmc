@@ -260,8 +260,7 @@ deploy_mmc_image_helper() {
 
     # optee-os
     if [ -f ${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin ]; then
-        install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/optee/* ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+        cp --no-preserve=ownership -rf ${DEPLOY_DIR_IMAGE}/optee ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     fi
 
     # decompress wic image for user data area boot partition update
