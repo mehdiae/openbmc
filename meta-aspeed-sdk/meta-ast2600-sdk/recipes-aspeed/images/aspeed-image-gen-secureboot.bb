@@ -63,6 +63,7 @@ install_unsigned_image() {
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+    install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts/aspeed
 
     # u-boot unsigned image, dtb and its
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${UBOOT_FITIMAGE_ITS_NAME} ${S}/${GEN_IMAGE_MODE}
@@ -73,8 +74,10 @@ install_unsigned_image() {
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}/linux.bin
     for kernel_dtb in ${KERNEL_DEVICETREE}; do
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb} ${S}/${GEN_IMAGE_MODE}
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+        kernel_dtb_basename=$(basename ${kernel_dtb})
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts/aspeed
     done
 }
 

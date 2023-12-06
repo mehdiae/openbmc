@@ -33,7 +33,9 @@ inherit lib_package multilib_header multilib_script ptest
 MULTILIB_SCRIPTS = "${PN}-bin:${bindir}/c_rehash"
 
 PACKAGECONFIG ?= ""
-PACKAGECONFIG:class-target = "cryptodev-linux"
+# WORKAROUND
+# Disable cryptodev due to build failed with kernel 6.6
+#PACKAGECONFIG:class-target = "cryptodev-linux"
 # disable crypto device for ast2700
 PACKAGECONFIG:class-target:aspeed-g7 = ""
 PACKAGECONFIG:class-native = ""

@@ -52,7 +52,7 @@ ast2700-default
 ast2700-emmc
 ```
 
-- Linux kernel version is `6.1` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4 and machine without `515 and 54` for kernel v6.1.
+- Linux kernel version is `6.6` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4.
 - AST2600 revision is `A3` by default.
 - OPTEE-OS
   - AST2600
