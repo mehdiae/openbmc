@@ -49,6 +49,8 @@ ast2600-emmc-secure-tee-515
 ast2600-emmc-tee
 ast2600-emmc-tee-515
 ast2700-default
+ast2700-default-ltpi
+ast2700-default-ltpi-dual
 ast2700-emmc
 ```
 
