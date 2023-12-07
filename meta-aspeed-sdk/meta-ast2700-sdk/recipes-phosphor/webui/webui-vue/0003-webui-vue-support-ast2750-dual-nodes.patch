@@ -1,6 +1,6 @@
-From de16aa85db4caf0de4074d4edcc730d9adc4015e Mon Sep 17 00:00:00 2001
+From c6daf0bb04a5a307ee6a0220c362832213eb491b Mon Sep 17 00:00:00 2001
 From: VinceChang6637 <vince_chang@aspeedtech.com>
-Date: Wed, 29 Nov 2023 13:08:42 +0800
+Date: Thu, 7 Dec 2023 13:32:59 +0800
 Subject: [PATCH 3/3] webui-vue: support ast2750 dual nodes.
 
 1. Add KVM1 page.
@@ -10,17 +10,19 @@ Signed-off-by: VinceChang6637 <vince_chang@aspeedtech.com>
 ---
  src/assets/styles/bmc/custom/_index.scss      |   1 +
  src/assets/styles/bmc/custom/_kvm1.scss       |  12 ++
+ src/components/AppHeader/AppHeader.vue        |   5 +-
  .../AppNavigation/AppNavigationMixin.js       |   5 +
  src/env/components/AppNavigation/intel.js     |   5 +
  src/env/router/intel.js                       |  18 ++
  src/locales/en-US.json                        |  18 +-
  src/router/routes.js                          |  18 ++
+ .../Authentication/AuthenticanStore.js        |   4 +
  .../modules/Operations/VirtualMediaStore.js   |  21 ++
  src/views/Operations/Kvm1/Kvm1.vue            |  24 +++
  src/views/Operations/Kvm1/Kvm1Console.vue     | 190 ++++++++++++++++++
  src/views/Operations/Kvm1/index.js            |   2 +
  .../Operations/VirtualMedia/VirtualMedia.vue  |  67 ++++++
- 12 files changed, 379 insertions(+), 2 deletions(-)
+ 14 files changed, 387 insertions(+), 3 deletions(-)
  create mode 100644 src/assets/styles/bmc/custom/_kvm1.scss
  create mode 100644 src/views/Operations/Kvm1/Kvm1.vue
  create mode 100644 src/views/Operations/Kvm1/Kvm1Console.vue
@@ -57,6 +59,29 @@ index 0000000..a722384
 +  }
 +}
 \ No newline at end of file
+diff --git a/src/components/AppHeader/AppHeader.vue b/src/components/AppHeader/AppHeader.vue
+index 859a47f..571a993 100644
+--- a/src/components/AppHeader/AppHeader.vue
++++ b/src/components/AppHeader/AppHeader.vue
+@@ -141,7 +141,7 @@ export default {
+     };
+   },
+   computed: {
+-    ...mapState('authentication', ['consoleWindow']),
++    ...mapState('authentication', ['consoleWindow', 'consoleWindow1']),
+     isNavTagPresent() {
+       return this.assetTag || this.modelType || this.serialNumber;
+     },
+@@ -199,6 +199,9 @@ export default {
+     consoleWindow() {
+       if (this.consoleWindow === false) this.$eventBus.$consoleWindow.close();
+     },
++    consoleWindow1() {
++      if (this.consoleWindow1 === false) this.$eventBus.$consoleWindow1.close();
++    },
+     isAuthorized(value) {
+       if (value === false) {
+         this.errorToast(this.$t('global.toast.unAuthDescription'), {
 diff --git a/src/components/AppNavigation/AppNavigationMixin.js b/src/components/AppNavigation/AppNavigationMixin.js
 index 6123098..4afac29 100644
 --- a/src/components/AppNavigation/AppNavigationMixin.js
@@ -232,6 +257,41 @@ index 4cf8d72..bd3b4c7 100644
        {
          path: '/operations/firmware',
          name: 'firmware',
+diff --git a/src/store/modules/Authentication/AuthenticanStore.js b/src/store/modules/Authentication/AuthenticanStore.js
+index a6de840..f1811f0 100644
+--- a/src/store/modules/Authentication/AuthenticanStore.js
++++ b/src/store/modules/Authentication/AuthenticanStore.js
+@@ -6,12 +6,14 @@ const AuthenticationStore = {
+   namespaced: true,
+   state: {
+     consoleWindow: null,
++    consoleWindow1: null,
+     authError: false,
+     xsrfCookie: Cookies.get('XSRF-TOKEN'),
+     isAuthenticatedCookie: Cookies.get('IsAuthenticated'),
+   },
+   getters: {
+     consoleWindow: (state) => state.consoleWindow,
++    consoleWindow1: (state) => state.consoleWindow1,
+     authError: (state) => state.authError,
+     isLoggedIn: (state) => {
+       return (
+@@ -36,6 +38,7 @@ const AuthenticationStore = {
+       state.isAuthenticatedCookie = undefined;
+     },
+     setConsoleWindow: (state, window) => (state.consoleWindow = window),
++    setConsoleWindow1: (state, window) => (state.consoleWindow1 = window),
+   },
+   actions: {
+     login({ commit }, { username, password }) {
+@@ -53,6 +56,7 @@ const AuthenticationStore = {
+         .post('/logout', { data: [] })
+         .then(() => {
+           commit('setConsoleWindow', false);
++          commit('setConsoleWindow1', false);
+           commit('logout');
+         })
+         .then(() => router.push('/login'))
 diff --git a/src/store/modules/Operations/VirtualMediaStore.js b/src/store/modules/Operations/VirtualMediaStore.js
 index 3ae08a1..ef0775e 100644
 --- a/src/store/modules/Operations/VirtualMediaStore.js
@@ -328,7 +388,7 @@ index 0000000..1593a51
 +</style>
 diff --git a/src/views/Operations/Kvm1/Kvm1Console.vue b/src/views/Operations/Kvm1/Kvm1Console.vue
 new file mode 100644
-index 0000000..6805352
+index 0000000..9849050
 --- /dev/null
 +++ b/src/views/Operations/Kvm1/Kvm1Console.vue
 @@ -0,0 +1,190 @@
@@ -362,7 +422,7 @@ index 0000000..6805352
 +            v-if="!isFullWindow"
 +            variant="link"
 +            type="button"
-+            @click="openConsoleWindow()"
++            @click="openConsoleWindow1()"
 +          >
 +            <icon-launch />
 +            {{ $t('pageKvm1.openNewTab') }}
@@ -479,27 +539,27 @@ index 0000000..6805352
 +          this.$refs.panel.children[0].children[0].clientWidth - 10 + 'px';
 +      }
 +    },
-+    openConsoleWindow() {
-+      // If consoleWindow is not null
++    openConsoleWindow1() {
++      // If consoleWindow1 is not null
 +      // Check the newly opened window is closed or not
-+      if (this.$eventBus.$consoleWindow) {
++      if (this.$eventBus.$consoleWindow1) {
 +        // If window is not closed set focus to new window
 +        // If window is closed, do open new window
-+        if (!this.$eventBus.$consoleWindow.closed) {
-+          this.$eventBus.$consoleWindow.focus();
++        if (!this.$eventBus.$consoleWindow1.closed) {
++          this.$eventBus.$consoleWindow1.focus();
 +          return;
 +        } else {
-+          this.openNewWindow();
++          this.openNewWindow1();
 +        }
 +      } else {
-+        // If consoleWindow is null, open new window
-+        this.openNewWindow();
++        // If consoleWindow1 is null, open new window
++        this.openNewWindow1();
 +      }
 +    },
-+    openNewWindow() {
-+      this.$eventBus.$consoleWindow = window.open(
++    openNewWindow1() {
++      this.$eventBus.$consoleWindow1 = window.open(
 +        '#/console/kvm1',
-+        'kvmConsoleWindow',
++        'kvmConsoleWindow1',
 +        'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=700,height=550'
 +      );
 +    },
