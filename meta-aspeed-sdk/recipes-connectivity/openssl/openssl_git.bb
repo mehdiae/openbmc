@@ -16,7 +16,6 @@ SRC_URI = "git://gerrit.aspeed.com:29418/openssl.git;protocol=ssh;branch=${BRANC
            file://run-ptest \
            file://0001-skip-test_symbol_presence.patch \
            file://0001-buildinfo-strip-sysroot-and-debug-prefix-map-from-co.patch \
-           file://afalg.patch \
            file://reproducible.patch \
            "
 
