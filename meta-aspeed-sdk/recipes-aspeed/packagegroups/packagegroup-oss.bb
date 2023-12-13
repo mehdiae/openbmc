@@ -42,6 +42,7 @@ RDEPENDS:${PN}-apps = " \
     ${@d.getVar('PREFERRED_PROVIDER_u-boot-fw-utils', True) or 'u-boot-fw-utils'} \
     aer-inject \
     fio \
+    mctp \
     "
 
 SUMMARY:${PN}-extended = "Open Source Extended Applications"
