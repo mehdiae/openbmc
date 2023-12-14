@@ -27,9 +27,6 @@ EXTRA_USERS_PARAMS = " \
 # in kernel build time.
 TZ = '/etc/localtime'
 
-# AST2600 Alternate Boot Record feature
-#require conf/machine/include/ast-abr.inc
-
 # Free Open Source Software (FOSS) Creation
 # INHERIT += "archiver"
 # ARCHIVER_MODE[src] = "original"
