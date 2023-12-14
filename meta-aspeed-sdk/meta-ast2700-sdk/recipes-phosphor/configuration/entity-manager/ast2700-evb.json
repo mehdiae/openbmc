@@ -73,7 +73,7 @@
         {
             "Index": 7,
             "Name": "Battery",
-            "ScaleFactor": 0.75188,
+            "ScaleFactor": 0.33333,
             "PollRate": 43200,
             "Thresholds": [
                 {
