@@ -63,7 +63,7 @@ do_deploy() {
     # spl
     install -m 644 ${B}/spl/u-boot-spl.dtb ${DEPLOYDIR}
     install -m 644 ${B}/spl/u-boot-spl-nodtb.bin ${DEPLOYDIR}
-    install -m 644 ${B}/spl/u-boot-spl.bin ${DEPLOYDIR}
+    install -m 644 ${B}/u-boot-spl.bin ${DEPLOYDIR}
 
     # spl binman
     install -m 644 ${BOOTMCU_FW_BINARY} ${DEPLOYDIR}
