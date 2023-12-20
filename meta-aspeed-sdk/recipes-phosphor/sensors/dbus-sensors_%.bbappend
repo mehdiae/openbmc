@@ -14,3 +14,8 @@ SRC_URI:append:aspeed-g7 = " \
 SRC_URI:append = " \
     file://add-uring_args-for-all-build-targets.patch \
 "
+
+# Disable ipmbsensor service by default
+DISABLE_IPMBSENSOR_SERVICE ?= "1"
+SYSTEMD_SERVICE:${PN}:remove = "${@bb.utils.contains('DISABLE_IPMBSENSOR_SERVICE', '1', 'xyz.openbmc_project.ipmbsensor.service', '', d)}"
+FILES:${PN} += "${systemd_unitdir}"
