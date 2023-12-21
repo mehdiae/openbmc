@@ -248,7 +248,7 @@
             "Type": "AspeedFan"
         },
         {
-            "Class": "Hwmon",
+            "Class": "Aspeed2600_Hwmon",
             "Name": "Chassis Intrusion Sensor",
             "Type": "ChassisIntrusionSensor"
         }
