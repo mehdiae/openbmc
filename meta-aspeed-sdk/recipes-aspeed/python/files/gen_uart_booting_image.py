@@ -14,7 +14,13 @@ if __name__ == "__main__":
     src_len_align = (src_len + 3) & (~3)
     src_len_byte = src_len_align.to_bytes(4, byteorder='little', signed=False)
 
-    dst_image = src_len_byte + src_image
+    # output zero padding
+    padding_len = src_len_align - src_len
+    if (padding_len > 0):
+        padding_byte = (b'\x00' * padding_len)
+        dst_image = src_len_byte + src_image + padding_byte
+    else:
+        dst_image = src_len_byte + src_image
 
     with open(dst, 'w+b') as w:
         w.write(dst_image)

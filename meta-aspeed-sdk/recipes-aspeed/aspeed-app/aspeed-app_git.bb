@@ -8,8 +8,8 @@ SRC_URI += "file://0001-Support-MCTP-I3C-for-slave-dev.patch"
 
 PV = "1.0+git${SRCPV}"
 
-# Tag for v00.01.10
-SRCREV = "7e7f26ef148a677a132b664cd41e51241e477b87"
+# Tag for v00.01.11
+SRCREV = "75e5bd45a62e87142dda39a601d7f9ec4ed9314a"
 BRANCH = "master"
 
 S = "${WORKDIR}/git"

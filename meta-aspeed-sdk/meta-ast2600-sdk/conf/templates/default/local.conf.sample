@@ -1,14 +1,23 @@
 MACHINE ??= "ast2600-default"
 #MACHINE ??= "ast2600-default-ecc"
 #MACHINE ??= "ast2600-default-ncsi"
+#MACHINE ??= "ast2600-default-raw"
 #MACHINE ??= "ast2600-default-secure"
 #MACHINE ??= "ast2600-default-tee"
 #MACHINE ??= "ast2600-default-secure-tee"
+#MACHINE ??= "ast2600-default-515"
+#MACHINE ??= "ast2600-default-secure-515"
+#MACHINE ??= "ast2600-default-tee-515"
+#MACHINE ??= "ast2600-default-secure-tee-515"
 #MACHINE ??= "ast2600-default-54"
 #MACHINE ??= "ast2600-emmc"
 #MACHINE ??= "ast2600-emmc-secure"
 #MACHINE ??= "ast2600-emmc-tee"
 #MACHINE ??= "ast2600-emmc-secure-tee"
+#MACHINE ??= "ast2600-emmc-515"
+#MACHINE ??= "ast2600-emmc-secure-515"
+#MACHINE ??= "ast2600-emmc-tee-515"
+#MACHINE ??= "ast2600-emmc-secure-tee-515"
 
 DISTRO ?= "openbmc-phosphor"
 PACKAGE_CLASSES ?= "package_ipk"
@@ -34,9 +43,6 @@ EXTRA_USERS_PARAMS = " \
 # Change time zone to local time from UTC for applying localtime
 # in kernel build time.
 TZ = '/etc/localtime'
-
-# AST2600 Alternate Boot Record feature
-#require conf/machine/include/ast-abr.inc
 
 # Enable both of them if BMC flash model is Cypress S25Hxx and 2-bit ECC is enabled.
 #require conf/machine/include/cypress-s25hx.inc

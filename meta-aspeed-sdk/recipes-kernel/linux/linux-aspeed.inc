@@ -10,7 +10,6 @@ KERNEL_EXTRA_ARGS = "V=1"
 
 KSRC = "git://github.com/AspeedTech-BMC/linux.git;protocol=https;branch=${KBRANCH}"
 SRC_URI = "${KSRC}"
-SRC_URI:append:ast-abr = " file://0001-abr-alternate-flash-layout.patch "
 
 LINUX_VERSION_EXTENSION ?= "-${SRCREV}"
 

@@ -63,6 +63,7 @@ install_unsigned_image() {
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot
     install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+    install -d ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts/aspeed
 
     # u-boot unsigned image, dtb and its
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${UBOOT_FITIMAGE_ITS_NAME} ${S}/${GEN_IMAGE_MODE}
@@ -72,8 +73,12 @@ install_unsigned_image() {
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_FITIMAGE_ITS_NAME} ${S}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}
     install -m 0644 ${DEPLOY_DIR_IMAGE}/fitImage-linux.bin-${MACHINE} ${S}/${GEN_IMAGE_MODE}/linux.bin
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_DEVICETREE} ${S}/${GEN_IMAGE_MODE}
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${KERNEL_DEVICETREE} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+    for kernel_dtb in ${KERNEL_DEVICETREE}; do
+        kernel_dtb_basename=$(basename ${kernel_dtb})
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/${kernel_dtb_basename} ${S}/${GEN_IMAGE_MODE}/arch/arm/boot/dts/aspeed
+    done
 }
 
 make_otp_image() {
@@ -142,7 +147,8 @@ socsec_sign_spl_and_verify() {
         $signing_extra_opts \
         --output ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.staged
 
-    rm -f ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}
+    # install unsigned image
+    install -m 0644 ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME} ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned
     mv ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.staged ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}
 
     # verify spl and otp
@@ -192,6 +198,12 @@ make_recovery_image() {
     python3 ${STAGING_BINDIR_NATIVE}/gen_uart_booting_image.py ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME} ${S}/${GEN_IMAGE_MODE}/recovery_${SPL_IMAGE_NAME}
 }
 
+make_emmc_unsigned_rot_image() {
+    if [ -f ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned ]; then
+        python3 ${STAGING_BINDIR_NATIVE}/gen_emmc_boot_image.py ${S}/${GEN_IMAGE_MODE}/${SPL_IMAGE_NAME}.unsigned ${S}/${GEN_IMAGE_MODE}/emmc_${SPL_IMAGE_NAME}.unsigned
+    fi
+}
+
 make_boot_partition_ext4() {
     # Generate a compressed ext4 filesystem with the fitImage file in it to be
     # flashed to the user data area at boot partition of the eMMC
@@ -227,8 +239,7 @@ deploy_static_image_helper() {
 
     # optee-os
     if [ -f ${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin ]; then
-        install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/optee/* ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+        cp --no-preserve=ownership -rf ${DEPLOY_DIR_IMAGE}/optee ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     fi
 }
 
@@ -252,8 +263,7 @@ deploy_mmc_image_helper() {
 
     # optee-os
     if [ -f ${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin ]; then
-        install -d ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/optee/* ${DEPLOYDIR}/${GEN_IMAGE_MODE}/optee
+        cp --no-preserve=ownership -rf ${DEPLOY_DIR_IMAGE}/optee ${DEPLOYDIR}/${GEN_IMAGE_MODE}
     fi
 
     # decompress wic image for user data area boot partition update
@@ -616,6 +626,8 @@ python do_deploy() {
         bb.build.exec_func("make_recovery_image", d)
 
         if aspeed_boot_emmc == "yes":
+            print("Make emmc unsigned rot image")
+            bb.build.exec_func("make_emmc_unsigned_rot_image", d)
             print("Deploy mmc image...")
             deploy_mmc_image(d)
         else:

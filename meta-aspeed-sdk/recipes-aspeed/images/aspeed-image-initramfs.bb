@@ -15,6 +15,8 @@ IMAGE_INSTALL:append = " \
         packagegroup-aspeed-ktools \
         packagegroup-aspeed-usbtools \
         "
+# uninstall packagegroup-oss-extra by default.
+# IMAGE_INSTALL:append = " packagegroup-oss-extra "
 
 EXTRA_IMAGE_FEATURES:append = " \
         nfs-client \
