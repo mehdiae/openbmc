@@ -23,30 +23,46 @@ Reference:
 . setup <machine> [build_dir]
 Target machine must be specified. Use one of:
 ast2500-default
+ast2500-default-515
 ast2500-default-54
 ast2600-dcscm
 ast2600-dcscm-amd
 ast2600-dcscm-avenue-city
 ast2600-default
+ast2600-default-515
 ast2600-default-54
 ast2600-default-ecc
 ast2600-default-ncsi
+ast2600-default-raw
 ast2600-default-secure
+ast2600-default-secure-515
 ast2600-default-secure-tee
+ast2600-default-secure-tee-515
 ast2600-default-tee
+ast2600-default-tee-515
 ast2600-emmc
+ast2600-emmc-515
 ast2600-emmc-secure
+ast2600-emmc-secure-515
 ast2600-emmc-secure-tee
+ast2600-emmc-secure-tee-515
 ast2600-emmc-tee
+ast2600-emmc-tee-515
+ast2700-default
+ast2700-default-ltpi
+ast2700-default-ltpi-dual
+ast2700-emmc
 ```
 
-- Linux kernel version is `5.15` by default. machine with `54` postfix for kernel v5.4.
+- Linux kernel version is `6.6` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4.
 - AST2600 revision is `A3` by default.
 - OPTEE-OS
   - AST2600
     - OPTEE-OS is disabled by default. machine with `tee` postfix for OPTEE-OS enable.
+  - AST2700
+    - OPTEE-OS is enabled by default.
 
-1. AST2700 (**Not support yet**)
+1. AST2700
 
 ```
 . setup ast2700-default [build_dir]
@@ -104,7 +120,7 @@ After you successfully built the image, the image file can be found in: `[build_
 - `otp_image`: OTP image
 
 ### Recovery Image via UART
-- `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.sh for recovery image via UART
+- `recovery_u-boot-spl` : u-boot-spl.bin processed with gen_uart_booting_image.py for recovery image via UART
 
 # Free Open Source Software (FOSS)
 The Yocto/OpenBMC build system supports to provide the following things to meet the FOSS requirement.

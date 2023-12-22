@@ -50,6 +50,24 @@
                 "key_pem": "test_oem_dss_public_key_2048_4.pem",
                 "offset": "0x880",
                 "number_id": 4
+            },
+            {
+                "types": "rsa_pub_oem",
+                "key_pem": "test_oem_dss_public_key_2048_5.pem",
+                "offset": "0x980",
+                "number_id": 5
+            },
+            {
+                "types": "rsa_pub_oem",
+                "key_pem": "test_oem_dss_public_key_2048_6.pem",
+                "offset": "0xa80",
+                "number_id": 6
+            },
+            {
+                "types": "rsa_pub_oem",
+                "key_pem": "test_oem_dss_public_key_2048_7.pem",
+                "offset": "0xb80",
+                "number_id": 7
             }
         ]
     },

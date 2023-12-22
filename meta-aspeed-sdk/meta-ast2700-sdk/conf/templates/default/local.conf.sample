@@ -1,4 +1,6 @@
 MACHINE ??= "ast2700-default"
+#MACHINE ??= "ast2700-default-ltpi"
+#MACHINE ??= "ast2700-default-ltpi-dual"
 #MACHINE ??= "ast2700-emmc"
 
 DISTRO ?= "openbmc-phosphor"

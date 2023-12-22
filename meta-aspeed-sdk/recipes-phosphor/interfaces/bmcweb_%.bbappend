@@ -2,7 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 EXTRA_OEMESON:append= " \
     -Dredfish-dbus-log=enabled \
-    -Dhttp-body-limit=128 \
+    -Dhttp-body-limit=264 \
     "
 
 SRC_URI:append = " \

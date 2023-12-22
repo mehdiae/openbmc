@@ -1,0 +1,26 @@
+From 60b1e005586597deeddc285af8829375736be875 Mon Sep 17 00:00:00 2001
+From: VinceChang6637 <vince_chang@aspeedtech.com>
+Date: Tue, 12 Dec 2023 18:20:56 +0800
+Subject: [PATCH 2/3] fansensor support ast2600 and ast2700 pwm driver
+
+Signed-off-by: VinceChang6637 <vince_chang@aspeedtech.com>
+---
+ src/FanMain.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/FanMain.cpp b/src/FanMain.cpp
+index 9c8a738..4166541 100644
+--- a/src/FanMain.cpp
++++ b/src/FanMain.cpp
+@@ -67,6 +67,8 @@ static const std::map<std::string, FanTypes> compatibleFanTypes = {
+     {"aspeed,ast2400-pwm-tacho", FanTypes::aspeed},
+     {"aspeed,ast2500-pwm-tacho", FanTypes::aspeed},
+     {"nuvoton,npcm750-pwm-fan", FanTypes::nuvoton},
++    {"aspeed,ast2600-pwm-tach", FanTypes::aspeed},
++    {"aspeed,ast2700-pwm-tach", FanTypes::aspeed},
+     {"hpe,gxp-fan-ctrl", FanTypes::hpe}
+     // add compatible string here for new fan type
+ };
+-- 
+2.25.1
+

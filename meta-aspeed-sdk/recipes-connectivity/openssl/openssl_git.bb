@@ -11,12 +11,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=d343e62fc9c833710bbbed25f27364c8"
 
 DEPENDS = "hostperl-runtime-native"
 
-BRANCH="aspeed-dev-v1.1.1g"
+BRANCH="aspeed-master-v1.1.1g"
 SRC_URI = "git://gerrit.aspeed.com:29418/openssl.git;protocol=ssh;branch=${BRANCH} \
            file://run-ptest \
            file://0001-skip-test_symbol_presence.patch \
            file://0001-buildinfo-strip-sysroot-and-debug-prefix-map-from-co.patch \
-           file://afalg.patch \
            file://reproducible.patch \
            "
 
@@ -24,8 +23,8 @@ SRC_URI:append:class-nativesdk = " \
            file://environment.d-openssl.sh \
            "
 PV = "1.1.1g+git${SRCPV}"
-# Tag for v00.01.01
-SRCREV = "4787534fe05848827ae60626ee8d9216949fafb5"
+# Tag for v00.01.02
+SRCREV = "d8ed01af9bb61dfcc66fb391dfcf5b71528d9782"
 
 S = "${WORKDIR}/git"
 
@@ -33,7 +32,9 @@ inherit lib_package multilib_header multilib_script ptest
 MULTILIB_SCRIPTS = "${PN}-bin:${bindir}/c_rehash"
 
 PACKAGECONFIG ?= ""
-PACKAGECONFIG:class-target = "cryptodev-linux"
+# WORKAROUND
+# Disable cryptodev due to build failed with kernel 6.6
+#PACKAGECONFIG:class-target = "cryptodev-linux"
 # disable crypto device for ast2700
 PACKAGECONFIG:class-target:aspeed-g7 = ""
 PACKAGECONFIG:class-native = ""
