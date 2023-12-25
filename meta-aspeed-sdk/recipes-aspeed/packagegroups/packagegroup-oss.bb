@@ -43,6 +43,7 @@ RDEPENDS:${PN}-apps = " \
     aer-inject \
     fio \
     mctp \
+    memtester \
     "
 
 SUMMARY:${PN}-extended = "Open Source Extended Applications"
