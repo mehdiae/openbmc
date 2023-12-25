@@ -2,7 +2,7 @@ KBRANCH = "aspeed-master-v6.6"
 LINUX_VERSION ?= "6.6.1"
 
 # Tag for v00.06.00
-SRCREV = "866b061494ddcd9b8a2fa90d4a6f760466ce2e8d"
+SRCREV = "db6d4731c26304858292ca2bd4803e59c05ad9c5"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
