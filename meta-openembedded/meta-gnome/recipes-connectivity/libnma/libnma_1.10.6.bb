@@ -4,7 +4,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 DEPENDS = "glib-2.0 gtk+3 gtk4 networkmanager"
 
-GNOMEBASEBUILDCLASS = "meson"
 inherit gnomebase gobject-introspection gtk-doc gettext vala features_check
 
 REQUIRED_DISTRO_FEATURES = "${@bb.utils.contains('PACKAGECONFIG','gcr','x11','',d)} opengl"
@@ -27,3 +26,8 @@ EXTRA_OEMESON:append:riscv32 = " -Dvapi=false"
 EXTRA_OEMESON:append:powerpc64le = " -Dvapi=false"
 
 GTKDOC_MESON_OPTION = "gtk_doc"
+
+do_install:append() {
+    # conflicts with the file provided by network-manager-applet
+    rm -f ${D}${datadir}/glib-2.0/schemas/org.gnome.nm-applet.gschema.xml
+}
