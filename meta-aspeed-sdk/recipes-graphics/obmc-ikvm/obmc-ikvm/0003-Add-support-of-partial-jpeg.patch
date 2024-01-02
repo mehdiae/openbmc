@@ -20,10 +20,10 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  ikvm_video.hpp  | 23 +++++++++++++++++++++++
  4 files changed, 53 insertions(+), 7 deletions(-)
 
-diff --git a/ikvm_args.cpp b/ikvm_args.cpp
-index 6377f65..2cbdf56 100644
---- a/ikvm_args.cpp
-+++ b/ikvm_args.cpp
+Index: git/ikvm_args.cpp
+===================================================================
+--- git.orig/ikvm_args.cpp
++++ git/ikvm_args.cpp
 @@ -39,7 +39,7 @@ Args::Args(int argc, char* argv[]) :
                  break;
              case 'm':
@@ -33,10 +33,10 @@ index 6377f65..2cbdf56 100644
                      format = 0;
                  break;
              case 'h':
-diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index b775e3c..c8ddcb7 100644
---- a/ikvm_server.cpp
-+++ b/ikvm_server.cpp
+Index: git/ikvm_server.cpp
+===================================================================
+--- git.orig/ikvm_server.cpp
++++ git/ikvm_server.cpp
 @@ -157,8 +157,13 @@ void Server::sendFrame()
                  cl->ublen = sz_rfbFramebufferUpdateMsg;
                  rfbSendUpdateBuf(cl);
@@ -53,11 +53,11 @@ index b775e3c..c8ddcb7 100644
                  cl->updateBuf[cl->ublen++] = (char)(rfbTightJpeg << 4);
                  rfbSendCompressedDataTight(cl, data, video.getFrameSize(i));
                  if (cl->enableLastRectEncoding)
-diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index f5330c2..7b3d2d1 100644
---- a/ikvm_video.cpp
-+++ b/ikvm_video.cpp
-@@ -33,17 +33,21 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Device::Error;
+Index: git/ikvm_video.cpp
+===================================================================
+--- git.orig/ikvm_video.cpp
++++ git/ikvm_video.cpp
+@@ -33,17 +33,21 @@ using namespace sdbusplus::xyz::openbmc_
  Video::Video(const std::string& p, Input& input, int fr, int sub, int fmt) :
      resizeAfterOpen(false), timingsError(false), fd(-1), frameRate(fr),
      height(600), width(800), subSampling(sub), input(input),
@@ -119,10 +119,10 @@ index f5330c2..7b3d2d1 100644
      rc = ioctl(fd, VIDIOC_S_FMT, &fmt);
      if (rc < 0)
      {
-diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index a758d29..059a195 100644
---- a/ikvm_video.hpp
-+++ b/ikvm_video.hpp
+Index: git/ikvm_video.hpp
+===================================================================
+--- git.orig/ikvm_video.hpp
++++ git/ikvm_video.hpp
 @@ -6,6 +6,7 @@
  #include <string>
  #include <vector>
@@ -131,11 +131,10 @@ index a758d29..059a195 100644
  
  #ifndef V4L2_PIX_FMT_AJPG
  #define V4L2_PIX_FMT_AJPG     v4l2_fourcc('A', 'J', 'P', 'G')
-@@ -122,6 +123,14 @@ class Video
-     {
+@@ -126,6 +127,14 @@ class Video
          return pixelformat;
      }
-+    /*
+     /*
 +     * @brief Gets the pixel format flags of the video frame
 +     *
 +     * @return Value of the pixel format flags of video frame */
@@ -143,10 +142,11 @@ index a758d29..059a195 100644
 +    {
 +        return pixelformatflags;
 +    }
-     /*
++    /*
       * @brief Gets the width of the video frame
       *
-@@ -150,6 +159,17 @@ class Video
+      * @return Value of the width of video frame in pixels
+@@ -153,6 +162,17 @@ class Video
          subSampling = _sub;
      }
  
@@ -164,7 +164,7 @@ index a758d29..059a195 100644
      /* @brief Number of bits per component of a pixel */
      static const int bitsPerSample;
      /* @brief Number of bytes of storage for a pixel */
-@@ -180,6 +200,7 @@ class Video
+@@ -183,6 +203,7 @@ class Video
          size_t payload;
          size_t size;
          uint32_t sequence;
@@ -172,7 +172,7 @@ index a758d29..059a195 100644
      };
  
      /*
-@@ -208,6 +229,8 @@ class Video
+@@ -211,6 +232,8 @@ class Video
  
      /* @brief Pixel Format  */
      uint32_t pixelformat;
@@ -181,6 +181,3 @@ index a758d29..059a195 100644
  };
  
  } // namespace ikvm
--- 
-2.34.1
-

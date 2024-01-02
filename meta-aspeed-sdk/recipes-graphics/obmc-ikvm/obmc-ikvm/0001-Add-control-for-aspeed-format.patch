@@ -21,10 +21,10 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  ikvm_video.hpp   |  7 ++++++-
  6 files changed, 82 insertions(+), 7 deletions(-)
 
-diff --git a/ikvm_args.cpp b/ikvm_args.cpp
-index 681a9f8..6377f65 100644
---- a/ikvm_args.cpp
-+++ b/ikvm_args.cpp
+Index: git/ikvm_args.cpp
+===================================================================
+--- git.orig/ikvm_args.cpp
++++ git/ikvm_args.cpp
 @@ -8,12 +8,13 @@
  namespace ikvm
  {
@@ -61,10 +61,10 @@ index 681a9f8..6377f65 100644
      fprintf(stderr, "-h, --help             show this message and exit\n");
      fprintf(stderr, "-k device              HID keyboard gadget device\n");
      fprintf(stderr, "-p device              HID mouse gadget device\n");
-diff --git a/ikvm_args.hpp b/ikvm_args.hpp
-index 089c700..9d41966 100644
---- a/ikvm_args.hpp
-+++ b/ikvm_args.hpp
+Index: git/ikvm_args.hpp
+===================================================================
+--- git.orig/ikvm_args.hpp
++++ git/ikvm_args.hpp
 @@ -78,6 +78,11 @@ class Args
          return subsampling;
      }
@@ -86,10 +86,10 @@ index 089c700..9d41966 100644
      /* @brief Path to the USB keyboard device */
      std::string keyboardPath;
      /* @brief Path to the USB mouse device */
-diff --git a/ikvm_manager.cpp b/ikvm_manager.cpp
-index 2f66fd5..3a0b815 100644
---- a/ikvm_manager.cpp
-+++ b/ikvm_manager.cpp
+Index: git/ikvm_manager.cpp
+===================================================================
+--- git.orig/ikvm_manager.cpp
++++ git/ikvm_manager.cpp
 @@ -8,7 +8,7 @@ Manager::Manager(const Args& args) :
      continueExecuting(true), serverDone(false), videoDone(true),
      input(args.getKeyboardPath(), args.getPointerPath(), args.getUdcName()),
@@ -99,10 +99,10 @@ index 2f66fd5..3a0b815 100644
      server(args, input, video)
  {}
  
-diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index 6a6cd06..d50379b 100644
---- a/ikvm_server.cpp
-+++ b/ikvm_server.cpp
+Index: git/ikvm_server.cpp
+===================================================================
+--- git.orig/ikvm_server.cpp
++++ git/ikvm_server.cpp
 @@ -9,6 +9,8 @@
  #include <phosphor-logging/log.hpp>
  #include <xyz/openbmc_project/Common/error.hpp>
@@ -120,10 +120,15 @@ index 6a6cd06..d50379b 100644
      rfbClientIteratorPtr it;
      rfbClientPtr cl;
      int64_t frame_crc = -1;
-@@ -181,6 +184,29 @@ void Server::sendFrame()
-                 rfbSendUpdateBuf(cl);
-                 break;
- 
+@@ -176,6 +179,29 @@ void Server::sendFrame()
+                 rfbSendCompressedDataTight(cl, data, video.getFrameSize());
+                 if (cl->enableLastRectEncoding)
+                 {
++                    rfbSendLastRectMarker(cl);
++                }
++                rfbSendUpdateBuf(cl);
++                break;
++
 +            case V4L2_PIX_FMT_AJPG:
 +                fu->type = rfbFramebufferUpdate;
 +                cl->ublen = sz_rfbFramebufferUpdateMsg;
@@ -142,18 +147,13 @@ index 6a6cd06..d50379b 100644
 +                rfbSendCompressedDataTight(cl, data, video.getFrameSize());
 +                if (cl->enableLastRectEncoding)
 +                {
-+                    rfbSendLastRectMarker(cl);
-+                }
-+                rfbSendUpdateBuf(cl);
-+                break;
-+
-             default:
-                 break;
-         }
-diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index 3445715..72e7631 100644
---- a/ikvm_video.cpp
-+++ b/ikvm_video.cpp
+                     rfbSendLastRectMarker(cl);
+                 }
+                 rfbSendUpdateBuf(cl);
+Index: git/ikvm_video.cpp
+===================================================================
+--- git.orig/ikvm_video.cpp
++++ git/ikvm_video.cpp
 @@ -30,11 +30,26 @@ using namespace phosphor::logging;
  using namespace sdbusplus::xyz::openbmc_project::Common::File::Error;
  using namespace sdbusplus::xyz::openbmc_project::Common::Device::Error;
@@ -214,23 +214,26 @@ index 3445715..72e7631 100644
      {
          log<level::ERR>("Pixel Format not supported",
                          entry("PIXELFORMAT=%d", pixelformat));
-diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index 15bbb0b..119764f 100644
---- a/ikvm_video.hpp
-+++ b/ikvm_video.hpp
-@@ -6,6 +6,11 @@
+Index: git/ikvm_video.hpp
+===================================================================
+--- git.orig/ikvm_video.hpp
++++ git/ikvm_video.hpp
+@@ -6,6 +6,14 @@
  #include <string>
  #include <vector>
  
 +#ifndef V4L2_PIX_FMT_AJPG
 +#define V4L2_PIX_FMT_AJPG     v4l2_fourcc('A', 'J', 'P', 'G')
++#endif
++
++#ifndef V4L2_PIX_FMT_FLAG_PARTIAL_JPG
 +#define V4L2_PIX_FMT_FLAG_PARTIAL_JPG   0x00000004
 +#endif
 +
  namespace ikvm
  {
  
-@@ -23,7 +28,7 @@ class Video
+@@ -23,7 +31,7 @@ class Video
       * @param[in] input - Reference to the Input object
       * @param[in] fr    - desired frame rate of the video
       */
@@ -239,6 +242,3 @@ index 15bbb0b..119764f 100644
      ~Video();
      Video(const Video&) = default;
      Video& operator=(const Video&) = default;
--- 
-2.34.1
-

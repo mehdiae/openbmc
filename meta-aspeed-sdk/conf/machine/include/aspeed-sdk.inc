@@ -24,6 +24,8 @@ MACHINE_FEATURES += "hw-rng"
 MACHINEOVERRIDES =. "aspeed:"
 
 PREFERRED_VERSION_iperf3 ?= "3.1.4"
+PREFERRED_VERSION_openssl ?= "3.2.0"
+PREFERRED_VERSION_openssl-native ?= "3.2.0"
 
 # It should be removed if kernel 5.4 is no longer supported.
 require oldest-kernel-54.inc
