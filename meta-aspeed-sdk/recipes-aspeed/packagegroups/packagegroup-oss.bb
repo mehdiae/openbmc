@@ -68,6 +68,11 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     iozone3 \
     hdparm \
     fio \
+    memtester \
+    aer-inject \
+    pciutils \
+    dhrystone \
+    nvme-cli \
     "
 
 RDEPENDS:${PN}-apps:append:cypress-s25hx = " \
