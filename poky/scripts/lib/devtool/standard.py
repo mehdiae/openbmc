@@ -919,7 +919,7 @@ def modify(args, config, basepath, workspace):
                     if line.startswith('*'):
                         (stdout, _) = bb.process.run('git rev-parse devtool-base', cwd=srctree)
                         initial_revs["."] = stdout.rstrip()
-                if not initial_revs["."]:
+                if "." not in initial_revs:
                     # Otherwise, just grab the head revision
                     (stdout, _) = bb.process.run('git rev-parse HEAD', cwd=srctree)
                     initial_revs["."] = stdout.rstrip()
@@ -992,8 +992,9 @@ def modify(args, config, basepath, workspace):
             if initial_revs:
                 for name, rev in initial_revs.items():
                         f.write('\n# initial_rev %s: %s\n' % (name, rev))
-                        for commit in commits[name]:
-                            f.write('# commit %s: %s\n' % (name, commit))
+                        if name in commits:
+                            for commit in commits[name]:
+                                f.write('# commit %s: %s\n' % (name, commit))
             if branch_patches:
                 for branch in branch_patches:
                     if branch == args.branch:
