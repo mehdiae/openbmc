@@ -27,7 +27,6 @@ ast2500-default-515
 ast2500-default-54
 ast2600-dcscm
 ast2600-dcscm-amd
-ast2600-dcscm-avenue-city
 ast2600-default
 ast2600-default-515
 ast2600-default-54

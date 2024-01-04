@@ -23,18 +23,18 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
             file://meson_options.txt;subdir=${S} \
             file://aspeed-pfr-tool.conf.in;subdir=${S} \
             file://BootCompleted.service;subdir=${S} \
+            file://aspeed-pfr-tool-egs.conf;subdir=${S} \
           "
 
 DEPENDS = "openssl i2c-tools"
 RDEPENDS:${PN} = "openssl i2c-tools"
 
-EXTRA_OEMESON:ast2600-dcscm-avenue-city = " \
-    -Dpch_active_pfm_offset=0x03fe0000 \
-    -Dpch_staging_offset=0x04000000 \
-    -Dpch_recovery_offset=0x06000000 \
-    "
-
 inherit obmc-phosphor-systemd
+
+do_install:append() {
+    install -m 0644 ${S}/aspeed-pfr-tool-egs.conf ${D}/${datadir}/pfrconfig/
+}
+
 SYSTEMD_SERVICE:${PN} = "BootCompleted.service"
 
 FILES:${PN}:append = " ${datadir}/pfrconfig"

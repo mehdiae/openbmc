@@ -3,7 +3,7 @@ Description=Intel PFR MCTP I3C Message Handler
 After=BootCompleted.service
 
 [Service]
-ExecStart=/usr/bin/pfr-mctpd -d /sys/bus/i3c/devices/i3c-0/slave-mqueue
+ExecStart=/usr/bin/pfr-mctpd -d /dev/i3c-mctp-target-0
 Type=oneshot
 RemainAfterExit=yes
 SyslogIdentifier=pfr-mctp-i3c
