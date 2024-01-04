@@ -44,6 +44,7 @@ RDEPENDS:${PN}-apps = " \
     fio \
     mctp \
     memtester \
+    coremark \
     "
 
 SUMMARY:${PN}-extended = "Open Source Extended Applications"
@@ -68,6 +69,7 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     iozone3 \
     hdparm \
     fio \
+    coremark \
     "
 
 RDEPENDS:${PN}-apps:append:cypress-s25hx = " \
