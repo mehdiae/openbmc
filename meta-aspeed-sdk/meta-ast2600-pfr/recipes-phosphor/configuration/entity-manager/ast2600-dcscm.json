@@ -20,15 +20,6 @@
         "EntityId": 7,
         "EntityInstance": 0
     },
-    "xyz.openbmc_project.Inventory.Decorator.Asset": {
-        "Manufacturer": "$PRODUCT_MANUFACTURER",
-        "Model": "$PRODUCT_PRODUCT_NAME",
-        "PartNumber": "$PRODUCT_PART_NUMBER",
-        "SerialNumber": "$PRODUCT_SERIAL_NUMBER"
-    },
-    "xyz.openbmc_project.Inventory.Decorator.AssetTag": {
-        "AssetTag": "$PRODUCT_ASSET_TAG"
-    },
     "Name": "AST2600 DCSCM",
     "Probe": "TRUE",
     "Type": "Board"
