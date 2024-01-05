@@ -7,7 +7,7 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://COPYING;md5=dc9db360e0bbd4e46672f3fd91dd6c4b"
 
 SRC_URI = " \
-    git://github.com/google/glog.git;nobranch=1;protocol=https \
+    git://github.com/google/glog.git;branch=master;protocol=https \
     file://libexecinfo.patch \
     file://0001-Change-SleepForMilliseconds-parameter-from-unsigned-.patch \
 "
@@ -22,6 +22,8 @@ PACKAGECONFIG ?= "shared unwind 64bit-atomics"
 PACKAGECONFIG:remove:riscv64 = "unwind"
 PACKAGECONFIG:remove:riscv32 = "unwind 64bit-atomics"
 PACKAGECONFIG:remove:mipsarch = "64bit-atomics"
+PACKAGECONFIG:remove:armv5 = "64bit-atomics"
+PACKAGECONFIG:remove:armv6 = "64bit-atomics"
 
 PACKAGECONFIG:append:libc-musl:riscv64 = " execinfo"
 PACKAGECONFIG:append:libc-musl:riscv32 = " execinfo"

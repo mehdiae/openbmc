@@ -70,6 +70,11 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     hdparm \
     fio \
     coremark \
+    memtester \
+    aer-inject \
+    pciutils \
+    dhrystone \
+    nvme-cli \
     "
 
 RDEPENDS:${PN}-apps:append:cypress-s25hx = " \

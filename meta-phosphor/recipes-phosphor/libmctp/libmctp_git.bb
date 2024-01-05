@@ -6,11 +6,10 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=0d30807bb7a4f16d36e96b78f9ed8fae"
 DEPENDS += "autoconf-archive-native \
             systemd \
            "
-SRCREV = "99b9d238bc163ffa82ecd0b704eb0489f4a86e32"
+SRCREV = "5c90129312a384af5e27fdf96f8e79981ff32fe5"
 PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} pcap"
 PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_system_unitdir}, \
                           --without-systemdsystemunitdir,systemd"
-PACKAGECONFIG[astlpc-raw-kcs] = "--enable-astlpc-raw-kcs,--disable-astlpc-raw-kcs,udev,udev"
 PACKAGECONFIG[pcap] = "--enable-capture,--disable-capture,libpcap,"
 PV = "1.0+git${SRCPV}"
 PR = "r1"

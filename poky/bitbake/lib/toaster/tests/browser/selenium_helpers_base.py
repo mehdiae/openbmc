@@ -21,6 +21,7 @@ import unittest
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException, \
         StaleElementReferenceException, TimeoutException
@@ -32,9 +33,13 @@ def create_selenium_driver(cls,browser='chrome'):
         browser = env_browser
 
     if browser == 'chrome':
-        return webdriver.Chrome(
-            service_args=["--verbose", "--log-path=selenium.log"]
-        )
+        options = webdriver.ChromeOptions()
+        options.add_argument('headless')
+        options.add_argument('--disable-infobars')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--remote-debugging-port=9222')
+        return webdriver.Chrome(options=options)
     elif browser == 'firefox':
         return webdriver.Firefox()
     elif browser == 'marionette':
@@ -66,7 +71,9 @@ class Wait(WebDriverWait):
     _TIMEOUT = 10
     _POLL_FREQUENCY = 0.5
 
-    def __init__(self, driver):
+    def __init__(self, driver, timeout=_TIMEOUT, poll=_POLL_FREQUENCY):
+        self._TIMEOUT = timeout
+        self._POLL_FREQUENCY = poll
         super(Wait, self).__init__(driver, self._TIMEOUT, self._POLL_FREQUENCY)
 
     def until(self, method, message=''):
@@ -153,11 +160,11 @@ class SeleniumTestCaseBase(unittest.TestCase):
 
     def find(self, selector):
         """ Find single element by CSS selector """
-        return self.driver.find_element_by_css_selector(selector)
+        return self.driver.find_element(By.CSS_SELECTOR, selector)
 
     def find_all(self, selector):
         """ Find all elements matching CSS selector """
-        return self.driver.find_elements_by_css_selector(selector)
+        return self.driver.find_elements(By.CSS_SELECTOR, selector)
 
     def element_exists(self, selector):
         """
@@ -170,18 +177,19 @@ class SeleniumTestCaseBase(unittest.TestCase):
         """ Return the element which currently has focus on the page """
         return self.driver.switch_to.active_element
 
-    def wait_until_present(self, selector):
+    def wait_until_present(self, selector, poll=0.5):
         """ Wait until element matching CSS selector is on the page """
         is_present = lambda driver: self.find(selector)
         msg = 'An element matching "%s" should be on the page' % selector
-        element = Wait(self.driver).until(is_present, msg)
+        element = Wait(self.driver, poll=poll).until(is_present, msg)
         return element
 
-    def wait_until_visible(self, selector):
+    def wait_until_visible(self, selector, poll=1):
         """ Wait until element matching CSS selector is visible on the page """
         is_visible = lambda driver: self.find(selector).is_displayed()
         msg = 'An element matching "%s" should be visible' % selector
-        Wait(self.driver).until(is_visible, msg)
+        Wait(self.driver, poll=poll).until(is_visible, msg)
+        time.sleep(poll)  # wait for visibility to settle
         return self.find(selector)
 
     def wait_until_focused(self, selector):

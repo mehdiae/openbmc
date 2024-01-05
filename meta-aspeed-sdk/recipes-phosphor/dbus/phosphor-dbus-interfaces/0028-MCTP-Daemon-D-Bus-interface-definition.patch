@@ -1,4 +1,4 @@
-From b71be53feae971f950dca5a7d4870ab53cea0889 Mon Sep 17 00:00:00 2001
+From 166a9c33b602992e28d1d6b540990a1606c92860 Mon Sep 17 00:00:00 2001
 From: Jamin Lin <jamin_lin@aspeedtech.com>
 Date: Thu, 7 Jul 2022 16:49:30 +0800
 Subject: [PATCH] MCTP Daemon D-Bus interface definition.
@@ -10,6 +10,7 @@ https://gerrit.openbmc-project.xyz/c/openbmc/docs/+/28424/9/designs/mctp.md
 Signed-off-by: Arun P. Mohanan <arun.p.m@linux.intel.com>
 Signed-off-by: Mariusz Kowalski <mariusz.kowalski@intel.com>
 Signed-off-by: Karol Wachowski <karol.wachowski@intel.com>
+
 ---
  .../openbmc_project/MCTP/Base.interface.yaml  | 227 ++++++++++++++++++
  .../MCTP/Binding/PCIe.interface.yaml          |  29 +++
@@ -339,7 +340,7 @@ index 0000000..d46298e
 +      type: boolean
 +      description: Indicates Eid pool is managed by self
 diff --git a/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml b/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
-index 8cb0f13..abb3ac9 100644
+index 568fb99..84d203b 100644
 --- a/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
 +++ b/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
 @@ -6,6 +6,11 @@ description: >
@@ -352,7 +353,7 @@ index 8cb0f13..abb3ac9 100644
 +          Endpoint / BusOwner / Bridge
 +
      - name: NetworkId
-       type: size
+       type: uint32
        description: >
 diff --git a/yaml/xyz/openbmc_project/MCTP/SupportedMessageTypes.interface.yaml b/yaml/xyz/openbmc_project/MCTP/SupportedMessageTypes.interface.yaml
 new file mode 100644
@@ -396,6 +397,3 @@ index 0000000..fa447ee
 +    - name: VDIANA
 +      type: boolean
 +      description: Indicates support availability
--- 
-2.25.1
-
