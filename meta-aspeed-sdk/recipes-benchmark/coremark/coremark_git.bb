@@ -15,11 +15,21 @@ SRC_URI = "git://github.com/eembc/coremark.git;branch=main;protocol=https"
 S = "${WORKDIR}/git"
 
 do_compile() {
-    oe_runmake PORT_DIR=linux "LFLAGS_END=${LDFLAGS}" link
+    rm -rf ${S}/output
+    install -d ${S}/output
+
+    oe_runmake PORT_DIR=linux LFLAGS_END="${LDFLAGS} -pthread" XCFLAGS="-DMULTITHREAD=1 -DUSE_FORK" link
+    install -m 0755 coremark.exe ${S}/output/coremark_1thread
+    oe_runmake clean
+    oe_runmake PORT_DIR=linux "LFLAGS_END=${LDFLAGS} -pthread" XCFLAGS="-DMULTITHREAD=2 -DUSE_FORK" link
+    install -m 0755 coremark.exe ${S}/output/coremark_2thread
+    oe_runmake clean
+    oe_runmake PORT_DIR=linux "LFLAGS_END=${LDFLAGS} -pthread" XCFLAGS="-DMULTITHREAD=4 -DUSE_FORK" link
+    install -m 0755 coremark.exe ${S}/output/coremark_4thread
 }
 
 do_install() {
     install -d ${D}/${bindir}
-    install ${S}/coremark.exe ${D}/${bindir}
+    install -m 0755 ${S}/output/* ${D}/${bindir}
 }
 
