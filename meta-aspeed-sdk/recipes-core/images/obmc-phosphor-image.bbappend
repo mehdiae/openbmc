@@ -44,18 +44,7 @@ EXTRA_IMAGE_FEATURES:append = " \
         ${@bb.utils.contains('DISTRO_FEATURES', 'phosphor-mmc', 'read-only-rootfs-delayed-postinsts', '', d)} \
         "
 
-OVERLAY_MKFS_OPTS:cypress-s25hx:static-rwfs-jffs2 = " -c 16 -e 262144 --pad=${RWFS_SIZE} "
-
-do_generate_rwfs_static:static-rwfs-jffs2() {
-    rwdir=$(pwd)
-    rwdir=${rwdir}/jffs2
-    image=rwfs.jffs2
-
-    rm -rf $rwdir $image > /dev/null 2>&1
-    mkdir -p ${rwdir}/cow
-    rwdir=${rwdir}/cow
-
-    ${JFFS2_RWFS_CMD}  ${OVERLAY_MKFS_OPTS} --squash-uids
-}
+# Enable spi-nor-ecc.inc and unmask below to generate an image-rwfs with cleanmarker size set to 16.
+#OVERLAY_MKFS_OPTS:spi-nor-ecc = " -c 16 -e 262144 --pad=${RWFS_SIZE} "
 
 inherit image_types_phosphor_aspeed

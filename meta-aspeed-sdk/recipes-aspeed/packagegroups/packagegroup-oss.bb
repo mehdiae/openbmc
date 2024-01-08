@@ -77,7 +77,7 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     nvme-cli \
     "
 
-RDEPENDS:${PN}-apps:append:cypress-s25hx = " \
+RDEPENDS:${PN}-apps:append:spi-nor-ecc = " \
     mtd-utils \
     "
 
