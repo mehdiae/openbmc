@@ -10,7 +10,7 @@ SRC_URI = " git://gerrit.aspeed.com:29418/cerberus;protocol=ssh;branch=${BRANCH}
             file://recovery_tools \
           "
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 SRCREV = "${AUTOREV}"
 BRANCH = "aspeed-dev"
 

@@ -19,7 +19,7 @@ SRC_URI:append:class-nativesdk = " \
            file://environment.d-openssl.sh \
            "
 
-PV = "3.2.0+git${SRCPV}"
+PV = "3.2.0+git"
 SRCREV = "${AUTOREV}"
 
 

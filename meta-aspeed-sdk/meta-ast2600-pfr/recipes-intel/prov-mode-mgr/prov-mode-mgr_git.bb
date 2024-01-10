@@ -1,7 +1,7 @@
 SUMMARY = "Provision mode daemon - RestrictionMode"
 DESCRIPTION = "Daemon allows to configure RestrictionMode property"
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 
 S = "${WORKDIR}/git"
 

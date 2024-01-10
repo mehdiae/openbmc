@@ -17,7 +17,7 @@ SRC_URI = " \
 	file://ecp384 \
 	"
 
-PV = "2.2.0+git${SRCPV}"
+PV = "2.2.0+git"
 SRCREV = "aef708d2016a17722ff9eddb7f312fb5ac8e4f7e"
 
 S = "${WORKDIR}/git"

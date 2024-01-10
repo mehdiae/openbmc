@@ -6,7 +6,7 @@ inherit pkgconfig meson
 SRC_URI = " git://gerrit.aspeed.com:29418/aspeed_app.git;protocol=ssh;branch=${BRANCH} "
 SRC_URI:append:ast2600-dcscm = " file://0001-mctp-i3c-Add-thread-to-receive-mctp-response.patch "
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 SRCREV = "${AUTOREV}"
 BRANCH = "develop"
 

@@ -10,7 +10,7 @@ SRC_URI = " \
 	file://0001-Porting-for-ast2600-pfr-evaluation-board.patch \
 	"
 
-PV = "0.1+git${SRCPV}"
+PV = "0.1+git"
 SRCREV = "bcc7ce1f418c1a16a7868fee62499fa677242254"
 
 S = "${WORKDIR}/git"

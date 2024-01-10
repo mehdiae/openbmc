@@ -17,7 +17,7 @@ do_configure[cleandirs] = "${B}"
 # We don't have 'u-boot-initial-env' target in our u-boot version
 UBOOT_INITIAL_ENV = ""
 
-PV = "v2019.04+git${SRCPV}"
+PV = "v2019.04+git"
 
 python do_set_local_version() {
     import os

@@ -1,7 +1,7 @@
 SUMMARY = "Phosphor U-Boot environment manager"
 DESCRIPTION = "Daemon to read or write U-Boot environment variables"
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 
 S = "${WORKDIR}/git"
 

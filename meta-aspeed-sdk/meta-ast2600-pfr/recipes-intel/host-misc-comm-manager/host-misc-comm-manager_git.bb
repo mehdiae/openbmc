@@ -2,7 +2,7 @@ SUMMARY = "Miscellaneous host interface communication manager"
 DESCRIPTION = "Daemon exposes Miscellaneous host interface communications like \
                platform reset, mail box & scratch pad"
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 
 S = "${WORKDIR}/git"
 
