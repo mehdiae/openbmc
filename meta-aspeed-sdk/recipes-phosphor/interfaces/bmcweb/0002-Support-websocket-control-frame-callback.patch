@@ -15,10 +15,10 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  http/websocket.hpp             | 45 ++++++++++++++++++++++++++++++++--
  2 files changed, 61 insertions(+), 4 deletions(-)
 
-Index: git/http/routing/websocketrule.hpp
-===================================================================
---- git.orig/http/routing/websocketrule.hpp
-+++ git/http/routing/websocketrule.hpp
+diff --git a/http/routing/websocketrule.hpp b/http/routing/websocketrule.hpp
+index bf6daad6..7fe71d40 100644
+--- a/http/routing/websocketrule.hpp
++++ b/http/routing/websocketrule.hpp
 @@ -38,7 +38,7 @@ class WebSocketRule : public BaseRule
              myConnection = std::make_shared<
                  crow::websocket::ConnectionImpl<boost::asio::ip::tcp::socket>>(
@@ -66,10 +66,10 @@ Index: git/http/routing/websocketrule.hpp
 +    std::function<void(crow::websocket::Connection&, const std::string&)> pongHandler;
  };
  } // namespace crow
-Index: git/http/websocket.hpp
-===================================================================
---- git.orig/http/websocket.hpp
-+++ git/http/websocket.hpp
+diff --git a/http/websocket.hpp b/http/websocket.hpp
+index 027ab246..a34763bd 100644
+--- a/http/websocket.hpp
++++ b/http/websocket.hpp
 @@ -65,14 +65,18 @@ class ConnectionImpl : public Connection
                             std::function<void()>&& whenComplete)>
              messageExHandlerIn,
@@ -91,10 +91,10 @@ Index: git/http/websocket.hpp
      {
          /* Turn on the timeouts on websocket stream to server role */
          ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(
-@@ -173,6 +177,41 @@ class ConnectionImpl : public Connection
-                 self->close("write error");
-             }
-         });
+@@ -136,6 +140,41 @@ class ConnectionImpl : public Connection
+         ws.async_accept(*ptr,
+                         std::bind_front(&self_t::acceptDone, this,
+                                         shared_from_this(), std::move(mobile)));
 +
 +        ws.control_callback([this, self(shared_from_this())](
 +                                boost::beast::websocket::frame_type kind,
@@ -132,7 +132,7 @@ Index: git/http/websocket.hpp
 +        });
      }
  
-     void sendBinary(std::string&& msg) override
+     void sendBinary(std::string_view msg) override
 @@ -374,6 +413,8 @@ class ConnectionImpl : public Connection
          messageExHandler;
      std::function<void(Connection&, const std::string&)> closeHandler;
