@@ -58,6 +58,7 @@ do_compile() {
 }
 
 do_deploy() {
+    sub_ver=$(cat ${B}/.subversion)
     install -d ${DEPLOYDIR}
 
     # spl
@@ -67,6 +68,7 @@ do_deploy() {
 
     # spl binman
     install -m 644 ${BOOTMCU_FW_BINARY} ${DEPLOYDIR}
+    install -m 644 ${BOOTMCU_FW_BINARY} ${DEPLOYDIR}/${BOOTMCU_FW_BINARY}-${sub_ver}
 }
 
 addtask deploy before do_build after do_compile
