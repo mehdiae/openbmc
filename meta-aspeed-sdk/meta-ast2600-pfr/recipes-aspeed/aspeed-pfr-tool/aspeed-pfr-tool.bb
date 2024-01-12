@@ -38,3 +38,6 @@ inherit obmc-phosphor-systemd
 SYSTEMD_SERVICE:${PN} = "BootCompleted.service"
 
 FILES:${PN}:append = " ${datadir}/pfrconfig"
+
+# Workaround
+do_collect_spdx_deps[nostamp] = "1"
