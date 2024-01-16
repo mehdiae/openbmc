@@ -9,7 +9,6 @@ PFR_SHA ?= "1"
 
 SRC_URI = " \
            file://pfr_image.py \
-           file://pfr_manifest_ast2600_dcscm.json \
            file://pfm_config.xml \
            file://bmc_config.xml \
            file://csk_prv.pem \
@@ -29,7 +28,6 @@ do_install () {
         install -d ${D}${bindir}
         install -d ${D}/${datadir}/pfrconfig
         install -m 775 ${WORKDIR}/pfr_image.py ${D}${bindir}/pfr_image.py
-        install -m 400 ${WORKDIR}/*.json ${D}/${datadir}/pfrconfig
         install -m 400 ${WORKDIR}/pfm_config.xml ${D}/${datadir}/pfrconfig/pfm_config.xml
         install -m 400 ${WORKDIR}/bmc_config.xml ${D}/${datadir}/pfrconfig/bmc_config.xml
         install -m 400 ${WORKDIR}/csk_prv.pem ${D}/${datadir}/pfrconfig/csk_prv.pem

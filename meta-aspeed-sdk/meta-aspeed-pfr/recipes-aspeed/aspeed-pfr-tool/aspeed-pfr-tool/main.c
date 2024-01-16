@@ -102,7 +102,7 @@ void printArguments(ARGUMENTS args)
 
 void parseConfigElements(ARGUMENTS *args)
 {
-	unsigned int len = 0;
+	size_t len = 0;
 	char *line = NULL;
 	int read;
 	FILE *fp;
