@@ -19,9 +19,9 @@
 int extractQxQyFromPubkey(const char *file, uint8_t *qx, uint8_t *qy, int *len)
 {
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
-	EC_KEY *eckey = NULL;
+	EC_KEY * eckey = NULL;
 #else
-	EVP_PKEY *eckey = NULL;
+	EVP_PKEY * eckey = NULL;
 #endif
 	uint8_t *pub = NULL;
 	int ret = 1;
@@ -148,6 +148,31 @@ int getRootKeyHash(const char *file, uint8_t *hash, int *len)
 		printf("%s, Unsuported key size.\n", __func__);
 		return 1;
 	}
+
+	return 0;
+}
+
+int getLMSRootKeyHash(const char *file, HashAlg type, uint8_t *hash, int *len)
+{
+	uint8_t buffer[SHA384_LENGTH*2];
+	int rlen;
+	FILE *fp;
+
+	fp = fopen(file, "r+");
+	if (fp) {
+		rlen = fread(buffer, 1, sizeof(buffer), fp);
+		fclose(fp);
+		if (rlen <= 0) {
+			printf("failed to read public key (%s)\n", file);
+			return -1;
+		}
+	} else
+		printf("failed to open public key (%s)\n", file);
+
+	if (type == Sha256)
+		hashBuffer(buffer, rlen, Sha256, hash, len);
+	else
+		hashBuffer(buffer, rlen, Sha384, hash, len);
 
 	return 0;
 }
@@ -330,9 +355,19 @@ int doProvision(ARGUMENTS args)
 	uint8_t write_buffer[64];
 	int hashLen = 0;
 
-	if (getRootKeyHash(args.provision_cmd, write_buffer, &hashLen)) {
-		printf("Get root key hash failed\n");
-		return 1;
+	if (args.lms_mode) {
+		HashAlg type;
+
+		type = (args.lms_mode == 384)?Sha384:Sha256;
+		if (getLMSRootKeyHash(args.provision_cmd, type, write_buffer, &hashLen)) {
+			printf("Get root key hash failed\n");
+			return 1;
+		}
+	} else {
+		if (getRootKeyHash(args.provision_cmd, write_buffer, &hashLen)) {
+			printf("Get root key hash failed\n");
+			return 1;
+		}
 	}
 
 	if (args.debug_flag) {

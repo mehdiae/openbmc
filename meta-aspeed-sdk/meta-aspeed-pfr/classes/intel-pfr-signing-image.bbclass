@@ -29,6 +29,8 @@ PFR_BUILD_VER_MIN ?= "0"
 PFR_BUILD_NUM ?= "565566"
 # 1 = SHA256
 # 2 = SHA384
+# 3 = LMS384
+# 4 = LMS256
 PFR_SHA ?= "2"
 
 do_generate_signed_pfr_image(){
@@ -45,9 +47,21 @@ do_generate_signed_pfr_image(){
     if [ "${PFR_SHA}" = "1" ]; then
         pfmconfig_xml="pfm_config.xml"
         bmcconfig_xml="bmc_config.xml"
-    else
+        PFR_SHA_TYPE=1
+    elif [ "${PFR_SHA}" = "2" ]; then
         pfmconfig_xml="pfm_config_secp384r1.xml"
         bmcconfig_xml="bmc_config_secp384r1.xml"
+        PFR_SHA_TYPE=2
+    elif [ "${PFR_SHA}" = "3" ]; then
+        pfmconfig_xml="pfm_config_lms384.xml"
+        bmcconfig_xml="bmc_config_lms384.xml"
+        SIGN_UTILITY=${PFR_SCRIPT_DIR}/intel-pfr-signing-utility_lms
+        PFR_SHA_TYPE=2
+    elif [ "${PFR_SHA}" = "4" ]; then
+        pfmconfig_xml="pfm_config_lms256.xml"
+        bmcconfig_xml="bmc_config_lms256.xml"
+        SIGN_UTILITY=${PFR_SCRIPT_DIR}/intel-pfr-signing-utility_lms
+        PFR_SHA_TYPE=1
     fi
 
     rm -rf ${PFR_IMAGES_DIR}
@@ -69,7 +83,7 @@ do_generate_signed_pfr_image(){
         -b ${PFR_BUILD_NUM} \
         -v ${PFR_BKC_VER} \
         -s ${PFR_SVN} \
-        -a ${PFR_SHA} \
+        -a ${PFR_SHA_TYPE} \
         -o ${output_bin}
 
     # sign the PFM region

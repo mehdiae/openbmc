@@ -22,6 +22,14 @@ SRC_URI = " \
            file://rk384_prv.pem \
            file://pfm_config_secp384r1.xml \
            file://bmc_config_secp384r1.xml \
+           file://rootkey_h10.prv \
+           file://rootkey_h10.pub \
+           file://cskkey_h10.prv \
+           file://cskkey_h10.pub \
+           file://pfm_config_lms384.xml \
+           file://bmc_config_lms384.xml \
+           file://pfm_config_lms256.xml \
+           file://bmc_config_lms256.xml \
           "
 
 do_install () {
@@ -41,6 +49,14 @@ do_install () {
         install -m 400 ${WORKDIR}/rk384_prv.pem ${D}/${datadir}/pfrconfig/rk384_prv.pem
         install -m 400 ${WORKDIR}/pfm_config_secp384r1.xml ${D}/${datadir}/pfrconfig/pfm_config_secp384r1.xml
         install -m 400 ${WORKDIR}/bmc_config_secp384r1.xml ${D}/${datadir}/pfrconfig/bmc_config_secp384r1.xml
+        install -m 644 ${WORKDIR}/rootkey_h10.prv ${D}/${datadir}/pfrconfig/rootkey_h10.prv
+        install -m 644 ${WORKDIR}/rootkey_h10.pub ${D}/${datadir}/pfrconfig/rootkey_h10.pub
+        install -m 644 ${WORKDIR}/cskkey_h10.prv ${D}/${datadir}/pfrconfig/cskkey_h10.prv
+        install -m 644 ${WORKDIR}/cskkey_h10.pub ${D}/${datadir}/pfrconfig/cskkey_h10.pub
+        install -m 400 ${WORKDIR}/pfm_config_lms384.xml ${D}/${datadir}/pfrconfig/pfm_config_lms384.xml
+        install -m 400 ${WORKDIR}/bmc_config_lms384.xml ${D}/${datadir}/pfrconfig/bmc_config_lms384.xml
+        install -m 400 ${WORKDIR}/pfm_config_lms256.xml ${D}/${datadir}/pfrconfig/pfm_config_lms256.xml
+        install -m 400 ${WORKDIR}/bmc_config_lms256.xml ${D}/${datadir}/pfrconfig/bmc_config_lms256.xml
 }
 
 do_install:class-target () {
@@ -48,8 +64,10 @@ do_install:class-target () {
 
         if [ "${PFR_SHA}" = "1" ]; then
                 install -m 400 ${WORKDIR}/rk_pub.pem ${D}/${datadir}/pfrconfig/rk_pub.pem
-        else
+        elif [ "${PFR_SHA}" = "2" ]; then
                 install -m 400 ${WORKDIR}/rk384_pub.pem ${D}/${datadir}/pfrconfig/rk384_pub.pem
+        else
+                install -m 400 ${WORKDIR}/rootkey_h10.pub ${D}/${datadir}/pfrconfig/rootkey_h10.pub
         fi
 }
 

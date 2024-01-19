@@ -11,6 +11,7 @@ typedef struct _ARGUMENTS {
 	uint8_t i2c_bus;
 	uint8_t rot_addr;
 	uint8_t debug_flag;
+	int lms_mode;
 	uint32_t bmc_active_pfm_offset;
 	uint32_t bmc_staging_offset;
 	uint32_t bmc_recovery_offset;

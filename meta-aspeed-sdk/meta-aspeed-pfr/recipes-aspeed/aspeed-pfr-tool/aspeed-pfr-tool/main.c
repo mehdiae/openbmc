@@ -21,7 +21,7 @@
 #include "info.h"
 #include "spdm.h"
 
-static const char short_options[] = "hvb:a:c:p:uk:w:r:dsiS:";
+static const char short_options[] = "hvb:a:c:p:uk:w:r:dsiS:l:";
 static const struct option
 	long_options[] = {
 	{ "help", no_argument, NULL, 'h' },
@@ -38,6 +38,7 @@ static const struct option
 	{ "status", no_argument, NULL, 's' },
 	{ "info", no_argument, NULL, 'i' },
 	{ "spdm", required_argument, NULL, 'S' },
+	{ "lms", required_argument, NULL, 'l' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -61,6 +62,7 @@ static void usage(FILE *fp, int argc, char **argv)
 		" -s | --status         show rot status\n"
 		" -i | --info           show bmc/pch version info\n"
 		" -S | --spdm           enable or disable SPDM attestation\n"
+		" -l | --lms            use LMS sign scheme\n"
 		"example:\n"
 		"--provision /usr/share/pfrconfig/rk_pub.pem\n"
 		"--provision show\n"
@@ -77,6 +79,8 @@ static void usage(FILE *fp, int argc, char **argv)
 		"--info\n"
 		"--spdm enable\n"
 		"--spdm disable\n"
+		"--lms 256\n"
+		"--lms 384\n"
 		"",
 		argv[0]);
 }
@@ -217,6 +221,13 @@ int main(int argc, char *argv[])
 				spdm_flag = 1;
 			} else if (strcmp(optarg, "disable") == 0) {
 				spdm_flag = 0;
+			}
+			break;
+		case 'l':
+			args.lms_mode = strtoul(optarg, 0, 10);
+			if ((args.lms_mode != 256) && (args.lms_mode != 384)) {
+				usage(stdout, argc, argv);
+				exit(EXIT_FAILURE);
 			}
 			break;
 		default:
