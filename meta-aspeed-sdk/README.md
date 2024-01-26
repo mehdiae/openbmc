@@ -51,6 +51,7 @@ ast2700-default
 ast2700-default-ltpi
 ast2700-default-ltpi-dual
 ast2700-emmc
+ast2700-dcscm
 ```
 
 - Linux kernel version is `6.6` by default. machine with `515` postfix for kernel v5.15, machine with `54` postfix for kernel v5.4.
