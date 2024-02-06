@@ -2,6 +2,7 @@ MACHINE ??= "ast2700-default"
 #MACHINE ??= "ast2700-default-ltpi"
 #MACHINE ??= "ast2700-default-ltpi-dual"
 #MACHINE ??= "ast2700-emmc"
+#MACHINE ??= "ast2700-abr"
 
 DISTRO ?= "openbmc-phosphor"
 PACKAGE_CLASSES ?= "package_ipk"
