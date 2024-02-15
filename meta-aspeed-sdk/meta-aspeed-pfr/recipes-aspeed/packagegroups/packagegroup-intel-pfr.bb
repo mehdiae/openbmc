@@ -21,3 +21,7 @@ RDEPENDS:${PN}-apps = " \
 RDEPENDS:${PN}-apps:append:ast2600-dcscm = " \
     bmc-boot-done \
     "
+
+RDEPENDS:${PN}-apps:append:ast2700-dcscm = " \
+    bmc-boot-done \
+    "

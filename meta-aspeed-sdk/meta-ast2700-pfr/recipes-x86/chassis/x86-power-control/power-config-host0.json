@@ -7,6 +7,12 @@
             "Polarity": "ActiveLow"
         },
         {
+            "Name": "PostComplete",
+            "LineName": "POST_COMPLETE",
+            "Type" : "GPIO",
+            "Polarity": "ActiveLow"
+        },
+        {
             "Name": "PowerButton",
             "LineName": "FP_PWR_BTN_PFR_N",
             "Type": "GPIO",
@@ -14,13 +20,13 @@
         },
         {
             "Name": "PowerOk",
-            "LineName": "PWRGD_AUX_PWRGD_PFR_CPU0",
+            "LineName": "PWRGD_S0_PWROK_CPU0",
             "Type": "GPIO",
             "Polarity": "ActiveHigh"
         },
         {
             "Name": "PowerOut",
-            "LineName": "FP_BMC_PWR_BTN_OUT_N",
+            "LineName": "FM_PWR_BTN_OUT_CPU0_N",
             "Type": "GPIO",
             "Polarity": "ActiveLow"
         },
@@ -32,7 +38,7 @@
         },
         {
             "Name": "ResetOut",
-            "LineName": "RST_BMC_RSTBTN_OUT_N",
+            "LineName": "FM_RST_BTN_OUT_CPU0_PLD_N_OE",
             "Type": "GPIO",
             "Polarity": "ActiveLow"
         }
