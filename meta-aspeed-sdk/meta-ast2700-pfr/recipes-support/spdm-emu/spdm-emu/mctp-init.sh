@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -f /tmp/.mctp_init_done ];then
+	exit 0
+fi
+
 cpu_rev_id=$(devmem 0x12c02000 32)
 io_rev_id=$(devmem 0x14c02000 32)
 
@@ -27,3 +31,4 @@ mctp addr add 0x0a dev mctpi2c15
 mctp route add 0x0b via mctpi2c15
 mctp neigh add 0x0b dev mctpi2c15 lladdr 0x70
 
+touch /tmp/.mctp_init_done
