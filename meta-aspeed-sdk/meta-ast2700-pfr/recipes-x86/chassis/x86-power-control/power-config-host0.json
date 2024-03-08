@@ -8,21 +8,27 @@
         },
         {
             "Name": "PostComplete",
-            "LineName": "POST_COMPLETE",
-            "Type" : "GPIO",
-            "Polarity": "ActiveLow"
+            "DbusName": "xyz.openbmc_project.Inventory.Manager",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PostComplete",
+            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+            "Property": "Functional",
+            "Type": "DBUS"
         },
         {
-            "Name": "PowerButton",
-            "LineName": "FP_PWR_BTN_PFR_N",
-            "Type": "GPIO",
-            "Polarity": "ActiveLow"
-        },
+            "Name" : "PowerButton",
+            "DbusName": "xyz.openbmc_project.Inventory.Manager",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PowerButton",
+            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+            "Property": "Functional",
+            "Type": "DBUS"
+        },    
         {
             "Name": "PowerOk",
-            "LineName": "PWRGD_S0_PWROK_CPU0",
-            "Type": "GPIO",
-            "Polarity": "ActiveHigh"
+            "DbusName": "xyz.openbmc_project.Inventory.Manager",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PowerOk",
+            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+            "Property": "Functional",
+            "Type": "DBUS"
         },
         {
             "Name": "PowerOut",
