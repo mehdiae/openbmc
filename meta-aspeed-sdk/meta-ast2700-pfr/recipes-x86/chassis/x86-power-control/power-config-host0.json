@@ -9,25 +9,25 @@
         {
             "Name": "PostComplete",
             "DbusName": "xyz.openbmc_project.Inventory.Manager",
-            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PostComplete",
-            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
-            "Property": "Functional",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0",
+            "Interface": "xyz.openbmc_project.State.Host",
+            "Property": "PostComplete",
             "Type": "DBUS"
         },
         {
-            "Name" : "PowerButton",
+            "Name": "PowerButton",
             "DbusName": "xyz.openbmc_project.Inventory.Manager",
-            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PowerButton",
-            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
-            "Property": "Functional",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0",
+            "Interface": "xyz.openbmc_project.State.Host",
+            "Property": "PowerButton",
             "Type": "DBUS"
-        },    
+        },
         {
             "Name": "PowerOk",
             "DbusName": "xyz.openbmc_project.Inventory.Manager",
-            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0/PowerOk",
-            "Interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
-            "Property": "Functional",
+            "Path": "/xyz/openbmc_project/inventory/system/chassis/host0",
+            "Interface": "xyz.openbmc_project.State.Host",
+            "Property": "PowerOk",
             "Type": "DBUS"
         },
         {

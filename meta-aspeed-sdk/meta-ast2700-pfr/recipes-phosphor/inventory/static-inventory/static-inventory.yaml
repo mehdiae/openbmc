@@ -9,18 +9,18 @@ events:
       actions:
           - name: createObjects
             objs:
-                /system/chassis/host0/PostComplete:
-                  xyz.openbmc_project.State.Decorator.OperationalStatus:
-                    Functional:
+                /system/chassis/host0:
+                 xyz.openbmc_project.State.Host:
+                    PostComplete:
                         value: true
                         type: boolean
-                /system/chassis/host0/PowerButton:
-                  xyz.openbmc_project.State.Decorator.OperationalStatus:
-                    Functional:
+                /system/chassis/host0:
+                 xyz.openbmc_project.State.Host:
+                    PowerButton:
                         value: true
                         type: boolean
-                /system/chassis/host0/PowerOk:
-                  xyz.openbmc_project.State.Decorator.OperationalStatus:
-                    Functional:
+                /system/chassis/host0:
+                 xyz.openbmc_project.State.Host:
+                    PowerOk:
                         value: true
                         type: boolean
