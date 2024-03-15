@@ -7,7 +7,7 @@
             "Type": "EEPROM"
         },
         {
-            "Address": "0x4a",
+            "Address": "0x4b",
             "Bus": 12,
             "Name": "Ambient_Temp",
             "Thresholds": [
