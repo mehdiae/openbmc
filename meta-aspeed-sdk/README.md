@@ -52,6 +52,7 @@ ast2700-default-ltpi
 ast2700-default-ltpi-dual
 ast2700-emmc
 ast2700-dcscm
+ast2700-dcscm-1700demo
 ast2700-abr
 ```
 
@@ -62,6 +63,9 @@ ast2700-abr
     - OPTEE-OS is disabled by default. machine with `tee` postfix for OPTEE-OS enable.
   - AST2700
     - OPTEE-OS is enabled by default.
+- ARM Trusted Firmware A
+  - AST2700
+    - ATF is enabled by default.
 
 1. AST2700
 
