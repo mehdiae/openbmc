@@ -66,15 +66,13 @@ do_rust_setup_snapshot () {
     fi
 }
 addtask rust_setup_snapshot after do_unpack before do_configure
+addtask do_test_compile after do_configure do_rust_gen_targets
 do_rust_setup_snapshot[dirs] += "${WORKDIR}/rust-snapshot"
 do_rust_setup_snapshot[vardepsexclude] += "UNINATIVE_LOADER"
 
 python do_configure() {
     import json
-    try:
-        import configparser
-    except ImportError:
-        import ConfigParser as configparser
+    import configparser
 
     # toml is rather similar to standard ini like format except it likes values
     # that look more JSON like. So for our purposes simply escaping all values
@@ -129,6 +127,7 @@ python do_configure() {
     # [rust]
     config.add_section("rust")
     config.set("rust", "rpath", e(True))
+    config.set("rust", "remap-debuginfo", e(True))
     config.set("rust", "channel", e(d.expand("${RUST_CHANNEL}")))
 
     # Whether or not to optimize the compiler and standard library
@@ -155,13 +154,9 @@ python do_configure() {
 
     config.set("build", "vendor", e(True))
 
-    if not "targets" in locals():
-        targets = [d.getVar("RUST_TARGET_SYS")]
-    config.set("build", "target", e(targets))
+    config.set("build", "target", e([d.getVar("RUST_TARGET_SYS")]))
 
-    if not "hosts" in locals():
-        hosts = [d.getVar("RUST_HOST_SYS")]
-    config.set("build", "host", e(hosts))
+    config.set("build", "host", e([d.getVar("RUST_HOST_SYS")]))
 
     # We can't use BUILD_SYS since that is something the rust snapshot knows
     # nothing about when trying to build some stage0 tools (like fabricate)
@@ -223,11 +218,18 @@ FILES:${PN}-dev = ""
 do_compile () {
 }
 
+do_test_compile[dirs] = "${B}"
+do_test_compile () {
+    rust_runx build src/tools/remote-test-server --target "${RUST_TARGET_SYS}"
+}
+
 ALLOW_EMPTY:${PN} = "1"
 
-PACKAGES =+ "${PN}-tools-clippy ${PN}-tools-rustfmt"
+PACKAGES =+ "${PN}-rustdoc ${PN}-tools-clippy ${PN}-tools-rustfmt"
+FILES:${PN}-rustdoc = "${bindir}/rustdoc"
 FILES:${PN}-tools-clippy = "${bindir}/cargo-clippy ${bindir}/clippy-driver"
 FILES:${PN}-tools-rustfmt = "${bindir}/rustfmt"
+RDEPENDS:${PN}-rustdoc = "${PN}"
 RDEPENDS:${PN}-tools-clippy = "${PN}"
 RDEPENDS:${PN}-tools-rustfmt = "${PN}"
 

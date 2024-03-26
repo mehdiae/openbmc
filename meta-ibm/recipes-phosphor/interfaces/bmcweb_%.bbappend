@@ -5,6 +5,7 @@ EXTRA_OEMESON:append = " \
     -Dredfish-dump-log=enabled \
     -Dredfish-oem-manager-fan-data=disabled \
     -Dbmcweb-logging=error \
+    -Dredfish-bmc-journal=disabled \
 "
 
 EXTRA_OEMESON:append:p10bmc = " \
@@ -17,6 +18,11 @@ EXTRA_OEMESON:append:witherspoon-tacoma = " \
     -Dmutual-tls-auth=disabled \
     -Dkvm=disabled \
     -Dvm-websocket=disabled \
+"
+
+EXTRA_OEMESON:append:system1 = " \
+     -Dhttp-body-limit=400 \
+     -Dredfish-dbus-log=enabled \
 "
 
 inherit obmc-phosphor-discovery-service

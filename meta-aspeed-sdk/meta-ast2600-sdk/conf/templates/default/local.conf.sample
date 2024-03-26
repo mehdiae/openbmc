@@ -44,9 +44,8 @@ EXTRA_USERS_PARAMS = " \
 # in kernel build time.
 TZ = '/etc/localtime'
 
-# Enable both of them if BMC flash model is Cypress S25Hxx and 2-bit ECC is enabled.
-#require conf/machine/include/cypress-s25hx.inc
-#require conf/machine/include/static-rwfs.inc
+# Enable spi-nor-ecc.inc if BMC flash model support ECC mode.
+#require conf/machine/include/spi-nor-ecc.inc
 
 # Free Open Source Software (FOSS) Creation
 # INHERIT += "archiver"

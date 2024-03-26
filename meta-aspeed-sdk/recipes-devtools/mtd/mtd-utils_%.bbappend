@@ -1,3 +1,3 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI:append:cypress-s25hx = " file://0001-support-2bit-ecc.patch"
+SRCREV:spi-nor-ecc = "71edfe3b5a51ea9a7fac9760804db328ea1ec8a0"

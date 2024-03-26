@@ -8,19 +8,16 @@ Signed-off-by: VinceChang6637 <vince_chang@aspeedtech.com>
  src/FanMain.cpp | 2 ++
  1 file changed, 2 insertions(+)
 
-diff --git a/src/FanMain.cpp b/src/FanMain.cpp
-index 9c8a738..4166541 100644
---- a/src/FanMain.cpp
-+++ b/src/FanMain.cpp
-@@ -67,6 +67,8 @@ static const std::map<std::string, FanTypes> compatibleFanTypes = {
+Index: git/src/FanMain.cpp
+===================================================================
+--- git.orig/src/FanMain.cpp
++++ git/src/FanMain.cpp
+@@ -66,6 +66,8 @@ std::optional<RedundancySensor> systemRe
+ static const std::map<std::string, FanTypes> compatibleFanTypes = {
      {"aspeed,ast2400-pwm-tacho", FanTypes::aspeed},
      {"aspeed,ast2500-pwm-tacho", FanTypes::aspeed},
-     {"nuvoton,npcm750-pwm-fan", FanTypes::nuvoton},
 +    {"aspeed,ast2600-pwm-tach", FanTypes::aspeed},
 +    {"aspeed,ast2700-pwm-tach", FanTypes::aspeed},
+     {"nuvoton,npcm750-pwm-fan", FanTypes::nuvoton},
+     {"nuvoton,npcm845-pwm-fan", FanTypes::nuvoton},
      {"hpe,gxp-fan-ctrl", FanTypes::hpe}
-     // add compatible string here for new fan type
- };
--- 
-2.25.1
-

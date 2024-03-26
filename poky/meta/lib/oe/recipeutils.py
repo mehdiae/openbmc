@@ -24,7 +24,7 @@ from collections import OrderedDict, defaultdict
 from bb.utils import vercmp_string
 
 # Help us to find places to insert values
-recipe_progression = ['SUMMARY', 'DESCRIPTION', 'AUTHOR', 'HOMEPAGE', 'BUGTRACKER', 'SECTION', 'LICENSE', 'LICENSE_FLAGS', 'LIC_FILES_CHKSUM', 'PROVIDES', 'DEPENDS', 'PR', 'PV', 'SRCREV', 'SRCPV', 'SRC_URI', 'S', 'do_fetch()', 'do_unpack()', 'do_patch()', 'EXTRA_OECONF', 'EXTRA_OECMAKE', 'EXTRA_OESCONS', 'do_configure()', 'EXTRA_OEMAKE', 'do_compile()', 'do_install()', 'do_populate_sysroot()', 'INITSCRIPT', 'USERADD', 'GROUPADD', 'PACKAGES', 'FILES', 'RDEPENDS', 'RRECOMMENDS', 'RSUGGESTS', 'RPROVIDES', 'RREPLACES', 'RCONFLICTS', 'ALLOW_EMPTY', 'populate_packages()', 'do_package()', 'do_deploy()', 'BBCLASSEXTEND']
+recipe_progression = ['SUMMARY', 'DESCRIPTION', 'HOMEPAGE', 'BUGTRACKER', 'SECTION', 'LICENSE', 'LICENSE_FLAGS', 'LIC_FILES_CHKSUM', 'PROVIDES', 'DEPENDS', 'PR', 'PV', 'SRCREV', 'SRC_URI', 'S', 'do_fetch()', 'do_unpack()', 'do_patch()', 'EXTRA_OECONF', 'EXTRA_OECMAKE', 'EXTRA_OESCONS', 'do_configure()', 'EXTRA_OEMAKE', 'do_compile()', 'do_install()', 'do_populate_sysroot()', 'INITSCRIPT', 'USERADD', 'GROUPADD', 'PACKAGES', 'FILES', 'RDEPENDS', 'RRECOMMENDS', 'RSUGGESTS', 'RPROVIDES', 'RREPLACES', 'RCONFLICTS', 'ALLOW_EMPTY', 'populate_packages()', 'do_package()', 'do_deploy()', 'BBCLASSEXTEND']
 # Variables that sometimes are a bit long but shouldn't be wrapped
 nowrap_vars = ['SUMMARY', 'HOMEPAGE', 'BUGTRACKER', r'SRC_URI\[(.+\.)?md5sum\]', r'SRC_URI\[(.+\.)?sha256sum\]']
 list_vars = ['SRC_URI', 'LIC_FILES_CHKSUM']
@@ -421,8 +421,6 @@ def copy_recipe_files(d, tgt_dir, whole_dir=False, download=True, all_variants=F
             # Ensure we handle class-target if we're dealing with one of the variants
             variants.append('target')
             for variant in variants:
-                if variant.startswith("devupstream"):
-                    localdata.setVar('SRCPV', 'git')
                 localdata.setVar('CLASSOVERRIDE', 'class-%s' % variant)
                 fetch_urls(localdata)
 
@@ -674,11 +672,11 @@ def bbappend_recipe(rd, destlayerdir, srcfiles, install=None, wildcardver=False,
         destlayerdir: base directory of the layer to place the bbappend in
             (subdirectory path from there will be determined automatically)
         srcfiles: dict of source files to add to SRC_URI, where the value
-            is the full path to the file to be added, and the value is the
-            original filename as it would appear in SRC_URI or None if it
-            isn't already present. You may pass None for this parameter if
-            you simply want to specify your own content via the extralines
-            parameter.
+            is the full path to the file to be added, and the value is a
+            dict with 'path' key containing the original filename as it
+            would appear in SRC_URI or None if it isn't already present.
+            You may pass None for this parameter if you simply want to specify
+            your own content via the extralines parameter.
         install: dict mapping entries in srcfiles to a tuple of two elements:
             install path (*without* ${D} prefix) and permission value (as a
             string, e.g. '0644').
@@ -765,10 +763,9 @@ def bbappend_recipe(rd, destlayerdir, srcfiles, install=None, wildcardver=False,
     copyfiles = {}
     if srcfiles:
         instfunclines = []
-        for i, (newfile, origsrcfile) in enumerate(srcfiles.items()):
-            srcfile = origsrcfile
+        for i, (newfile, param) in enumerate(srcfiles.items()):
             srcurientry = None
-            if not srcfile:
+            if not 'path' in param or not param['path']:
                 srcfile = os.path.basename(newfile)
                 srcurientry = 'file://%s' % srcfile
                 if params and params[i]:
@@ -780,7 +777,10 @@ def bbappend_recipe(rd, destlayerdir, srcfiles, install=None, wildcardver=False,
                         appendline('SRC_URI:append%s' % appendoverride, '=', ' ' + srcurientry)
                     else:
                         appendline('SRC_URI', '+=', srcurientry)
-            copyfiles[newfile] = srcfile
+                param['path'] = srcfile
+            else:
+                srcfile = param['path']
+            copyfiles[newfile] = param
             if install:
                 institem = install.pop(newfile, None)
                 if institem:
@@ -903,7 +903,12 @@ def bbappend_recipe(rd, destlayerdir, srcfiles, install=None, wildcardver=False,
             outdir = redirect_output
         else:
             outdir = appenddir
-        for newfile, srcfile in copyfiles.items():
+        for newfile, param in copyfiles.items():
+            srcfile = param['path']
+            patchdir = param.get('patchdir', ".")
+
+            if patchdir != ".":
+                newfile = os.path.join(os.path.split(newfile)[0], patchdir, os.path.split(newfile)[1])
             filedest = os.path.join(outdir, destsubdir, os.path.basename(srcfile))
             if os.path.abspath(newfile) != os.path.abspath(filedest):
                 if newfile.startswith(tempfile.gettempdir()):
@@ -947,10 +952,9 @@ def replace_dir_vars(path, d):
         path = path.replace(dirpath, '${%s}' % dirvars[dirpath])
     return path
 
-def get_recipe_pv_without_srcpv(pv, uri_type):
+def get_recipe_pv_with_pfx_sfx(pv, uri_type):
     """
-    Get PV without SRCPV common in SCM's for now only
-    support git.
+    Get PV separating prefix and suffix components.
 
     Returns tuple with pv, prefix and suffix.
     """
@@ -958,7 +962,7 @@ def get_recipe_pv_without_srcpv(pv, uri_type):
     sfx = ''
 
     if uri_type == 'git':
-        git_regex = re.compile(r"(?P<pfx>v?)(?P<ver>.*?)(?P<sfx>\+[^\+]*(git)?r?(AUTOINC\+))(?P<rev>.*)")
+        git_regex = re.compile(r"(?P<pfx>v?)(?P<ver>.*?)(?P<sfx>\+[^\+]*(git)?r?(AUTOINC\+)?)(?P<rev>.*)")
         m = git_regex.match(pv)
 
         if m:
@@ -1010,7 +1014,7 @@ def get_recipe_upstream_version(rd):
     src_uri = src_uris.split()[0]
     uri_type, _, _, _, _, _ =  decodeurl(src_uri)
 
-    (pv, pfx, sfx) = get_recipe_pv_without_srcpv(rd.getVar('PV'), uri_type)
+    (pv, pfx, sfx) = get_recipe_pv_with_pfx_sfx(rd.getVar('PV'), uri_type)
     ru['current_version'] = pv
 
     manual_upstream_version = rd.getVar("RECIPE_UPSTREAM_VERSION")
@@ -1038,7 +1042,7 @@ def get_recipe_upstream_version(rd):
             revision = ud.method.latest_revision(ud, rd, 'default')
             upversion = pv
             if revision != rd.getVar("SRCREV"):
-                upversion = upversion + "-new-commits-available" 
+                upversion = upversion + "-new-commits-available"
         else:
             pupver = ud.method.latest_versionstring(ud, rd)
             (upversion, revision) = pupver
