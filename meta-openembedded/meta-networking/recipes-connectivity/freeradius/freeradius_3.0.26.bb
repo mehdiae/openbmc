@@ -43,10 +43,8 @@ SRCREV = "d956f683d37ea40e7977cc5907361f3e6988a439"
 
 UPSTREAM_CHECK_GITTAGREGEX = "release_(?P<pver>\d+(\_\d+)+)"
 
-CVE_CHECK_IGNORE = "\
-    CVE-2002-0318 \
-    CVE-2011-4966 \
-"
+CVE_STATUS[CVE-2002-0318] = "fixed-version: The CPE in the NVD database doesn't reflect correctly the vulnerable versions."
+CVE_STATUS[CVE-2011-4966] = "fixed-version: The CPE in the NVD database doesn't reflect correctly the vulnerable versions."
 
 PARALLEL_MAKE = ""
 
@@ -288,5 +286,12 @@ FILES:${PN} =+ "${libdir}/rlm_*.so* ${libdir}/proto_*so*"
 
 RDEPENDS:${PN} += "perl"
 RDEPENDS:${PN}-utils = "${PN} perl"
+RDEPENDS:${PN}-krb5 = "${PN}"
+RDEPENDS:${PN}-ldap = "${PN}"
+RDEPENDS:${PN}-mysql = "${PN}"
+RDEPENDS:${PN}-perl = "${PN}"
+RDEPENDS:${PN}-postgresql = "${PN}"
+RDEPENDS:${PN}-python = "${PN}"
+RDEPENDS:${PN}-unixodbc = "${PN}"
 
 CLEANBROKEN = "1"

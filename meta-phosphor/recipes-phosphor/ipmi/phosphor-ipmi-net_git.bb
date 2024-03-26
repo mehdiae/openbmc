@@ -18,7 +18,7 @@ DEPENDS += "cli11"
 DEPENDS += "libmapper"
 DEPENDS += "systemd"
 DEPENDS += "phosphor-ipmi-host"
-SRCREV = "de4121c73894af9711e6f34763dfb3d9462c55d7"
+SRCREV = "7b534095425121afd42d669655a902aaaea5716b"
 PV = "1.0+git${SRCPV}"
 PR = "r1"
 

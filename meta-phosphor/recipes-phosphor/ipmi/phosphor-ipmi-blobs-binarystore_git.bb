@@ -8,7 +8,7 @@ DEPENDS += "phosphor-ipmi-blobs"
 DEPENDS += "phosphor-logging"
 DEPENDS += "protobuf-native"
 DEPENDS += "protobuf"
-SRCREV = "53992e85d2dc5864db7a7e4a8ee6f6676974e9ba"
+SRCREV = "7f10780928ba5db439282f9306e255d07783f20e"
 PACKAGECONFIG ??= ""
 PACKAGECONFIG[blobtool] = "-Dblobtool=enabled,-Dblobtool=disabled"
 PV = "1.0+git${SRCPV}"
@@ -18,7 +18,9 @@ SRC_URI = "git://github.com/openbmc/phosphor-ipmi-blobs-binarystore;branch=maste
 
 S = "${WORKDIR}/git"
 
-inherit meson pkgconfig
+inherit meson pkgconfig systemd
+
+SYSTEMD_SERVICE:${PN} += "${@bb.utils.contains('PACKAGECONFIG', 'blobtool', 'binarystore-migration.service', '', d)}"
 
 EXTRA_OEMESON:append = " -Dtests=disabled"
 

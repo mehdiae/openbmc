@@ -1,8 +1,8 @@
 KBRANCH = "aspeed-master-v6.6"
-LINUX_VERSION ?= "6.6.1"
+LINUX_VERSION ?= "6.6.22"
 
-# Tag for v00.06.00
-SRCREV = "db6d4731c26304858292ca2bd4803e59c05ad9c5"
+# Tag for v00.06.01
+SRCREV = "fb8a1ecd35dde9440b9915e292fbbe1a08e726a8"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
@@ -14,4 +14,4 @@ DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'ast-secure', 'aspeed-secur
 SRC_URI:append = " file://ipmi_ssif.cfg "
 SRC_URI:append = " file://mtd_test.cfg "
 SRC_URI:append = " file://crpyto_manager.cfg "
-SRC_URI:append:cypress-s25hx = " file://jffs2_writebuffer.cfg "
+SRC_URI:append:spi-nor-ecc = " file://jffs2_writebuffer.cfg "

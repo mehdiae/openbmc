@@ -16,25 +16,25 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  2 files changed, 61 insertions(+), 4 deletions(-)
 
 diff --git a/http/routing/websocketrule.hpp b/http/routing/websocketrule.hpp
-index 5e558f2edb..e941ad7de4 100644
+index bf6daad6..7fe71d40 100644
 --- a/http/routing/websocketrule.hpp
 +++ b/http/routing/websocketrule.hpp
 @@ -38,7 +38,7 @@ class WebSocketRule : public BaseRule
              myConnection = std::make_shared<
                  crow::websocket::ConnectionImpl<boost::asio::ip::tcp::socket>>(
-                 req, req.url(), std::move(adaptor), openHandler, messageHandler,
--                messageExHandler, closeHandler, errorHandler);
-+                messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
-         myConnection->start();
+                 req.url(), req.session, std::move(adaptor), openHandler,
+-                messageHandler, messageExHandler, closeHandler, errorHandler);
++                messageHandler, messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
+         myConnection->start(req);
      }
  #else
 @@ -53,7 +53,7 @@ class WebSocketRule : public BaseRule
              myConnection = std::make_shared<crow::websocket::ConnectionImpl<
                  boost::beast::ssl_stream<boost::asio::ip::tcp::socket>>>(
-                 req, req.url(), std::move(adaptor), openHandler, messageHandler,
--                messageExHandler, closeHandler, errorHandler);
-+                messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
-         myConnection->start();
+                 req.url(), req.session, std::move(adaptor), openHandler,
+-                messageHandler, messageExHandler, closeHandler, errorHandler);
++                messageHandler, messageExHandler, closeHandler, errorHandler, pingHandler, pongHandler);
+         myConnection->start(req);
      }
  #endif
 @@ -93,6 +93,20 @@ class WebSocketRule : public BaseRule
@@ -67,10 +67,10 @@ index 5e558f2edb..e941ad7de4 100644
  };
  } // namespace crow
 diff --git a/http/websocket.hpp b/http/websocket.hpp
-index 216c4131db..882b6e5cf6 100644
+index 027ab246..a34763bd 100644
 --- a/http/websocket.hpp
 +++ b/http/websocket.hpp
-@@ -63,14 +63,18 @@ class ConnectionImpl : public Connection
+@@ -65,14 +65,18 @@ class ConnectionImpl : public Connection
                             std::function<void()>&& whenComplete)>
              messageExHandlerIn,
          std::function<void(Connection&, const std::string&)> closeHandlerIn,
@@ -78,23 +78,23 @@ index 216c4131db..882b6e5cf6 100644
 +        std::function<void(Connection&)> errorHandlerIn,
 +        std::function<void(Connection&, const std::string&)> pingHandlerIn,
 +        std::function<void(Connection&, const std::string&)> pongHandlerIn) :
-         Connection(reqIn),
-         uri(urlViewIn), ws(std::move(adaptorIn)), inBuffer(inString, 131088),
+         uri(urlViewIn),
+         ws(std::move(adaptorIn)), inBuffer(inString, 131088),
          openHandler(std::move(openHandlerIn)),
          messageHandler(std::move(messageHandlerIn)),
          messageExHandler(std::move(messageExHandlerIn)),
          closeHandler(std::move(closeHandlerIn)),
--        errorHandler(std::move(errorHandlerIn)), session(reqIn.session)
+-        errorHandler(std::move(errorHandlerIn)), session(sessionIn)
 +        errorHandler(std::move(errorHandlerIn)),
 +        pingHandler(std::move(pingHandlerIn)),
-+        pongHandler(std::move(pongHandlerIn)), session(reqIn.session)
++        pongHandler(std::move(pongHandlerIn)), session(sessionIn)
      {
          /* Turn on the timeouts on websocket stream to server role */
          ws.set_option(boost::beast::websocket::stream_base::timeout::suggested(
 @@ -136,6 +140,41 @@ class ConnectionImpl : public Connection
-             }
-             acceptDone();
-         });
+         ws.async_accept(*ptr,
+                         std::bind_front(&self_t::acceptDone, this,
+                                         shared_from_this(), std::move(mobile)));
 +
 +        ws.control_callback([this, self(shared_from_this())](
 +                                boost::beast::websocket::frame_type kind,
@@ -133,7 +133,7 @@ index 216c4131db..882b6e5cf6 100644
      }
  
      void sendBinary(std::string_view msg) override
-@@ -366,6 +405,8 @@ class ConnectionImpl : public Connection
+@@ -374,6 +413,8 @@ class ConnectionImpl : public Connection
          messageExHandler;
      std::function<void(Connection&, const std::string&)> closeHandler;
      std::function<void(Connection&)> errorHandler;
@@ -142,6 +142,3 @@ index 216c4131db..882b6e5cf6 100644
      std::shared_ptr<persistent_data::UserSession> session;
  
      std::shared_ptr<Connection> selfOwned;
--- 
-2.25.1
-

@@ -17,6 +17,7 @@ SRC_URI = "${GITHUB_BASE_URI}/download/${PV}/${BP}.tar.gz \
 	   file://0001-Fix-can-not-print-full-login.patch \
            file://CVE-2023-29383.patch \
            file://0001-Overhaul-valid_field.patch \
+           file://CVE-2023-4641.patch \
            "
 
 SRC_URI:append:class-target = " \
@@ -65,13 +66,10 @@ PAM_PLUGINS = "libpam-runtime \
                pam-plugin-env \
                pam-plugin-group \
                pam-plugin-limits \
-               pam-plugin-lastlog \
                pam-plugin-motd \
                pam-plugin-mail \
                pam-plugin-shells \
                pam-plugin-rootok"
-
-PAM_PLUGINS:remove:libc-musl = "pam-plugin-lastlog"
 
 PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'pam', d)} \
                    ${@bb.utils.contains('DISTRO_FEATURES', 'xattr', 'attr', '', d)}"

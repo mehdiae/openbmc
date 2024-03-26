@@ -156,7 +156,7 @@ When finished exec new init or cleanup and run reboot -f.
 
 Warning: No job control!  Shell exit will panic the system!
 HERE
-		export PS1=init#\
+		export PS1="init# "
 		exec /bin/sh
 	fi
 }
@@ -323,7 +323,17 @@ then
 		fi
 		$update --no-restore-files $do_save
 		echo "Clearing read-write overlay filesystem."
-		flash_erase -j "/dev/$rwfs"
+		# SPI NOR Flash ECC Support
+		# If MTD_BIT_WRITEABLE is clear, it means this SPI flash support ECC.
+		# The cleanmarker size is set to 16 bytes.
+		mtd_bit_writable=$(( $(cat /sys/class/mtd/mtd5/flags) & (1 << 11) ))
+		echo "mtd_bit_writable $mtd_bit_writable"
+		if test "$mtd_bit_writable" -eq 0;
+		then
+			flash_erase -j -q -c 16 "/dev/$rwfs" 0 0
+		else
+			flash_erase -j -q "/dev/$rwfs" 0 0
+		fi
 		echo "Restoring saved files to read-write overlay filesystem."
 		touch $trigger
 		$update --no-save-files --clean-saved-files

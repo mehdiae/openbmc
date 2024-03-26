@@ -33,10 +33,10 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  ikvm_video.hpp  | 33 +++++++++++++++++--
  3 files changed, 100 insertions(+), 58 deletions(-)
 
-diff --git a/ikvm_server.cpp b/ikvm_server.cpp
-index d50379b..b775e3c 100644
---- a/ikvm_server.cpp
-+++ b/ikvm_server.cpp
+Index: git/ikvm_server.cpp
+===================================================================
+--- git.orig/ikvm_server.cpp
++++ git/ikvm_server.cpp
 @@ -10,6 +10,7 @@
  #include <xyz/openbmc_project/Common/error.hpp>
  
@@ -135,7 +135,7 @@ index d50379b..b775e3c 100644
  }
  
  void Server::clientFramebufferUpdateRequest(
-@@ -248,8 +236,8 @@ enum rfbNewClientAction Server::newClient(rfbClientPtr cl)
+@@ -248,8 +236,8 @@ enum rfbNewClientAction Server::newClien
  {
      Server* server = (Server*)cl->screen->screenData;
  
@@ -157,11 +157,11 @@ index d50379b..b775e3c 100644
      }
  
      rfbReleaseClientIterator(it);
-diff --git a/ikvm_video.cpp b/ikvm_video.cpp
-index 72e7631..f5330c2 100644
---- a/ikvm_video.cpp
-+++ b/ikvm_video.cpp
-@@ -32,7 +32,7 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Device::Error;
+Index: git/ikvm_video.cpp
+===================================================================
+--- git.orig/ikvm_video.cpp
++++ git/ikvm_video.cpp
+@@ -32,7 +32,7 @@ using namespace sdbusplus::xyz::openbmc_
  
  Video::Video(const std::string& p, Input& input, int fr, int sub, int fmt) :
      resizeAfterOpen(false), timingsError(false), fd(-1), frameRate(fr),
@@ -287,7 +287,7 @@ index 72e7631..f5330c2 100644
 +    }
 +}
 +
-+ 
++
  bool Video::needsResize()
  {
      int rc;
@@ -309,10 +309,10 @@ index 72e7631..f5330c2 100644
  
      rc = ioctl(fd, VIDIOC_STREAMOFF, &type);
      if (rc)
-diff --git a/ikvm_video.hpp b/ikvm_video.hpp
-index 119764f..a758d29 100644
---- a/ikvm_video.hpp
-+++ b/ikvm_video.hpp
+Index: git/ikvm_video.hpp
+===================================================================
+--- git.orig/ikvm_video.hpp
++++ git/ikvm_video.hpp
 @@ -5,6 +5,7 @@
  #include <mutex>
  #include <string>
@@ -321,7 +321,7 @@ index 119764f..a758d29 100644
  
  #ifndef V4L2_PIX_FMT_AJPG
  #define V4L2_PIX_FMT_AJPG     v4l2_fourcc('A', 'J', 'P', 'G')
-@@ -41,8 +42,11 @@ class Video
+@@ -44,8 +45,11 @@ class Video
       * @return Pointer to the video frame data
       */
      char* getData();
@@ -333,7 +333,7 @@ index 119764f..a758d29 100644
      /*
       * @brief Gets whether or not the video frame needs to be resized
       *
-@@ -78,7 +82,28 @@ class Video
+@@ -81,7 +85,28 @@ class Video
       */
      inline size_t getFrameSize() const
      {
@@ -363,7 +363,7 @@ index 119764f..a758d29 100644
      }
      /*
       * @brief Gets the height of the video frame
-@@ -131,8 +156,11 @@ class Video
+@@ -134,8 +159,11 @@ class Video
      static const int bytesPerPixel;
      /* @brief Number of components in a pixel (i.e. 3 for RGB pixel) */
      static const int samplesPerPixel;
@@ -375,7 +375,7 @@ index 119764f..a758d29 100644
      /*
       * @struct Buffer
       * @brief Store the address and size of frame data from streaming
-@@ -151,6 +179,7 @@ class Video
+@@ -154,6 +182,7 @@ class Video
          bool queued;
          size_t payload;
          size_t size;
@@ -383,7 +383,7 @@ index 119764f..a758d29 100644
      };
  
      /*
-@@ -164,8 +193,6 @@ class Video
+@@ -167,8 +196,6 @@ class Video
      int fd;
      /* @brief Desired frame rate of video stream in frames per second */
      int frameRate;
@@ -392,6 +392,3 @@ index 119764f..a758d29 100644
      /* @brief Height in pixels of the video frame */
      size_t height;
      /* @brief Width in pixels of the video frame */
--- 
-2.34.1
-

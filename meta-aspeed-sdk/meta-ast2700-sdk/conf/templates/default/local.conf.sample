@@ -1,7 +1,8 @@
 MACHINE ??= "ast2700-default"
-#MACHINE ??= "ast2700-default-ltpi"
-#MACHINE ??= "ast2700-default-ltpi-dual"
+#MACHINE ??= "ast2700-default-ast1700-evb"
+#MACHINE ??= "ast2700-default-ast1700-evb-cdr"
 #MACHINE ??= "ast2700-emmc"
+#MACHINE ??= "ast2700-abr"
 
 DISTRO ?= "openbmc-phosphor"
 PACKAGE_CLASSES ?= "package_ipk"
@@ -27,6 +28,9 @@ EXTRA_USERS_PARAMS = " \
 # Change time zone to local time from UTC for applying localtime
 # in kernel build time.
 TZ = '/etc/localtime'
+
+# Enable spi-nor-ecc.inc if BMC flash model support ECC mode.
+#require conf/machine/include/spi-nor-ecc.inc
 
 # Free Open Source Software (FOSS) Creation
 # INHERIT += "archiver"
