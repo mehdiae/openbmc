@@ -19,7 +19,7 @@ SRC_URI:append:class-nativesdk = " \
            file://environment.d-openssl.sh \
            "
 PV = "3.2.0+git${SRCPV}"
-# Tag for v00.01.02
+# Tag for v00.02.00
 SRCREV = "fe423aa3e0a51832714a4a934b21138084f8074a"
 
 
