@@ -77,10 +77,6 @@ RDEPENDS:${PN}-apps:remove:aspeed-g5 = " \
     nvme-cli \
     "
 
-RDEPENDS:${PN}-apps:append:spi-nor-ecc = " \
-    mtd-utils \
-    "
-
 SUMMARY:${PN}-libs = "Open Source Library"
 RDEPENDS:${PN}-libs = " \
     libgpiod \
