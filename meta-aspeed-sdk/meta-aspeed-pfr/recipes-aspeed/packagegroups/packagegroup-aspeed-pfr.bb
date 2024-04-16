@@ -18,5 +18,6 @@ RDEPENDS:${PN}-apps = " \
     aspeed-pfr-tool \
     spdm-emu \
     pfr-mctp-i3c \
+    pfr-i3ctool \
     "
 
