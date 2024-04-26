@@ -318,6 +318,29 @@ static const char *g_ufm_provisioning_status[8] = {
 	"Bit[6]: PIT Level-1 enforced",
 	"Bit[7]: PIT Level-2 has been completed successfully",
 };
+static const char *g_pfr_activity_info1[8] = {
+	"Bit[0]: I3C DAA (BMC)",
+	"Bit[1]: I3C Set EID (BMC)",
+	"Bit[2]: I3C EID Registration (BMC)",
+	"Bit[3]: I3C MUX Takeover",
+	"Bit[4]: I3C DAA (CPU)",
+	"Bit[5]: I3C Set EID (CPU)",
+	"Bit[6]: I3C EID Registration (CPU)",
+	"Reserved",
+};
+
+static const char *g_pfr_activity_info2[8] = {
+	"Bit[0]: BMC Boot Done",
+	"Bit[1]: IBB Boot Done",
+	"Bit[2]: OBB Boot Done",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+};
+
+static const char *g_pfr_activity_unknown = "Unkown";
 
 static uint8_t get_cpld_id(ARGUMENTS args)
 {
@@ -398,6 +421,38 @@ static void get_ufm_provisioning_status(ARGUMENTS args, uint8_t *ufm_provisionin
 	}
 }
 
+static const char *get_pfr_activity_1(ARGUMENTS args, uint8_t *activity)
+{
+	uint8_t i, stat;
+
+	*activity = i2cReadByteData(args, MB_PFR_ACTIVITY_INFO_1);
+	stat = *activity;
+
+	for (i = 0; i < 8; i++) {
+		if (stat & 1)
+			return g_pfr_activity_info1[i];
+		stat >>= 1;
+	}
+
+	return g_pfr_activity_unknown;
+}
+
+static const char *get_pfr_activity_2(ARGUMENTS args, uint8_t *activity)
+{
+	uint8_t i, stat;
+
+	*activity = i2cReadByteData(args, MB_PFR_ACTIVITY_INFO_2);
+	stat = *activity;
+
+	for (i = 0; i < 8; i++) {
+		if (stat & 1)
+			return g_pfr_activity_info2[i];
+		stat >>= 1;
+	}
+
+	return g_pfr_activity_unknown;
+}
+
 static void get_cpld_hash(ARGUMENTS args, uint8_t *hash_buf, uint8_t len)
 {
 	int i;
@@ -414,11 +469,15 @@ void show_status(ARGUMENTS args)
 	uint8_t major_err_code;
 	uint8_t minor_err_code;
 	uint8_t ufm_provisioning_status_code;
+	uint8_t pfr_activity_1_code;
+	uint8_t pfr_activity_2_code;
 	const char *plat_state;
 	const char *last_rc_reason;
 	const char *panic_reason;
 	const char *major_err;
 	const char *minor_err;
+	const char *pfr_activity_1;
+	const char *pfr_activity_2;
 	char ufm_provisioning_status[2048] = { 0 };
 	uint8_t hash_buf[SHA512_LENGTH] = { 0 };
 	int i;
@@ -463,6 +522,14 @@ void show_status(ARGUMENTS args)
 		minor_err = get_minor_update_err(args, &minor_err_code);
 	printf("Minor Error Code             : 0x%02x\n", minor_err_code);
 	printf("Minor Error                  : %s\n\n", minor_err);
+
+	pfr_activity_1 = get_pfr_activity_1(args, &pfr_activity_1_code);
+	printf("PFR Activity Info 1 Code     : 0x%02x\n", pfr_activity_1_code);
+	printf("PFR Activity Info 1          : %s\n\n", pfr_activity_1);
+
+	pfr_activity_2 = get_pfr_activity_2(args, &pfr_activity_2_code);
+	printf("PFR Activity Info 2 Code     : 0x%02x\n", pfr_activity_2_code);
+	printf("PFR Activity Info 2          : %s\n\n", pfr_activity_2);
 
 	get_ufm_provisioning_status(args, &ufm_provisioning_status_code, ufm_provisioning_status);
 	printf("UFM/Provisioning Status Code : 0x%02x\n", ufm_provisioning_status_code);
