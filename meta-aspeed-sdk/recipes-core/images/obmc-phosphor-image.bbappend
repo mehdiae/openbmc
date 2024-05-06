@@ -1,9 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 IMAGE_INSTALL:append = " \
-        webui-vue \
         libmctp \
         entity-manager \
-        dbus-sensors \
         "
 
 IMAGE_INSTALL:append = " \
