@@ -16,9 +16,13 @@ PACKAGES = " \
     ${PN}-extra \
     "
 
-# The size of fio is very large because its dependencies
-# includes python3-core
+# The size of fio is very large because its dependencies includes python3-core.
 # The size of fio and python3-core are 10MB.
+# A nvme-cli recipe creates post installation script.
+# It caused that generated read-only file system failed.
+# The root file system is read-only for emmc boot.
+# To fix it, adds "read-only-rootfs-delayed-postinsts" in IMAGE_FEATURES for emmc boot.
+# https://github.com/AspeedTech-BMC/openbmc/blob/aspeed-master/meta-openembedded/meta-oe/recipes-bsp/nvme-cli/nvme-cli_2.6.bb
 SUMMARY:${PN}-apps = "Open Source Applications"
 RDEPENDS:${PN}-apps = " \
     mdio-tool \
