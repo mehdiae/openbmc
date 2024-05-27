@@ -68,6 +68,9 @@ do_generate_signed_pfr_image(){
         rm -rf ${PFR_DEPLOY_IMAGES_DIR}
     fi
 
+    # Add "bmc_signed_cap.bin" for PFR BMC firmware update.
+    ln -sf ${PFR_IMAGES_DIR}/obmc_recovery_image.bin  ${PFR_IMAGES_DIR}/bmc_signed_cap.bin
+
     install -d ${PFR_DEPLOY_IMAGES_DIR}
     install -m 0644 ${PFR_IMAGES_DIR}/*.bin ${PFR_DEPLOY_IMAGES_DIR}/.
     install -m 0644 ${PFR_IMAGES_DIR}/${PFR_IMAGE_BIN} ${PFR_DEPLOY_IMAGES_DIR}/.
