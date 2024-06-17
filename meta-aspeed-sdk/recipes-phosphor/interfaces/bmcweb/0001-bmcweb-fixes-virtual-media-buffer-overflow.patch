@@ -1,4 +1,4 @@
-From 28aa379fd95f61c749779aea08e2a427f5aa56e4 Mon Sep 17 00:00:00 2001
+From b720e4766683f6447ca054e67fd4aebe175e8e5e Mon Sep 17 00:00:00 2001
 From: Troy Lee <troy_lee@aspeedtech.com>
 Date: Thu, 25 May 2023 14:14:41 +0800
 Subject: [PATCH] bmcweb: fixes virtual media buffer overflow
@@ -9,15 +9,15 @@ Signed-off-by: Troy Lee <troy_lee@aspeedtech.com>
  1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/include/vm_websocket.hpp b/include/vm_websocket.hpp
-index fed36815..4a2e2f8c 100644
+index 284b5d2e..5723164e 100644
 --- a/include/vm_websocket.hpp
 +++ b/include/vm_websocket.hpp
-@@ -50,7 +50,15 @@ class Handler : public std::enable_shared_from_this<Handler>
+@@ -63,7 +63,15 @@ class Handler : public std::enable_shared_from_this<Handler>
              return;
          }
  
 -        proxy.wait();
-+        std::error_code ec;
++        boost::system::error_code ec;
 +        do
 +        {
 +            proxy.wait(ec);
@@ -25,7 +25,7 @@ index fed36815..4a2e2f8c 100644
 +            {
 +                BMCWEB_LOG_ERROR("Error on proxy.wait(): {}", ec.message());
 +            }
-+        } while (ec == std::errc::interrupted);
++        } while (ec == boost::system::errc::interrupted);
      }
  
      void connect()
