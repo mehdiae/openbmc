@@ -74,6 +74,22 @@ To remove (or adjust) this delay set these variables in local.conf:
     BOOT_DELAY = "0"
     BOOT_DELAY_MS = "0"
 
+## Boot media
+
+The Raspberry Pi 4 board can load the boot image files from SD card and USB memory.
+By default SD card media is used as boot media.
+
+To switch the boot media from SD card to USB memory, the following variables are supported
+in local.conf: `CMDLINE_ROOT_PARTITION` and `BOOT_MEDIA`.
+The default value of `CMDLINE_ROOT_PARTITION` is "/dev/mmcblk0p2" to mount SD card. If you want to mount USB memory partition, set CMDLINE_ROOT_PARTITION to "/dev/sda2".
+`BOOT_MEDIA` allows  `mmc` and `usb`. The "mmc" is required to load an image from the SD card, following the u-boot specification. Similarly, if you want to load a boot image file from USB memory, set BOOT_MEDIA to "usb".
+
+For example, if you want to use USB boot, please define
+the following parameters in your local.conf file.
+
+    CMDLINE_ROOT_PARTITION = "/dev/sda2"
+    BOOT_MEDIA = "usb"
+
 ## Set overclocking options
 
 The Raspberry Pi can be overclocked. As of now overclocking up to the "Turbo
@@ -323,6 +339,13 @@ In case of dual CAN module (e.g. PiCAN2 Duo), set following variables instead:
 Some modules may require setting the frequency of the crystal oscillator used on the particular board. The frequency is usually marked on the package of the crystal. By default, it is set to 16 MHz. To change that to 8 MHz, the following variable also has to be set:
 
     CAN_OSCILLATOR="8000000"
+
+Configure the interrupt pin to the one connected to the CAN module. By default,
+the pins are set to 25 for can0 and 24 for can1. To change them to 12 and 16,
+the following variables also have to be set:
+
+    CAN0_INTERRUPT_PIN = "12"
+    CAN1_INTERRUPT_PIN = "16"
 
 Tested modules:
 

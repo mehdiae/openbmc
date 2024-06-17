@@ -377,6 +377,35 @@ If you need to install custom CMake toolchain files supplied by the application
 being built, you should install them (during :ref:`ref-tasks-install`) to the
 preferred CMake Module directory: ``${D}${datadir}/cmake/modules/``.
 
+.. _ref-classes-cmake-qemu:
+
+``cmake-qemu``
+==============
+
+The :ref:`ref-classes-cmake-qemu` class might be used instead of the
+:ref:`ref-classes-cmake` class. In addition to the features provided by the
+:ref:`ref-classes-cmake` class, the :ref:`ref-classes-cmake-qemu` class passes
+the ``CMAKE_CROSSCOMPILING_EMULATOR`` setting to ``cmake``. This allows to use
+QEMU user-mode emulation for the execution of cross-compiled binaries on the
+host machine.  For more information about ``CMAKE_CROSSCOMPILING_EMULATOR``
+please refer to the `related section of the CMake documentation
+<https://cmake.org/cmake/help/latest/variable/CMAKE_CROSSCOMPILING_EMULATOR.html>`__.
+
+Not all platforms are supported by QEMU. This class only works for machines with
+``qemu-usermode`` in the :ref:`ref-features-machine`. Using QEMU user-mode therefore
+involves a certain risk, which is also the reason why this feature is not part of
+the main :ref:`ref-classes-cmake` class by default.
+
+One use case is the execution of cross-compiled unit tests with CTest on the build
+machine. If ``CMAKE_CROSSCOMPILING_EMULATOR`` is configured::
+
+   cmake --build --target test
+
+works transparently with QEMU user-mode.
+
+If the CMake project is developed with this use case in mind this works very nicely.
+This also applies to an IDE configured to use ``cmake-native`` for cross-compiling.
+
 .. _ref-classes-cml1:
 
 ``cml1``
@@ -392,7 +421,7 @@ and BusyBox. It could have been called "kconfig" too.
 ``compress_doc``
 ================
 
-Enables compression for man pages and info pages. This class is intended
+Enables compression for manual and info pages. This class is intended
 to be inherited globally. The default compression mechanism is gz (gzip)
 but you can select an alternative mechanism by setting the
 :term:`DOC_COMPRESS` variable.
@@ -535,6 +564,13 @@ The ``Patched`` state of a CVE issue is detected from patch files with the forma
 ``CVE-ID.patch``, e.g. ``CVE-2019-20633.patch``, in the :term:`SRC_URI` and using
 CVE metadata of format ``CVE: CVE-ID`` in the commit message of the patch file.
 
+.. note::
+
+   Commit message metadata (``CVE: CVE-ID`` in a patch header) will not be scanned
+   in any patches that are remote, i.e. that are anything other than local files
+   referenced via ``file://`` in SRC_URI. However, a ``CVE-ID`` in a remote patch
+   file name itself will be registered.
+
 If the recipe adds ``CVE-ID`` as flag of the :term:`CVE_STATUS` variable with status
 mapped to ``Ignored``, then the CVE state is reported as ``Ignored``::
 
@@ -636,7 +672,7 @@ The padding size can be modified by setting :term:`DT_PADDING_SIZE`
 to the desired size, in bytes.
 
 See :oe_git:`devicetree.bbclass sources
-</openembedded-core/tree/meta/classes-recipe/devicetree.bbclass>` 
+</openembedded-core/tree/meta/classes-recipe/devicetree.bbclass>`
 for further variables controlling this class.
 
 Here is an excerpt of an example ``recipes-kernel/linux/devicetree-acme.bb``
@@ -664,7 +700,7 @@ information about using :ref:`ref-classes-devshell`.
 The :ref:`ref-classes-devupstream` class uses
 :term:`BBCLASSEXTEND` to add a variant of the
 recipe that fetches from an alternative URI (e.g. Git) instead of a
-tarball. Following is an example::
+tarball. Here is an example::
 
    BBCLASSEXTEND = "devupstream:target"
    SRC_URI:class-devupstream = "git://git.example.com/example;branch=main"
@@ -909,6 +945,20 @@ The :ref:`ref-classes-go-mod` class allows to use Go modules, and inherits the
 :ref:`ref-classes-go` class.
 
 See the associated :term:`GO_WORKDIR` variable.
+
+.. _ref-classes-go-vendor:
+
+``go-vendor``
+=============
+
+The :ref:`ref-classes-go-vendor` class implements support for offline builds,
+also known as Go vendoring. In such a scenario, the module dependencias are
+downloaded during the :ref:`ref-tasks-fetch` task rather than when modules are
+imported, thus being coherent with Yocto's concept of fetching every source
+beforehand.
+
+The dependencies are unpacked into the modules' ``vendor`` directory, where a
+manifest file is generated.
 
 .. _ref-classes-gobject-introspection:
 
@@ -1155,13 +1205,17 @@ enables the :ref:`ref-classes-image_types` class. The :ref:`ref-classes-image` c
 ``IMGCLASSES`` variable as follows::
 
    IMGCLASSES = "rootfs_${IMAGE_PKGTYPE} image_types ${IMAGE_CLASSES}"
-   IMGCLASSES += "${@['populate_sdk_base', 'populate_sdk_ext']['linux' in d.getVar("SDK_OS")]}"
+   # Only Linux SDKs support populate_sdk_ext, fall back to populate_sdk_base
+   # in the non-Linux SDK_OS case, such as mingw32
+   inherit populate_sdk_base
+   IMGCLASSES += "${@['', 'populate_sdk_ext']['linux' in d.getVar("SDK_OS")]}"
    IMGCLASSES += "${@bb.utils.contains_any('IMAGE_FSTYPES', 'live iso hddimg', 'image-live', '', d)}"
    IMGCLASSES += "${@bb.utils.contains('IMAGE_FSTYPES', 'container', 'image-container', '', d)}"
    IMGCLASSES += "image_types_wic"
    IMGCLASSES += "rootfs-postcommands"
    IMGCLASSES += "image-postinst-intercepts"
-   inherit ${IMGCLASSES}
+   IMGCLASSES += "overlayfs-etc"
+   inherit_defer ${IMGCLASSES}
 
 The :ref:`ref-classes-image_types` class also handles conversion and compression of images.
 
@@ -1217,8 +1271,8 @@ Please keep in mind that the QA checks
 are meant to detect real or potential problems in the packaged
 output. So exercise caution when disabling these checks.
 
-Here are the tests you can list with the :term:`WARN_QA` and
-:term:`ERROR_QA` variables:
+The tests you can list with the :term:`WARN_QA` and
+:term:`ERROR_QA` variables are:
 
 -  ``already-stripped:`` Checks that produced binaries have not
    already been stripped prior to the build system extracting debug
@@ -1267,6 +1321,11 @@ Here are the tests you can list with the :term:`WARN_QA` and
    :ref:`ref-tasks-compile` log for indications that
    paths to locations on the build host were used. Using such paths
    might result in host contamination of the build output.
+
+-  ``cve_status_not_in_db:`` Checks for each component if CVEs that are ignored
+   via :term:`CVE_STATUS`, that those are (still) reported for this component
+   in the NIST database. If not, a warning is printed. This check is disabled
+   by default.
 
 -  ``debug-deps:`` Checks that all packages except ``-dbg`` packages
    do not depend on ``-dbg`` packages, which would cause a packaging
@@ -1530,6 +1589,12 @@ Here are the tests you can list with the :term:`WARN_QA` and
       This is only relevant when you are using runtime package management
       on your target system.
 
+-  ``virtual-slash:`` Checks to see if ``virtual/`` is being used in
+   :term:`RDEPENDS` or :term:`RPROVIDES`, which is not good practice ---
+   ``virtual/`` is a convention intended for use in the build context
+   (i.e. :term:`PROVIDES` and :term:`DEPENDS`) rather than the runtime
+   context.
+
 -  ``xorg-driver-abi:`` Checks that all packages containing Xorg
    drivers have ABI dependencies. The ``xserver-xorg`` recipe provides
    driver ABI names. All drivers should depend on the ABI versions that
@@ -1537,16 +1602,6 @@ Here are the tests you can list with the :term:`WARN_QA` and
    ``xorg-driver-input.inc`` or ``xorg-driver-video.inc`` will
    automatically get these versions. Consequently, you should only need
    to explicitly add dependencies to binary driver recipes.
-
-.. _ref-classes-insserv:
-
-``insserv``
-===========
-
-The :ref:`ref-classes-insserv` class uses the ``insserv`` utility to update the order
-of symbolic links in ``/etc/rc?.d/`` within an image based on
-dependencies specified by LSB headers in the ``init.d`` scripts
-themselves.
 
 .. _ref-classes-kernel:
 
@@ -2329,6 +2384,24 @@ section of ``pyproject.toml`` (See `PEP-518 <https://www.python.org/dev/peps/pep
 
 Python modules built with ``flit_core.buildapi`` are pure Python (no
 ``C`` or ``Rust`` extensions).
+
+Internally this uses the :ref:`ref-classes-python_pep517` class.
+
+.. _ref-classes-python_maturin:
+
+``python_maturin``
+==================
+
+The :ref:`ref-classes-python_maturin` class provides support for python-maturin, a replacement
+for setuptools_rust and another "backend" for building Python Wheels.
+
+.. _ref-classes-python_mesonpy:
+
+``python_mesonpy``
+==================
+
+The :ref:`ref-classes-python_mesonpy` class enables building Python modules which use the
+meson-python build system.
 
 Internally this uses the :ref:`ref-classes-python_pep517` class.
 
@@ -3210,7 +3283,7 @@ The :ref:`ref-classes-uboot-config` class provides support for U-Boot configurat
 a machine. Specify the machine in your recipe as follows::
 
    UBOOT_CONFIG ??= <default>
-   UBOOT_CONFIG[foo] = "config,images"
+   UBOOT_CONFIG[foo] = "config,images,binary"
 
 You can also specify the machine using this method::
 
@@ -3227,7 +3300,7 @@ information.
 The :ref:`ref-classes-uboot-sign` class provides support for U-Boot verified boot.
 It is intended to be inherited from U-Boot recipes.
 
-Here are variables used by this class:
+The variables used by this class are:
 
 -  :term:`SPL_MKIMAGE_DTCOPTS`: DTC options for U-Boot ``mkimage`` when
    building the FIT image.
@@ -3242,7 +3315,7 @@ Here are variables used by this class:
 -  :term:`UBOOT_FIT_KEY_REQ_ARGS`: ``openssl req`` arguments.
 -  :term:`UBOOT_FIT_SIGN_ALG`: signature algorithm for the FIT image.
 -  :term:`UBOOT_FIT_SIGN_NUMBITS`: size of the private key for FIT image
-   signing.                                                  
+   signing.
 -  :term:`UBOOT_FIT_KEY_SIGN_PKCS`: algorithm for the public key certificate
    for FIT image signing.
 -  :term:`UBOOT_FITIMAGE_ENABLE`: enable the generation of a U-Boot FIT image.

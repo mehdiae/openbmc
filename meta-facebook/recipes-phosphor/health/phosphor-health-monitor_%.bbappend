@@ -7,14 +7,14 @@ CPU_CRIT_TGT ?= "reboot.target"
 CPU_WARN_VAL ?= "80.0"
 CPU_WARN_TGT ?= ""
 
-MEM_CRIT_VAL ?= "85.0"
+MEM_CRIT_VAL ?= "10.0"
 MEM_CRIT_TGT ?= "reboot.target"
-MEM_WARN_VAL ?= "70.0"
+MEM_WARN_VAL ?= "15.0"
 MEM_WARN_TGT ?= ""
 
-STORAGE_CRIT_VAL ?= "95.0"
+STORAGE_CRIT_VAL ?= "5.0"
 STORAGE_CRIT_TGT ?= ""
-STORAGE_WARN_VAL ?= "90.0"
+STORAGE_WARN_VAL ?= "10.0"
 STORAGE_WARN_TGT ?= ""
 
 do_install:prepend() {

@@ -2,7 +2,7 @@ SUMMARY = "Simon Tatham's Portable Puzzle Collection"
 DESCRIPTION = "Collection of small computer programs which implement one-player puzzle games."
 HOMEPAGE = "http://www.chiark.greenend.org.uk/~sgtatham/puzzles/"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENCE;md5=92d2b7a2fc96b5f7f17101df7db1fefa"
+LIC_FILES_CHKSUM = "file://LICENCE;md5=191542b32377bde254e9799e0a46f18b"
 
 # gtk support includes a bunch of x11 headers
 REQUIRED_DISTRO_FEATURES = "x11"
@@ -10,7 +10,7 @@ REQUIRED_DISTRO_FEATURES = "x11"
 SRC_URI = "git://git.tartarus.org/simon/puzzles.git;branch=main;protocol=https"
 
 UPSTREAM_CHECK_COMMITS = "1"
-SRCREV = "96d65e852cea8a95001fa70e3ec2996d4ea5e2b4"
+SRCREV = "80aac3104096aee4057b675c53ece8e60793aa90"
 PE = "2"
 PV = "0.0+git"
 

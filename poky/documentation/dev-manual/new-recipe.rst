@@ -100,7 +100,7 @@ command::
 
 Running ``recipetool create -o OUTFILE`` creates the base recipe and
 locates it properly in the layer that contains your source files.
-Following are some syntax examples:
+Here are some syntax examples:
 
  - Use this syntax to generate a recipe based on source. Once generated,
    the recipe resides in the existing source code layer::
@@ -303,28 +303,33 @@ If your :term:`SRC_URI` statement includes URLs pointing to individual files
 fetched from a remote server other than a version control system,
 BitBake attempts to verify the files against checksums defined in your
 recipe to ensure they have not been tampered with or otherwise modified
-since the recipe was written. Two checksums are used:
-``SRC_URI[md5sum]`` and ``SRC_URI[sha256sum]``.
+since the recipe was written. Multiple checksums are supported:
+``SRC_URI[md5sum]``, ``SRC_URI[sha1sum]``, ``SRC_URI[sha256sum]``.
+``SRC_URI[sha384sum]`` and ``SRC_URI[sha512sum]``, but only
+``SRC_URI[sha256sum]`` is commonly used.
+
+.. note::
+
+   ``SRC_URI[md5sum]`` used to also be commonly used, but it is deprecated
+   and should be replaced by ``SRC_URI[sha256sum]`` when updating existing
+   recipes.
 
 If your :term:`SRC_URI` variable points to more than a single URL (excluding
-SCM URLs), you need to provide the ``md5`` and ``sha256`` checksums for
-each URL. For these cases, you provide a name for each URL as part of
-the :term:`SRC_URI` and then reference that name in the subsequent checksum
-statements. Here is an example combining lines from the files
-``git.inc`` and ``git_2.24.1.bb``::
+SCM URLs), you need to provide the ``sha256`` checksum for each URL. For these
+cases, you provide a name for each URL as part of the :term:`SRC_URI` and then
+reference that name in the subsequent checksum statements. Here is an example
+combining lines from the files ``git.inc`` and ``git_2.24.1.bb``::
 
    SRC_URI = "${KERNELORG_MIRROR}/software/scm/git/git-${PV}.tar.gz;name=tarball \
               ${KERNELORG_MIRROR}/software/scm/git/git-manpages-${PV}.tar.gz;name=manpages"
 
-   SRC_URI[tarball.md5sum] = "166bde96adbbc11c8843d4f8f4f9811b"
    SRC_URI[tarball.sha256sum] = "ad5334956301c86841eb1e5b1bb20884a6bad89a10a6762c958220c7cf64da02"
-   SRC_URI[manpages.md5sum] = "31c2272a8979022497ba3d4202df145d"
    SRC_URI[manpages.sha256sum] = "9a7ae3a093bea39770eb96ca3e5b40bff7af0b9f6123f089d7821d0e5b8e1230"
 
-Proper values for ``md5`` and ``sha256`` checksums might be available
+The proper value for the ``sha256`` checksum might be available together
 with other signatures on the download page for the upstream source (e.g.
 ``md5``, ``sha1``, ``sha256``, ``GPG``, and so forth). Because the
-OpenEmbedded build system only deals with ``sha256sum`` and ``md5sum``,
+OpenEmbedded build system typically only deals with ``sha256sum``,
 you should verify all the signatures you find by hand.
 
 If no :term:`SRC_URI` checksums are specified when you attempt to build the
@@ -1227,7 +1232,7 @@ inherit the :ref:`ref-classes-autotools` class, which contains the definitions
 of all the steps needed to build an Autotool-based application. The result of
 the build is automatically packaged. And, if the application uses NLS for
 localization, packages with local information are generated (one package per
-language). Following is one example: (``hello_2.3.bb``)::
+language). Here is one example: (``hello_2.3.bb``)::
 
    SUMMARY = "GNU Helloworld application"
    SECTION = "examples"
@@ -1280,7 +1285,7 @@ Splitting an Application into Multiple Packages
 You can use the variables :term:`PACKAGES` and :term:`FILES` to split an
 application into multiple packages.
 
-Following is an example that uses the ``libxpm`` recipe. By default,
+Here is an example that uses the ``libxpm`` recipe. By default,
 this recipe generates a single package that contains the library along
 with a few binaries. You can modify the recipe to split the binaries
 into separate packages::
@@ -1505,7 +1510,7 @@ in the BitBake User Manual.
       when you make the assignment, but this is not generally needed.
 
 -  *Quote All Assignments ("value"):* Use double quotes around values in
-   all variable assignments (e.g. ``"value"``). Following is an example::
+   all variable assignments (e.g. ``"value"``). Here is an example::
 
       VAR1 = "${OTHERVAR}"
       VAR2 = "The version is ${PV}"

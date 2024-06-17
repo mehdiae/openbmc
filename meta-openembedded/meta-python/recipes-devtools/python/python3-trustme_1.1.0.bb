@@ -20,9 +20,11 @@ RDEPENDS:${PN} += " \
 "
 
 RDEPENDS:${PN}-ptest += " \
-	${PYTHON_PN}-pytest \
-	${PYTHON_PN}-service-identity \
-	${PYTHON_PN}-pyasn1-modules \
+    python3-pyopenssl \
+    python3-pyasn1-modules \
+    python3-pytest \
+    python3-service-identity \
+    python3-unittest-automake-output \
 "
 
 do_install_ptest() {

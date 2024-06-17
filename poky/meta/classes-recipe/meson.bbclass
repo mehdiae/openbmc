@@ -74,7 +74,7 @@ nm = ${@meson_array('NM', d)}
 strip = ${@meson_array('STRIP', d)}
 readelf = ${@meson_array('READELF', d)}
 objcopy = ${@meson_array('OBJCOPY', d)}
-pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 llvm-config = 'llvm-config'
 cups-config = 'cups-config'
 g-ir-scanner = '${STAGING_BINDIR}/g-ir-scanner-wrapper'
@@ -90,6 +90,7 @@ cpp_link_args = ${@meson_array('LDFLAGS', d)}
 
 [properties]
 needs_exe_wrapper = true
+sys_root = '${STAGING_DIR_HOST}'
 
 [host_machine]
 system = '${@meson_operating_system('HOST_OS', d)}'
@@ -115,7 +116,7 @@ strip = ${@meson_array('BUILD_STRIP', d)}
 readelf = ${@meson_array('BUILD_READELF', d)}
 objcopy = ${@meson_array('BUILD_OBJCOPY', d)}
 llvm-config = '${STAGING_BINDIR_NATIVE}/llvm-config'
-pkgconfig = 'pkg-config-native'
+pkg-config = 'pkg-config-native'
 ${@rust_tool(d, "RUST_BUILD_SYS")}
 
 [built-in options]
@@ -152,9 +153,6 @@ meson_do_configure() {
     # https://github.com/mesonbuild/meson/commit/ef9aeb188ea2bc7353e59916c18901cde90fa2b3
     unset LD
 
-    # Work around "Meson fails if /tmp is mounted with noexec #2972"
-    mkdir -p "${B}/meson-private/tmp"
-    export TMPDIR="${B}/meson-private/tmp"
     bbnote Executing meson ${EXTRA_OEMESON}...
     if ! meson setup ${MESONOPTS} "${MESON_SOURCEPATH}" "${B}" ${MESON_CROSS_FILE} ${EXTRA_OEMESON}; then
         bbfatal_log meson failed

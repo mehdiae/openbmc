@@ -60,6 +60,8 @@ w=60
 while true; do
   start=$SECONDS
   while read -r line; do
+    # `script` terminates all lines with a CRLF, remove it
+    line="${line:0:-1}"
     if [ -z "$line" ]; then
       hextet=
       pfx=
@@ -69,11 +71,11 @@ while true; do
       t_pfx="${BASH_REMATCH[1]}"
       t_pfx_len="${BASH_REMATCH[2]}"
       ip_to_bytes t_pfx_b "$t_pfx" || continue
-      (( t_pfx_len == 76 && t_pfx_b[8] & 0xfd == 0xfd )) || continue
+      (( t_pfx_len == 76 && (t_pfx_b[8] & 0xfd) == 0xfd )) || continue
       (( t_pfx_b[9] |= 1 ))
       hextet="fd$(printf '%02x' "${t_pfx_b[9]}")"
       pfx="$(ip_bytes_to_str t_pfx_b)"
-    elif [[ "$line" =~ ^'DNS search list'' '*:' '*([^.]+)(.*[.]google[.]com)$ ]]; then
+    elif [[ "$line" =~ ^'DNS search list'' '*:' '*([^.]+)(.*[.]google[.]com)' '*$ ]]; then
       # Ideally, we use PCRE and with lookahead and can do this in a single regex
       #   ^([a-zA-Z0-9-]+(?=-n[a-fA-F0-9]{1,4})|[a-zA-Z0-9-]+(?!-n[a-fA-F0-9]{1,4}))[^.]*[.]((?:[a-zA-Z0-9]*[.])*google[.]com)$
       # Instead we do multiple steps to extract the needed info
@@ -87,7 +89,7 @@ while true; do
       set_net || true
       set_host || true
     fi
-  done < <(rdisc6 -d -m "$NCSI_IF" -w $(( w * 1000 )) 2>/dev/null)
+  done < <(exec script -q -c "rdisc6 -d -m $NCSI_IF -w $(( w * 1000 ))" /dev/null 2>/dev/null)
   # If rdisc6 exits early we still want to wait the full `w` time before
   # starting again.
   (( timeout = start + w - SECONDS ))
