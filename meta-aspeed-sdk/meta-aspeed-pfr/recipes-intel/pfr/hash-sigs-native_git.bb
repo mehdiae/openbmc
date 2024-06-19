@@ -32,7 +32,7 @@ do_install () {
     install -d ${D}${libdir}
     install -m 644 hss_verify.a ${D}${libdir}/libhss_verify.a
     install -m 644 hss_lib.a ${D}${libdir}/libhss_lib.a
-    install -d ${D}${includedir}
-    install -m 644 ${EXPORT_HEADER} ${D}${includedir}
+    install -d ${D}${includedir}/hss
+    install -m 644 ${EXPORT_HEADER} ${D}${includedir}/hss
 }
 
