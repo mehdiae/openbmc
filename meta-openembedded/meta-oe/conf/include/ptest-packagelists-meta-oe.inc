@@ -10,14 +10,15 @@ PTESTS_FAST_META_OE = "\
     cmocka \
     cunit \
     duktape \
-    fmt \
     function2 \
     fwupd \
     gcab \
+    jemalloc \
     jq \
     leveldb \
     libcereal \
     libee \
+    libgpiod \
     libio-pty-perl \
     libmanette \
     librelp \
@@ -26,11 +27,13 @@ PTESTS_FAST_META_OE = "\
     libxml++-5.0 \
     libyang \
     lmdb \
+    microsoft-gsl \
     minicoredumper \
     neon \
     nlohmann-json \
     nodejs \
     onig \
+    oprofile \
     protobuf \
     sdbus-c++ \
     uthash \
@@ -42,10 +45,11 @@ PTESTS_FAST_META_OE:append:x86 = " mcelog"
 PTESTS_FAST_META_OE:append:x86-64 = " mcelog"
 
 PTESTS_FAST_META_OE:remove:libc-musl = "minicoredumper"
-PTESTS_FAST_META_OE:remove:riscv64 = "nodejs"
-PTESTS_FAST_META_OE:remove:riscv32 = "nodejs"
+PTESTS_FAST_META_OE:remove:riscv64 = "nodejs oprofile"
+PTESTS_FAST_META_OE:remove:riscv32 = "nodejs oprofile"
 
 PTESTS_SLOW_META_OE = "\
+    c-ares \
     fftw \
     libusb-compat \
     rsyslog \
@@ -58,14 +62,10 @@ PTESTS_SLOW_META_OE:append:x86-64 = " kernel-selftest"
 PTESTS_SLOW_META_OE:remove:libc-musl = "kernel-selftest"
 
 PTESTS_PROBLEMS_META_OE ="\
-    jemalloc \
     keyutils \
     libdbi-perl \
-    libgpiod \
     libjcat \
     libteam \
-    libxml++ \
-    oprofile \
     ostree \
     psqlodbc \
     pv \

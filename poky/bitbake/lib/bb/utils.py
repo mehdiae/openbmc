@@ -604,7 +604,6 @@ def preserved_envvars():
     v = [
         'BBPATH',
         'BB_PRESERVE_ENV',
-        'BB_ENV_PASSTHROUGH',
         'BB_ENV_PASSTHROUGH_ADDITIONS',
     ]
     return v + preserved_envvars_exported()
@@ -759,7 +758,8 @@ def mkdirhier(directory):
     """Create a directory like 'mkdir -p', but does not complain if
     directory already exists like os.makedirs
     """
-
+    if '${' in str(directory):
+        bb.fatal("Directory name {} contains unexpanded bitbake variable. This may cause build failures and WORKDIR polution.".format(directory))
     try:
         os.makedirs(directory)
     except OSError as e:
@@ -1142,7 +1142,10 @@ def get_referenced_vars(start_expr, d):
 
 
 def cpu_count():
-    return multiprocessing.cpu_count()
+    try:
+        return len(os.sched_getaffinity(0))
+    except OSError:
+        return multiprocessing.cpu_count()
 
 def nonblockingfd(fd):
     fcntl.fcntl(fd, fcntl.F_SETFL, fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)

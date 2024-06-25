@@ -12,7 +12,6 @@ SRCREV = "b8fcc89b74c9128a13b07cc15a0ce25dca0cd97e"
 SRC_URI = "git://github.com/libimobiledevice/libplist;protocol=https;branch=master"
 
 S = "${WORKDIR}/git"
-PR = "r1"
 
 CVE_STATUS_GROUPS += "CVE_STATUS_LIBLIST"
 CVE_STATUS_LIBLIST[status] = "fixed-version: The CPE in the NVD database doesn't reflect correctly the vulnerable versions."
@@ -21,6 +20,10 @@ CVE_STATUS_LIBLIST = " \
     CVE-2017-5835 \
     CVE-2017-5836 \
 "
+
+do_configure:prepend() {
+    rm -f ${S}/m4/ax_python_devel.m4
+}
 
 do_install:append () {
     if [ -e ${D}${libdir}/python*/site-packages/plist/_plist.so ]; then

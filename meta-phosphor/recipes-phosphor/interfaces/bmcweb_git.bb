@@ -13,7 +13,7 @@ DEPENDS = " \
     ${@bb.utils.contains('PTEST_ENABLED', '1', 'gtest', '', d)} \
     ${@bb.utils.contains('PTEST_ENABLED', '1', 'gmock', '', d)} \
 "
-SRCREV = "c48377db9e745fe5169b58cf2812ff306c30057a"
+SRCREV = "8f5df132a70b47c2f299cb216812ec83d4fc1197"
 PV = "1.0+git${SRCPV}"
 
 SRC_URI = "git://github.com/openbmc/bmcweb.git;branch=master;protocol=https"
@@ -28,12 +28,18 @@ inherit systemd
 inherit useradd
 inherit pkgconfig meson ptest
 
-PACKAGECONFIG ??= ""
+PACKAGECONFIG ??= "mutual-tls-auth"
 PACKAGECONFIG[insecure-redfish-expand]="-Dinsecure-enable-redfish-query=enabled"
+PACKAGECONFIG[mutual-tls-auth]="-Dmutual-tls-auth=enabled,-Dmutual-tls-auth=disabled"
+
+MUTUAL_TLS_PARSING="username"
 
 EXTRA_OEMESON = " \
     --buildtype=minsize \
     -Dtests=${@bb.utils.contains('PTEST_ENABLED', '1', 'enabled', 'disabled', d)} \
+    ${@bb.utils.contains('PACKAGECONFIG', 'mutual-tls-auth', \
+        '-Dmutual-tls-common-name-parsing=' + d.getVar('MUTUAL_TLS_PARSING', True), \
+        '', d)} \
 "
 
 do_install_ptest() {

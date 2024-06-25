@@ -9,7 +9,7 @@ SUMMARY = "meta-python ptest test image"
 DESCRIPTION += "Also including the ${MCNAME} ptest package."
 HOMEPAGE = "https://www.openembedded.org/"
 
-PTESTS_META_PYTHON = "${PTESTS_SLOW_META_PYTHON} ${PTESTS_FAST_META_PYTHON}"
+PTESTS_META_PYTHON = "${PTESTS_SLOW_META_PYTHON} ${PTESTS_FAST_META_PYTHON} ${PTESTS_PROBLEMS_META_PYTHON}"
 
 IMAGE_INSTALL:append = " ${MCNAME}-ptest openssh"
 
@@ -27,6 +27,10 @@ IMAGE_ROOTFS_EXTRA_SPACE = "324288"
 QB_MEM = "-m 1024"
 # If a particular ptest needs more memory, it can be customized:
 #QB_MEM:virtclass-mcextend-<pn> = "-m 4096"
+# python3-scrypt ptests run into OOMs on RISCV64 qemu
+QB_MEM:virtclass-mcextend-python3-scrypt = "-m 2048"
+QB_MEM:virtclass-mcextend-python3-fastjsonschema = "-m 2048"
+QB_MEM:virtclass-mcextend-python3-pillow = "-m 2048"
 
 TEST_SUITES = "ping ssh parselogs ptest"
 

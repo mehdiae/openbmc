@@ -35,18 +35,24 @@ SYSTEMD_PACKAGES = "${PN}-discover \
                     ${PN}-systemd-target-monitor \
 "
 
-PACKAGECONFIG ??= "no-warm-reboot \
-                   only-run-apr-on-power-loss \
+# Set the common defaults
+PACKAGECONFIG ??= "only-run-apr-on-power-loss \
                    only-allow-boot-when-bmc-ready"
 
 # Disable warm reboots of host
 PACKAGECONFIG[no-warm-reboot] = "-Dwarm-reboot=disabled,-Dwarm-reboot=enabled"
+
+# Disable forced warm reboots of host
+PACKAGECONFIG[no-force-warm-reboot] = "-Dforce-warm-reboot=disabled,-Dforce-warm-reboot=enabled"
 
 # Only run auto power restore logic if system had ac loss
 PACKAGECONFIG[only-run-apr-on-power-loss] = "-Donly-run-apr-on-power-loss=true,-Donly-run-apr-on-power-loss=false"
 
 # Only allow boot operations when BMC is in Ready state
 PACKAGECONFIG[only-allow-boot-when-bmc-ready] = "-Donly-allow-boot-when-bmc-ready=true,-Donly-allow-boot-when-bmc-ready=false"
+
+# Enable host state GPIO
+PACKAGECONFIG[host-gpio] = "-Dhost-gpios=enabled,-Dhost-gpios=disabled,gpioplus"
 
 # The host-check function will check if the host is running
 # after a BMC reset.
@@ -76,19 +82,21 @@ DEPENDS += "nlohmann-json"
 DEPENDS += "cli11"
 DEPENDS += "libgpiod"
 
-RDEPENDS:${PN}-chassis += "bash"
+RDEPENDS:${PN}-bmc += "bash"
 RDEPENDS:${PN}-host += "bash"
 
 EXTRA_OEMESON:append = " -Dtests=disabled"
 
 FILES:${PN}-host = "${bindir}/phosphor-host-state-manager"
-FILES:${PN}-host += "${libexecdir}/host-reboot"
+FILES:${PN}-host += "${bindir}/phosphor-host-condition-gpio"
+FILES:${PN}-host += "${libexecdir}/phosphor-state-manager/host-reboot"
 DBUS_SERVICE:${PN}-host += "xyz.openbmc_project.State.Host@.service"
 DBUS_SERVICE:${PN}-host += "phosphor-reboot-host@.service"
 SYSTEMD_SERVICE:${PN}-host += "phosphor-reset-host-reboot-attempts@.service"
 SYSTEMD_SERVICE:${PN}-host += "phosphor-clear-one-time@.service"
 SYSTEMD_SERVICE:${PN}-host += "phosphor-set-host-transition-to-running@.service"
 SYSTEMD_SERVICE:${PN}-host += "phosphor-set-host-transition-to-off@.service"
+SYSTEMD_SERVICE:${PN}-host += "${@bb.utils.contains('PACKAGECONFIG', 'host-gpio', 'phosphor-host-condition-gpio@.service', '', d)}"
 
 FILES:${PN}-chassis = "${bindir}/phosphor-chassis-state-manager"
 DBUS_SERVICE:${PN}-chassis += "xyz.openbmc_project.State.Chassis@.service"
@@ -102,10 +110,9 @@ SYSTEMD_SERVICE:${PN}-chassis += "phosphor-set-chassis-transition-to-off@.servic
 
 SYSTEMD_SERVICE:${PN}-chassis-poweron-log += "phosphor-create-chassis-poweron-log@.service"
 
-FILES:${PN}-chassis += "${bindir}/obmcutil"
-
 FILES:${PN}-bmc = "${bindir}/phosphor-bmc-state-manager"
 FILES:${PN}-bmc += "${sysconfdir}/phosphor-systemd-target-monitor/phosphor-service-monitor-default.json"
+FILES:${PN}-bmc += "${bindir}/obmcutil"
 DBUS_SERVICE:${PN}-bmc += "xyz.openbmc_project.State.BMC.service"
 DBUS_SERVICE:${PN}-bmc += "obmc-bmc-service-quiesce@.target"
 
@@ -234,14 +241,14 @@ START_TMPL_CTRL = "obmc-chassis-poweron@.target"
 START_TGTFMT_CTRL = "obmc-host-startmin@{1}.target"
 START_INSTFMT_CTRL = "obmc-chassis-poweron@{0}.target"
 START_FMT_CTRL = "../${START_TMPL_CTRL}:${START_TGTFMT_CTRL}.requires/${START_INSTFMT_CTRL}"
-SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list_zip(d, 'START_FMT_CTRL', 'OBMC_POWER_INSTANCES', 'OBMC_CHASSIS_INSTANCES')}"
+SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list_zip(d, 'START_FMT_CTRL', 'OBMC_CHASSIS_INSTANCES', 'OBMC_CHASSIS_INSTANCES')}"
 
 # Chassis off requires host off
 STOP_TMPL_CTRL = "obmc-host-stop@.target"
 STOP_TGTFMT_CTRL = "obmc-chassis-poweroff@{0}.target"
 STOP_INSTFMT_CTRL = "obmc-host-stop@{1}.target"
 STOP_FMT_CTRL = "../${STOP_TMPL_CTRL}:${STOP_TGTFMT_CTRL}.requires/${STOP_INSTFMT_CTRL}"
-SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list_zip(d, 'STOP_FMT_CTRL', 'OBMC_CHASSIS_INSTANCES', 'OBMC_HOST_INSTANCES')}"
+SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list_zip(d, 'STOP_FMT_CTRL', 'OBMC_HOST_INSTANCES', 'OBMC_HOST_INSTANCES')}"
 
 # Hard power off requires chassis off
 HARD_OFF_TMPL_CTRL = "obmc-chassis-poweroff@.target"
@@ -256,8 +263,9 @@ SYSD_TGT = "multi-user.target"
 RESET_INSTFMT_CTRL = "obmc-chassis-powerreset@{0}.target"
 RESET_FMT_CTRL = "../${RESET_TMPL_CTRL}:${SYSD_TGT}.wants/${RESET_INSTFMT_CTRL}"
 SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list_zip(d, 'RESET_FMT_CTRL', 'OBMC_CHASSIS_INSTANCES')}"
+SYSTEMD_LINK[vardeps] += "OBMC_CHASSIS_INSTANCES OBMC_HOST_INSTANCES"
 
 SRC_URI = "git://github.com/openbmc/phosphor-state-manager;branch=master;protocol=https"
-SRCREV = "f0865dee9a54f382c38e1b5a0752907042eecb3f"
+SRCREV = "24b25a4617cf435e1855418567dea7d84564f948"
 
 S = "${WORKDIR}/git"

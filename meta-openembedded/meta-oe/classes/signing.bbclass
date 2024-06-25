@@ -6,9 +6,9 @@
 
 # This class provides a common workflow to use asymmetric (i.e. RSA) keys to
 # sign artifacts. Usually, the keys are either stored as simple files in the
-# file system or on a HSM (Hardware Security Module). While files are easy to
-# use, it's hard to verify that no copies of the private have been made and
-# only authorized persons are able to use the key. Use of an HSM addresses
+# file system or on an HSM (Hardware Security Module). While files are easy to
+# use, it's hard to verify that no copies of the private key have been made
+# and only authorized persons are able to use the key. Use of an HSM addresses
 # these risks by only allowing use of the key via an API (often PKCS #11). The
 # standard way of referring to a specific key in an HSM are PKCS #11 URIs (RFC
 # 7512).
@@ -142,10 +142,10 @@ signing_import_cert_from_pem() {
     signing_pkcs11_tool --type cert --write-object /proc/self/fd/0 --label "${role}"
 }
 
-# signing_import_pubkey_from_der <role> <pem>
+# signing_import_pubkey_from_der <role> <der>
 #
 # Import a public key from DER file to a role. To be used with SoftHSM.
-signing_import_pubkey_from_pem() {
+signing_import_pubkey_from_der() {
     local role="${1}"
     local der="${2}"
 
@@ -161,17 +161,17 @@ signing_import_pubkey_from_pem() {
     local pem="${2}"
 
     if [ -n "${IMPORT_PASS_FILE}" ]; then
-        openssl rsa \
+        openssl pkey \
             -passin "file:${IMPORT_PASS_FILE}" \
             -in "${pem}" -inform pem -pubout -outform der
     else
-        openssl rsa \
+        openssl pkey \
             -in "${pem}" -inform pem -pubout -outform der
     fi |
     signing_pkcs11_tool --type pubkey --write-object /proc/self/fd/0 --label "${role}"
 }
 
-# signing_import_privkey_from_der <role> <pem>
+# signing_import_privkey_from_der <role> <der>
 #
 # Import a private key from DER file to a role. To be used with SoftHSM.
 signing_import_privkey_from_der() {
@@ -189,11 +189,11 @@ signing_import_privkey_from_pem() {
     local pem="${2}"
 
     if [ -n "${IMPORT_PASS_FILE}" ]; then
-        openssl rsa \
+        openssl pkey \
             -passin "file:${IMPORT_PASS_FILE}" \
             -in "${pem}" -inform pem -outform der
     else
-        openssl rsa \
+        openssl pkey \
             -in "${pem}" -inform pem -outform der
     fi |
     signing_pkcs11_tool --type privkey --write-object /proc/self/fd/0 --label "${role}"

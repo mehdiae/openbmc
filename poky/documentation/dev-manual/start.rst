@@ -36,7 +36,7 @@ particular working environment and set of practices.
     equipment together and set up your development environment's
     hardware topology.
 
-    Here are possible roles:
+    Possible roles are:
 
     -  *Application Developer:* This type of developer does application
        level work on top of an existing software stack.
@@ -99,7 +99,7 @@ particular working environment and set of practices.
 
 #.  *Set up the Application Development Machines:* As mentioned earlier,
     application developers are creating applications on top of existing
-    software stacks. Following are some best practices for setting up
+    software stacks. Here are some best practices for setting up
     machines used for application development:
 
     -  Use a pre-built toolchain that contains the software stack
@@ -118,7 +118,7 @@ particular working environment and set of practices.
 
 #.  *Set up the Core Development Machines:* As mentioned earlier, core
     developers work on the contents of the operating system itself.
-    Following are some best practices for setting up machines used for
+    Here are some best practices for setting up machines used for
     developing images:
 
     -  Have the :term:`OpenEmbedded Build System` available on
@@ -334,7 +334,10 @@ to use the Extensible SDK, see the ":doc:`/sdk-manual/extensible`" Chapter in th
 Project Application Development and the Extensible Software Development
 Kit (eSDK) manual. If you want to work on the kernel, see the :doc:`/kernel-dev/index`. If you are going to use
 Toaster, see the ":doc:`/toaster-manual/setup-and-use`"
-section in the Toaster User Manual.
+section in the Toaster User Manual. If you are a VSCode user, you can configure
+the `Yocto Project BitBake
+<https://marketplace.visualstudio.com/items?itemName=yocto-project.yocto-bitbake>`__
+extension accordingly.
 
 Setting Up to Use CROss PlatformS (CROPS)
 -----------------------------------------
@@ -426,7 +429,10 @@ section. If you are going to use the Extensible SDK container, see the
 Project Application Development and the Extensible Software Development
 Kit (eSDK) manual. If you are going to use the Toaster container, see
 the ":doc:`/toaster-manual/setup-and-use`"
-section in the Toaster User Manual.
+section in the Toaster User Manual. If you are a VSCode user, you can configure
+the `Yocto Project BitBake
+<https://marketplace.visualstudio.com/items?itemName=yocto-project.yocto-bitbake>`__
+extension accordingly.
 
 Setting Up to Use Windows Subsystem For Linux (WSL 2)
 -----------------------------------------------------
@@ -554,7 +560,10 @@ Extensible SDK container, see the ":doc:`/sdk-manual/extensible`" Chapter in the
 Project Application Development and the Extensible Software Development
 Kit (eSDK) manual. If you are going to use the Toaster container, see
 the ":doc:`/toaster-manual/setup-and-use`"
-section in the Toaster User Manual.
+section in the Toaster User Manual. If you are a VSCode user, you can configure
+the `Yocto Project BitBake
+<https://marketplace.visualstudio.com/items?itemName=yocto-project.yocto-bitbake>`__
+extension accordingly.
 
 Locating Yocto Project Source Files
 ===================================
@@ -610,7 +619,7 @@ containing the release you wish to use, for example
 
 You will find there source archives of individual components (if you wish
 to use them individually), and of the corresponding Poky release bundling
-a selection of these components. 
+a selection of these components.
 
 .. note::
 
@@ -621,7 +630,7 @@ a selection of these components.
 Using the Downloads Page
 ------------------------
 
-The :yocto_home:`Yocto Project Website <>` uses a "DOWNLOADS" page
+The :yocto_home:`Yocto Project Website <>` uses a "RELEASES" page
 from which you can locate and download tarballs of any Yocto Project
 release. Rather than Git repositories, these files represent snapshot
 tarballs similar to the tarballs located in the Index of Releases
@@ -630,12 +639,13 @@ described in the ":ref:`dev-manual/start:accessing source archives`" section.
 #. *Go to the Yocto Project Website:* Open The
    :yocto_home:`Yocto Project Website <>` in your browser.
 
-#. *Get to the Downloads Area:* Select the "DOWNLOADS" item from the
-   pull-down "SOFTWARE" tab menu near the top of the page.
+#. *Get to the Downloads Area:* Select the "RELEASES" item from the
+   pull-down "DEVELOPMENT" tab menu near the top of the page.
 
-#. *Select a Yocto Project Release:* Use the menu next to "RELEASE" to
-   display and choose a recent or past supported Yocto Project release
-   (e.g. &DISTRO_NAME_NO_CAP;, &DISTRO_NAME_NO_CAP_MINUS_ONE;, and so forth).
+#. *Select a Yocto Project Release:* On the top of the "RELEASE" page currently
+   supported releases are displayed, further down past supported Yocto Project
+   releases are visible. The "Download" links in the rows of the table there
+   will lead to the download tarballs for the release.
 
    .. note::
 
@@ -645,9 +655,9 @@ described in the ":ref:`dev-manual/start:accessing source archives`" section.
    You can use the "RELEASE ARCHIVE" link to reveal a menu of all Yocto
    Project releases.
 
-#. *Download Tools or Board Support Packages (BSPs):* From the
-   "DOWNLOADS" page, you can download tools or BSPs as well. Just scroll
-   down the page and look for what you need.
+#. *Download Tools or Board Support Packages (BSPs):* Next to the tarballs you
+   will find download tools or BSPs as well. Just select a Yocto Project
+   release and look for what you need.
 
 Cloning and Checking Out Branches
 =================================

@@ -6,6 +6,8 @@ DEPENDS:append:p10bmc = " libgpiod"
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SYSTEMD_SERVICE:${PN}:append:p10bmc = " ibm-vpd-parser@.service"
+SYSTEMD_SERVICE:${PN}:append:p10bmc = " ibm-isdimm-vpd-parser@.service"
+SYSTEMD_SERVICE:${PN}:append:p10bmc = " ibm-spi-vpd-parser@.service"
 SYSTEMD_SERVICE:${PN}:append:p10bmc = " system-vpd.service"
 SYSTEMD_SERVICE:${PN}:append:p10bmc = " com.ibm.VPD.Manager.service"
 SYSTEMD_SERVICE:${PN}:append:p10bmc = " wait-vpd-parsers.service"
@@ -24,11 +26,6 @@ do_install:append:p10bmc() {
 do_install:append:witherspoon() {
         DEST=${D}${inventory_envdir}
         printf "\nEEPROM=/sys/devices/platform/ahb/ahb:apb/ahb:apb:bus@1e78a000/1e78a400.i2c-bus/i2c-11/11-0051/eeprom" >> ${DEST}/inventory
-}
-
-do_install:append:swift() {
-        DEST=${D}${inventory_envdir}
-        printf "\nEEPROM=/sys/devices/platform/ahb/ahb:apb/ahb:apb:bus@1e78a000/1e78a340.i2c-bus/i2c-8/8-0051/eeprom" >> ${DEST}/inventory
 }
 
 do_install:append:witherspoon-tacoma() {
