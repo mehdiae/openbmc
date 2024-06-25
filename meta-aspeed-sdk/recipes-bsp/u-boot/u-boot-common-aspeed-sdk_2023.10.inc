@@ -7,10 +7,10 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 PE = "1"
 
 BRANCH="aspeed-master-v2023.10"
-SRC_URI = "git://gerrit.aspeed.com:29418/u-boot.git;protocol=ssh;branch=${BRANCH}"
+SRC_URI = "git://github.com/AspeedTech-BMC/u-boot.git;protocol=https;branch=${BRANCH}"
 
-# Tag for v00.05.01
-SRCREV = "afa8abe5681fbf69c8be494df534f975926730ac"
+# Tag for v00.05.02
+SRCREV = "d577c7e4f8b9f52dcb5867a32a9df59fdc2762e6"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"

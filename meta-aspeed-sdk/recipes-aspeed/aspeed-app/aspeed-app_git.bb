@@ -3,14 +3,12 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0-or-lat
 
 inherit pkgconfig meson
 
-SRC_URI = " git://gerrit.aspeed.com:29418/aspeed_app.git;protocol=ssh;branch=${BRANCH} "
-SRC_URI:append:ast2600-dcscm = " file://0001-mctp-i3c-Add-thread-to-receive-mctp-response.patch "
-SRC_URI:append:ast2700-dcscm = " file://0001-mctp-i3c-Add-thread-to-receive-mctp-response.patch "
+SRC_URI = "git://github.com/AspeedTech-BMC/aspeed_app.git;protocol=https;branch=${BRANCH}"
 
-PV = "1.0+git${SRCPV}"
+PV = "1.0+git"
 
-# Tag for v00.01.12
-SRCREV = "ce1c59bb7070f66879d44513848bb9d7ca665b77"
+# Tag for v00.01.13
+SRCREV = "653c8aebab426ed7b626a73d8a155de9c1782a75"
 BRANCH = "master"
 
 S = "${WORKDIR}/git"

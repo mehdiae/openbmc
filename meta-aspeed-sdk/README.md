@@ -48,6 +48,7 @@ ast2600-emmc-secure-tee-515
 ast2600-emmc-tee
 ast2600-emmc-tee-515
 ast2700-default
+ast2700-default-ncsi
 ast2700-default-ast1700-evb
 ast2700-default-ast1700-evb-cdr
 ast2700-emmc

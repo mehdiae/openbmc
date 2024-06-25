@@ -8,7 +8,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=c75985e733726beaba57bc5253e96d04"
 
 BRANCH="aspeed-master-v3.2.0"
-SRC_URI = "git://gerrit.aspeed.com:29418/openssl.git;protocol=ssh;branch=${BRANCH} \
+SRC_URI = "git://github.com/AspeedTech-BMC/openssl.git;protocol=https;branch=${BRANCH} \
            file://run-ptest \
            file://0001-buildinfo-strip-sysroot-and-debug-prefix-map-from-co.patch \
            file://0001-Configure-do-not-tweak-mips-cflags.patch \
@@ -18,10 +18,9 @@ SRC_URI = "git://gerrit.aspeed.com:29418/openssl.git;protocol=ssh;branch=${BRANC
 SRC_URI:append:class-nativesdk = " \
            file://environment.d-openssl.sh \
            "
-PV = "3.2.0+git${SRCPV}"
-# Tag for v00.02.00
-SRCREV = "fe423aa3e0a51832714a4a934b21138084f8074a"
-
+PV = "3.2.0+git"
+# Tag for v00.02.01
+SRCREV = "c6c0c5fb26f3e5694973e7fb965b28726f8f4b08"
 
 inherit lib_package multilib_header multilib_script ptest perlnative manpages
 MULTILIB_SCRIPTS = "${PN}-bin:${bindir}/c_rehash"
