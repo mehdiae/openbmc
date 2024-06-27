@@ -133,28 +133,3 @@ do_generate_signed_pfr_image(){
     install -m 0644 ${PFR_IMAGES_DIR}/*.bin_aligned ${PFR_DEPLOY_IMAGES_DIR}/.
     install -m 0644 ${PFR_IMAGES_DIR}/${output_bin} ${PFR_DEPLOY_IMAGES_DIR}/.
 }
-
-#make_sig_capsule() {
-#    signature_files=""
-#    for file in "$@"; do
-#        openssl dgst -sha256 -sign ${SIGNING_KEY} -out "${file}.sig" $file
-#        signature_files="${signature_files} ${file}.sig"
-#    done
-#}
-#
-#make_tar_capsule() {
-#    files="$@"
-#    tar -h -cvf signed_cap.tar ${files}
-#}
-#
-#do_generate_pfr_capsule_tar[depends] += \
-#    " obmc-phosphor-image:do_generate_static_tar"
-#
-#do_generate_pfr_capsule_tar() {
-#    ln -sf ${S}/MANIFEST MANIFEST
-#    ln -sf ${S}/publickey publickey
-#    cp ${PFR_IMAGES_DIR}/bmc_signed_cap.bin image-img-stg
-#    make_sig_capsule MANIFEST publickey image-img-stg
-#    make_tar_capsule MANIFEST publickey image-img-stg ${signature_files}
-#}
-
