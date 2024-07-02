@@ -1,0 +1,34 @@
+From 89c14b62bd61fb754363092d4b57a8a09d08d4f0 Mon Sep 17 00:00:00 2001
+From: Jamin Lin <jamin_lin@aspeedtech.com>
+Date: Tue, 2 Jul 2024 10:18:03 +0800
+Subject: [PATCH] Support Yocto build
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+To make Yocto build system set its CC, AR and CFLASG
+, replace "=” with "?=" for CC, AR and CFLAGS
+environment variables of Makefile
+
+Signed-off-by: Jamin Lin <jamin_lin@aspeedtech.com>
+---
+ Makefile | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 6c62948..b2e1a91 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+-AR = /usr/bin/ar
+-CC = /usr/bin/gcc
+-CFLAGS = -Wall -O3
++AR ?= /usr/bin/ar
++CC ?= /usr/bin/gcc
++CFLAGS ?= -Wall -O3
+ 
+ all: hss_lib.a \
+      hss_lib_thread.a \
+-- 
+2.25.1
+
