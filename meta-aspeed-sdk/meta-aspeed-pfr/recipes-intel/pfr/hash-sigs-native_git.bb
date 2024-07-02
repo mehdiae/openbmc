@@ -10,6 +10,7 @@ inherit native
 
 SRC_URI = "git://github.com/cisco/hash-sigs.git;protocol=https;branch=master \
            file://0001-support-yocto-build.patch \
+           file://0002-to-support-openssl-3.0-library-code.patch \
           "
 
 PV = "1.0+git"
