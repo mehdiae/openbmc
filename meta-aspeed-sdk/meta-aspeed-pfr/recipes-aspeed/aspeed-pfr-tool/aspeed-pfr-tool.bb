@@ -22,20 +22,15 @@ SRC_URI = " file://include/provision.h;subdir=${S} \
             file://meson.build;subdir=${S} \
             file://meson_options.txt;subdir=${S} \
             file://aspeed-pfr-tool.conf.in;subdir=${S} \
-            file://BootCompleted.service;subdir=${S} \
             file://aspeed-pfr-tool-egs.conf;subdir=${S} \
           "
 
 DEPENDS = "openssl i2c-tools"
 RDEPENDS:${PN} = "openssl i2c-tools"
 
-inherit obmc-phosphor-systemd
-
 do_install:append() {
     install -m 0644 ${S}/aspeed-pfr-tool-egs.conf ${D}/${datadir}/pfrconfig/
 }
-
-SYSTEMD_SERVICE:${PN} = "BootCompleted.service"
 
 FILES:${PN}:append = " ${datadir}/pfrconfig"
 

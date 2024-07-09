@@ -55,7 +55,7 @@
 			"index": 5,
 			"offset": "0x4220000",
 			"size": "0x3de0000",
-			"prot_mask": 0,
+			"prot_mask": 1,
 			"pfm": 1,
 			"hash": 0,
 			"compress": 0
