@@ -151,6 +151,34 @@ dependencies in a virtual environment:
  $ pipenv install
  $ pipenv run make html
 
+Style checking the Yocto Project documentation
+==============================================
+
+The project is starting to use Vale (https://vale.sh/)
+to validate the text style.
+
+To install Vale:
+
+ $ pip install vale
+
+To run Vale:
+
+ $ make stylecheck
+
+Link checking the Yocto Project documentation
+=============================================
+
+To fix errors which are not reported by Sphinx itself,
+the project uses sphinx-lint (https://github.com/sphinx-contrib/sphinx-lint).
+
+To install sphinx-lint:
+
+ $ pip install sphinx-lint
+
+To run sphinx-lint:
+
+ $ make sphinx-lint
+
 Sphinx theme and CSS customization
 ==================================
 

@@ -62,8 +62,6 @@ supported on the following distributions:
 
 -  Ubuntu 22.04 (LTS)
 
--  Fedora 37
-
 -  Fedora 38
 
 -  CentOS Stream 8
@@ -74,19 +72,18 @@ supported on the following distributions:
 
 -  OpenSUSE Leap 15.4
 
--  AlmaLinux 8.8
+-  AlmaLinux 8
 
--  AlmaLinux 9.2
+-  AlmaLinux 9
 
-The following distribution versions are still tested (being listed
-in :term:`SANITY_TESTED_DISTROS`), even though the organizations
-publishing them no longer make updates publicly available:
+-  Rocky 9
+
+The following distribution versions are still tested, even though the
+organizations publishing them no longer make updates publicly available:
 
 -  Ubuntu 18.04 (LTS)
 
--  Ubuntu 22.10
-
--  OpenSUSE Leap 15.3
+-  Ubuntu 23.04
 
 Note that the Yocto Project doesn't have access to private updates
 that some of these versions may have. Therefore, our testing has
@@ -167,8 +164,8 @@ with a supported Ubuntu or Debian Linux distribution::
 
 Here are the packages needed to build Project documentation manuals::
 
-   $ sudo apt install make python3-pip inkscape texlive-latex-extra
-   &PIP3_HOST_PACKAGES_DOC;
+   $ sudo apt install git make inkscape texlive-latex-extra
+   $ sudo apt install sphinx python3-saneyaml python3-sphinx-rtd-theme
 
 Fedora Packages
 ---------------
@@ -180,7 +177,7 @@ with a supported Fedora Linux distribution::
 
 Here are the packages needed to build Project documentation manuals::
 
-   $ sudo dnf install make python3-pip which inkscape texlive-fncychap
+   $ sudo dnf install git make python3-pip which inkscape texlive-fncychap
    &PIP3_HOST_PACKAGES_DOC;
 
 openSUSE Packages
@@ -193,7 +190,7 @@ with a supported openSUSE distribution::
 
 Here are the packages needed to build Project documentation manuals::
 
-   $ sudo zypper install make python3-pip which inkscape texlive-fncychap
+   $ sudo zypper install git make python3-pip which inkscape texlive-fncychap
    &PIP3_HOST_PACKAGES_DOC;
 
 
@@ -220,7 +217,7 @@ with a supported AlmaLinux distribution::
 
 Here are the packages needed to build Project documentation manuals::
 
-   $ sudo dnf install make python3-pip which inkscape texlive-fncychap
+   $ sudo dnf install git make python3-pip which inkscape texlive-fncychap
    &PIP3_HOST_PACKAGES_DOC;
 
 .. _system-requirements-buildtools:

@@ -211,10 +211,12 @@ class ExportFuncsNode(AstNode):
 
     def eval(self, data):
 
+        sentinel = "    # Export function set\n"
         for func in self.n:
             calledfunc = self.classname + "_" + func
 
-            if data.getVar(func, False) and not data.getVarFlag(func, 'export_func', False):
+            basevar = data.getVar(func, False)
+            if basevar and sentinel not in basevar:
                 continue
 
             if data.getVar(func, False):
@@ -231,12 +233,11 @@ class ExportFuncsNode(AstNode):
             data.setVarFlag(func, "lineno", 1)
 
             if data.getVarFlag(calledfunc, "python", False):
-                data.setVar(func, "    bb.build.exec_func('" + calledfunc + "', d)\n", parsing=True)
+                data.setVar(func, sentinel + "    bb.build.exec_func('" + calledfunc + "', d)\n", parsing=True)
             else:
                 if "-" in self.classname:
                    bb.fatal("The classname %s contains a dash character and is calling an sh function %s using EXPORT_FUNCTIONS. Since a dash is illegal in sh function names, this cannot work, please rename the class or don't use EXPORT_FUNCTIONS." % (self.classname, calledfunc))
-                data.setVar(func, "    " + calledfunc + "\n", parsing=True)
-            data.setVarFlag(func, 'export_func', '1')
+                data.setVar(func, sentinel + "    " + calledfunc + "\n", parsing=True)
 
 class AddTaskNode(AstNode):
     def __init__(self, filename, lineno, func, before, after):
@@ -313,6 +314,16 @@ class InheritNode(AstNode):
     def eval(self, data):
         bb.parse.BBHandler.inherit(self.classes, self.filename, self.lineno, data)
 
+class InheritDeferredNode(AstNode):
+    def __init__(self, filename, lineno, classes):
+        AstNode.__init__(self, filename, lineno)
+        self.inherit = (classes, filename, lineno)
+
+    def eval(self, data):
+        inherits = data.getVar('__BBDEFINHERITS', False) or []
+        inherits.append(self.inherit)
+        data.setVar('__BBDEFINHERITS', inherits)
+
 def handleInclude(statements, filename, lineno, m, force):
     statements.append(IncludeNode(filename, lineno, m.group(1), force))
 
@@ -362,6 +373,10 @@ def handlePyLib(statements, filename, lineno, m):
 def handleInherit(statements, filename, lineno, m):
     classes = m.group(1)
     statements.append(InheritNode(filename, lineno, classes))
+
+def handleInheritDeferred(statements, filename, lineno, m):
+    classes = m.group(1)
+    statements.append(InheritDeferredNode(filename, lineno, classes))
 
 def runAnonFuncs(d):
     code = []
@@ -428,6 +443,14 @@ def multi_finalize(fn, d):
     for append in appends:
         logger.debug("Appending .bbappend file %s to %s", append, fn)
         bb.parse.BBHandler.handle(append, d, True)
+
+    while True:
+        inherits = d.getVar('__BBDEFINHERITS', False) or []
+        if not inherits:
+            break
+        inherit, filename, lineno = inherits.pop(0)
+        d.setVar('__BBDEFINHERITS', inherits)
+        bb.parse.BBHandler.inherit(inherit, filename, lineno, d, deferred=True)
 
     onlyfinalise = d.getVar("__ONLYFINALISE", False)
 

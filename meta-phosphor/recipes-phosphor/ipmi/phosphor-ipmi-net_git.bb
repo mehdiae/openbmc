@@ -15,10 +15,9 @@ HOMEPAGE = "https://github.com/openbmc/phosphor-net-ipmid"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 DEPENDS += "cli11"
-DEPENDS += "libmapper"
 DEPENDS += "systemd"
 DEPENDS += "phosphor-ipmi-host"
-SRCREV = "7b534095425121afd42d669655a902aaaea5716b"
+SRCREV = "426fcab8ba80e9e2f7ec205ac3a97482919d8055"
 PV = "1.0+git${SRCPV}"
 PR = "r1"
 
@@ -42,6 +41,7 @@ EXTRA_OEMESON = " \
         -Dtests=disabled \
         "
 
+RDEPENDS:${PN} += "srvcfg-manager"
 RRECOMMENDS:${PN} = "pam-ipmi"
 
 FILES:${PN} += " \

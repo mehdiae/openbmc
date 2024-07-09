@@ -6,9 +6,13 @@ require conf/machine/include/nuvoton.inc
 require conf/machine/include/igps-keys.inc
 
 KERNEL_IMAGETYPE ?= "Image"
+
+KERNEL_IMAGETYPE:df-obmc-static-norootfs = "Image"
+KERNEL_IMAGETYPES:df-obmc-static-norootfs = "${KERNEL_IMAGETYPE}"
+
 KERNEL_EXTRA_ARGS ?= "UIMAGE_LOADADDR=0x00008000"
 
-UBOOT_MACHINE ?= "ArbelEVB_defconfig"
+UBOOT_MACHINE ?= "arbel_evb_defconfig"
 UBOOT_ENTRYPOINT ?= "0x6200000"
 UBOOT_LOADADDRESS ?= "0x6200000"
 
@@ -38,8 +42,6 @@ include conf/machine/include/soc-family.inc
 MACHINEOVERRIDES .= ":npcm8xx"
 
 require conf/machine/include/arm/armv8a/tune-cortexa35.inc
-
-UBOOT_MKIMAGE:append:npcm8xx = " -E -B 8"
 
 COMPATIBLE_MACHINE:npcm8xx = "npcm8xx"
 TFA_PLATFORM = "npcm845x"

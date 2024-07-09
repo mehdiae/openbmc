@@ -311,7 +311,7 @@ system and gives an overview of their function and contents.
 
    :term:`BB_ALLOWED_NETWORKS`
       Specifies a space-delimited list of hosts that the fetcher is allowed
-      to use to obtain the required source code. Following are
+      to use to obtain the required source code. Here are
       considerations surrounding this variable:
 
       -  This host list is only used if :term:`BB_NO_NETWORK` is either not set
@@ -560,6 +560,10 @@ system and gives an overview of their function and contents.
 
    :term:`BB_INVALIDCONF`
       See :term:`bitbake:BB_INVALIDCONF` in the BitBake manual.
+
+   :term:`BB_LOADFACTOR_MAX`
+      The system load threshold above which BitBake will stop runnig extra
+      tasks.
 
    :term:`BB_LOGCONFIG`
       See :term:`bitbake:BB_LOGCONFIG` in the BitBake manual.
@@ -1688,6 +1692,11 @@ system and gives an overview of their function and contents.
       The list of package names (:term:`PN`) for which
       CVEs (Common Vulnerabilities and Exposures) are ignored.
 
+   :term:`CVE_DB_INCR_UPDATE_AGE_THRES`
+      Specifies the maximum age of the CVE database in seconds for an
+      incremental update (instead of a full-download). Use "0" to force a
+      full-download.
+
    :term:`CVE_DB_UPDATE_INTERVAL`
       Specifies the CVE database update interval in seconds, as used by
       ``cve-update-db-native``. The default value is "86400" i.e. once a day
@@ -2292,7 +2301,7 @@ system and gives an overview of their function and contents.
    :term:`DOC_COMPRESS`
       When inheriting the :ref:`ref-classes-compress_doc`
       class, this variable sets the compression policy used when the
-      OpenEmbedded build system compresses man pages and info pages. By
+      OpenEmbedded build system compresses manual and info pages. By
       default, the compression method used is gz (gzip). Other policies
       available are xz and bz2.
 
@@ -2329,6 +2338,12 @@ system and gives an overview of their function and contents.
 
       See the :ref:`ref-classes-systemd-boot` and :ref:`ref-classes-image-live`
       classes for more information.
+
+   :term:`EFI_UKI_DIR`
+      The primary place for the UKI image inside the EFI System Partition.
+
+   :term:`EFI_UKI_PATH`
+      The path for the UKI image inside the root filesystem.
 
    :term:`ENABLE_BINARY_LOCALE_GENERATION`
       Variable that controls which locales for ``glibc`` are generated
@@ -2983,18 +2998,18 @@ system and gives an overview of their function and contents.
 
    :term:`FIT_ADDRESS_CELLS`
       Specifies the value of the ``#address-cells`` value for the
-      description of the FIT image.  
+      description of the FIT image.
 
       The default value is set to "1" by the :ref:`ref-classes-kernel-fitimage`
-      class, which corresponds to 32 bit addresses. 
+      class, which corresponds to 32 bit addresses.
 
       For platforms that need to set 64 bit addresses, for example in
       :term:`UBOOT_LOADADDRESS` and :term:`UBOOT_ENTRYPOINT`, you need to
-      set this value to "2", as two 32 bit values (cells) will be needed 
+      set this value to "2", as two 32 bit values (cells) will be needed
       to represent such addresses.
 
       Here is an example setting "0x400000000" as a load address::
-    
+
          FIT_ADDRESS_CELLS = "2"
          UBOOT_LOADADDRESS= "0x04 0x00000000"
 
@@ -3233,6 +3248,14 @@ system and gives an overview of their function and contents.
       Here is an example from the ``dbus`` recipe::
 
          GROUPADD_PARAM:${PN} = "-r netdev"
+
+      More than one group can be added by separating each set of different
+      groups' parameters with a semicolon.
+
+      Here is an example adding multiple groups from the ``useradd-example.bb``
+      file in the ``meta-skeleton`` layer::
+
+         GROUPADD_PARAM:${PN} = "-g 880 group1; -g 890 group2"
 
       For information on the standard Linux shell command
       ``groupadd``, see https://linux.die.net/man/8/groupadd.
@@ -3963,15 +3986,15 @@ system and gives an overview of their function and contents.
       Specifies a space-separated list of license names (as they would
       appear in :term:`LICENSE`) that should be excluded
       from the build (if set globally), or from an image (if set locally
-      in an image recipe). 
+      in an image recipe).
 
       When the variable is set globally, recipes that provide no alternatives to listed
       incompatible licenses are not built. Packages that are individually
-      licensed with the specified incompatible licenses will be deleted. 
+      licensed with the specified incompatible licenses will be deleted.
       Most of the time this does not allow a feasible build (because it becomes impossible
       to satisfy build time dependencies), so the recommended way to
       implement license restrictions is to set the variable in specific
-      image recipes where the restrictions must apply. That way there 
+      image recipes where the restrictions must apply. That way there
       are no build time restrictions, but the license check is still
       performed when the image's filesystem is assembled from packages.
 
@@ -4025,7 +4048,7 @@ system and gives an overview of their function and contents.
       The default value of the variable is set as follows in the
       ``meta/conf/distro/defaultsetup.conf`` file::
 
-         INHERIT_DISTRO ?= "debian devshell sstate license"
+         INHERIT_DISTRO ?= "debian devshell sstate license remove-libtool create-spdx"
 
    :term:`INHIBIT_DEFAULT_DEPS`
       Prevents the default dependencies, namely the C compiler and standard
@@ -4487,12 +4510,12 @@ system and gives an overview of their function and contents.
       When kernel configuration fragments are missing for some
       :term:`KERNEL_FEATURES` specified by layers or BSPs,
       building and configuring the kernel stops with an error.
-    
+
       You can turn these errors into warnings by setting the
       following in ``conf/local.conf``::
 
          KERNEL_DANGLING_FEATURES_WARN_ONLY = "1"
-    
+
       You will still be warned that runtime issues may occur,
       but at least the kernel configuration and build process will
       be allowed to continue.
@@ -5658,6 +5681,9 @@ system and gives an overview of their function and contents.
       default by setting the variable in a custom distribution
       configuration file.
 
+   :term:`OPKG_MAKE_INDEX_EXTRA_PARAMS`
+      Specifies extra parameters for the ``opkg-make-index`` command.
+
    :term:`OVERLAYFS_ETC_DEVICE`
       When the :ref:`ref-classes-overlayfs-etc` class is
       inherited, specifies the device to be mounted for the read/write
@@ -6557,7 +6583,7 @@ system and gives an overview of their function and contents.
       The :term:`PREFERRED_PROVIDER` variable is set with the name (:term:`PN`) of
       the recipe you prefer to provide "virtual/kernel".
 
-      Following are more examples::
+      Here are more examples::
 
          PREFERRED_PROVIDER_virtual/xserver = "xserver-xf86"
          PREFERRED_PROVIDER_virtual/libgl ?= "mesa"
@@ -6742,11 +6768,11 @@ system and gives an overview of their function and contents.
 
       .. note::
 
-         A corresponding mechanism for virtual runtime dependencies
-         (packages) exists. However, the mechanism does not depend on any
-         special functionality beyond ordinary variable assignments. For
-         example, ``VIRTUAL-RUNTIME_dev_manager`` refers to the package of
-         the component that manages the ``/dev`` directory.
+         A corresponding mechanism for virtual runtime dependencies (packages)
+         exists. However, the mechanism does not depend on any special
+         functionality beyond ordinary variable assignments. For example,
+         :term:`VIRTUAL-RUNTIME_dev_manager <VIRTUAL-RUNTIME>` refers to the
+         package of the component that manages the ``/dev`` directory.
 
          Setting the "preferred provider" for runtime dependencies is as
          simple as using the following assignment in a configuration file::
@@ -6812,20 +6838,6 @@ system and gives an overview of their function and contents.
       The OpenEmbedded build system uses the ABI to construct directory
       names used when installing the Python headers and libraries in
       sysroot (e.g. ``.../python3.3m/...``).
-
-   :term:`PYTHON_PN`
-      When used by recipes that inherit the :ref:`ref-classes-setuptools3`
-      class, specifies the major Python version being built. For Python 3.x,
-      :term:`PYTHON_PN` would be "python3". You do not have to set this
-      variable as the OpenEmbedded build system automatically sets it for you.
-
-      The variable allows recipes to use common infrastructure such as the
-      following::
-
-         DEPENDS += "${PYTHON_PN}-native"
-
-      In the previous example,
-      the version of the dependency is :term:`PYTHON_PN`.
 
    :term:`QA_EMPTY_DIRS`
       Specifies a list of directories that are expected to be empty when
@@ -7152,6 +7164,9 @@ system and gives an overview of their function and contents.
       directory that becomes the root filesystem image. See the
       :term:`IMAGE_ROOTFS` variable for more
       information.
+
+   :term:`RPMBUILD_EXTRA_PARAMS`
+      Specifies extra user-defined parameters for the ``rpmbuild`` command.
 
    :term:`RPROVIDES`
       A list of package name aliases that a package also provides. These
@@ -7612,6 +7627,10 @@ system and gives an overview of their function and contents.
          configuration will not take effect.
 
    :term:`SDKPATH`
+      Defines the path used to collect the SDK components and build the
+      installer.
+
+   :term:`SDKPATHINSTALL`
       Defines the path offered to the user for installation of the SDK that
       is generated by the OpenEmbedded build system. The path appears as
       the default location for installing the SDK when you run the SDK's
@@ -7621,7 +7640,7 @@ system and gives an overview of their function and contents.
    :term:`SDKTARGETSYSROOT`
       The full path to the sysroot used for cross-compilation within an SDK
       as it will be when installed into the default
-      :term:`SDKPATH`.
+      :term:`SDKPATHINSTALL`.
 
    :term:`SECTION`
       The section in which packages should be categorized. Package
@@ -7870,7 +7889,7 @@ system and gives an overview of their function and contents.
       This option allows to associate `SPDX annotations
       <https://spdx.github.io/spdx-spec/v2.3/annotations/>`__ to a recipe,
       using the values of variables in the recipe::
-        
+
          ANNOTATION1 = "First annotation for recipe"
          ANNOTATION2 = "Second annotation for recipe"
          SPDX_CUSTOM_ANNOTATION_VARS = "ANNOTATION1 ANNOTATION2"
@@ -7912,6 +7931,11 @@ system and gives an overview of their function and contents.
       ``tmp/deploy/images/MACHINE`` by a factor of 130 (+15 MiB for this
       image), compared to just using the :ref:`ref-classes-create-spdx` class
       with no option.
+
+   :term:`SPDX_NAMESPACE_PREFIX`
+      This option could be used in order to change the prefix of ``spdxDocument``
+      and the prefix of ``documentNamespace``. It is set by default to
+      ``http://spdx.org/spdxdoc``.
 
    :term:`SPDX_PRETTY`
       This option makes the SPDX output more human-readable, using
@@ -7988,7 +8012,7 @@ system and gives an overview of their function and contents.
       The name of keys used by the :ref:`ref-classes-kernel-fitimage` class
       for signing U-Boot FIT image stored in the :term:`SPL_SIGN_KEYDIR`
       directory. If we have for example a ``dev.key`` key and a ``dev.crt``
-      certificate stored in the :term:`SPL_SIGN_KEYDIR` directory, you will 
+      certificate stored in the :term:`SPL_SIGN_KEYDIR` directory, you will
       have to set :term:`SPL_SIGN_KEYNAME` to ``dev``.
 
    :term:`SPLASH`
@@ -8025,7 +8049,7 @@ system and gives an overview of their function and contents.
 
           EXTRA_OECONF += "--disable-startup-msg --enable-img-fullscreen"
 
-      For information on append files, see the                                                                            
+      For information on append files, see the
       ":ref:`dev-manual/layers:appending other layers metadata with your layer`"
       section.
 
@@ -8789,6 +8813,10 @@ system and gives an overview of their function and contents.
       value so that executables built using the SDK also have the flags
       applied.
 
+   :term:`TARGET_DBGSRC_DIR`
+      Specifies the target path to debug source files. The default is
+      ``/usr/src/debug/${PN}/${PV}``.
+
    :term:`TARGET_FPU`
       Specifies the method for handling FPU code. For FPU-less targets,
       which include most ARM CPUs, the variable must be set to "soft". If
@@ -9383,23 +9411,30 @@ system and gives an overview of their function and contents.
       See the machine include files in the :term:`Source Directory`
       for these features.
 
+   :term:`UBOOT_BINARY`
+      Specifies the name of the binary build by U-Boot.
+
    :term:`UBOOT_CONFIG`
-      Configures the :term:`UBOOT_MACHINE` and can
-      also define :term:`IMAGE_FSTYPES` for individual
-      cases.
+      Configures one or more U-Boot configurations to build. Each
+      configuration can define the :term:`UBOOT_MACHINE` and optionally the
+      :term:`IMAGE_FSTYPES` and the :term:`UBOOT_BINARY`.
 
-      Following is an example from the ``meta-fsl-arm`` layer. ::
+      Here is an example from the ``meta-freescale`` layer. ::
 
-         UBOOT_CONFIG ??= "sd"
-         UBOOT_CONFIG[sd] = "mx6qsabreauto_config,sdcard"
-         UBOOT_CONFIG[eimnor] = "mx6qsabreauto_eimnor_config"
-         UBOOT_CONFIG[nand] = "mx6qsabreauto_nand_config,ubifs"
-         UBOOT_CONFIG[spinor] = "mx6qsabreauto_spinor_config"
+         UBOOT_CONFIG ??= "sdcard-ifc-secure-boot sdcard-ifc sdcard-qspi lpuart qspi secure-boot nor"
+         UBOOT_CONFIG[nor] = "ls1021atwr_nor_defconfig"
+         UBOOT_CONFIG[sdcard-ifc] = "ls1021atwr_sdcard_ifc_defconfig,,u-boot-with-spl-pbl.bin"
+         UBOOT_CONFIG[sdcard-qspi] = "ls1021atwr_sdcard_qspi_defconfig,,u-boot-with-spl-pbl.bin"
+         UBOOT_CONFIG[lpuart] = "ls1021atwr_nor_lpuart_defconfig"
+         UBOOT_CONFIG[qspi] = "ls1021atwr_qspi_defconfig"
+         UBOOT_CONFIG[secure-boot] = "ls1021atwr_nor_SECURE_BOOT_defconfig"
+         UBOOT_CONFIG[sdcard-ifc-secure-boot] = "ls1021atwr_sdcard_ifc_SECURE_BOOT_defconfig,,u-boot-with-spl-pbl.bin"
 
-      In this example, "sd" is selected as the configuration of the possible four for the
-      :term:`UBOOT_MACHINE`. The "sd" configuration defines
-      "mx6qsabreauto_config" as the value for :term:`UBOOT_MACHINE`, while the
-      "sdcard" specifies the :term:`IMAGE_FSTYPES` to use for the U-Boot image.
+      In this example, all possible seven configurations are selected. Each
+      configuration specifies "..._defconfig" as :term:`UBOOT_MACHINE`, and
+      the "sd..." configurations define an individual name for
+      :term:`UBOOT_BINARY`. No configuration defines a second parameter for
+      :term:`IMAGE_FSTYPES` to use for the U-Boot image.
 
       For more information on how the :term:`UBOOT_CONFIG` is handled, see the
       :ref:`ref-classes-uboot-config` class.
@@ -9432,10 +9467,10 @@ system and gives an overview of their function and contents.
 
    :term:`UBOOT_FIT_ADDRESS_CELLS`
       Specifies the value of the ``#address-cells`` value for the
-      description of the U-Boot FIT image.  
+      description of the U-Boot FIT image.
 
       The default value is set to "1" by the :ref:`ref-classes-uboot-sign`
-      class, which corresponds to 32 bit addresses. 
+      class, which corresponds to 32 bit addresses.
 
       For platforms that need to set 64 bit addresses in
       :term:`UBOOT_LOADADDRESS` and :term:`UBOOT_ENTRYPOINT`, you need to
@@ -9443,7 +9478,7 @@ system and gives an overview of their function and contents.
       to represent such addresses.
 
       Here is an example setting "0x400000000" as a load address::
-    
+
          UBOOT_FIT_ADDRESS_CELLS = "2"
          UBOOT_LOADADDRESS= "0x04 0x00000000"
 
@@ -9506,7 +9541,7 @@ system and gives an overview of their function and contents.
          UBOOT_FITIMAGE_ENABLE = "1"
 
       See the :ref:`ref-classes-uboot-sign` class for details.
-      
+
    :term:`UBOOT_LOADADDRESS`
       Specifies the load address for the U-Boot image. During U-Boot image
       creation, the :term:`UBOOT_LOADADDRESS` variable is passed as a
@@ -9861,6 +9896,33 @@ system and gives an overview of their function and contents.
       Additionally, you should also set the
       :term:`USERADD_ERROR_DYNAMIC` variable.
 
+   :term:`VIRTUAL-RUNTIME`
+      :term:`VIRTUAL-RUNTIME` is a commonly used prefix for defining virtual
+      packages for runtime usage, typically for use in :term:`RDEPENDS`
+      or in image definitions.
+
+      An example is ``VIRTUAL-RUNTIME_base-utils`` that makes it possible
+      to either use BusyBox based utilities::
+
+         VIRTUAL-RUNTIME_base-utils = "busybox"
+
+      or their full featured implementations from GNU Coreutils
+      and other projects::
+
+         VIRTUAL-RUNTIME_base-utils = "packagegroup-core-base-utils"
+
+      Here are two examples using this virtual runtime package. The
+      first one is in :yocto_git:`initramfs-framework_1.0.bb
+      </poky/tree/meta/recipes-core/initrdscripts/initramfs-framework_1.0.bb?h=scarthgap>`::
+
+         RDEPENDS:${PN} += "${VIRTUAL-RUNTIME_base-utils}"
+
+      The second example is in the :yocto_git:`core-image-initramfs-boot
+      </poky/tree/meta/recipes-core/images/core-image-initramfs-boot.bb?h=scarthgap>`
+      image definition::
+
+         PACKAGE_INSTALL = "${INITRAMFS_SCRIPTS} ${VIRTUAL-RUNTIME_base-utils} base-passwd"
+
    :term:`VOLATILE_LOG_DIR`
       Specifies the persistence of the target's ``/var/log`` directory,
       which is used to house postinstall target log files.
@@ -9922,7 +9984,7 @@ system and gives an overview of their function and contents.
       With the :term:`WKS_FILE_DEPENDS` variable, you have the possibility to
       specify a list of additional dependencies (e.g. native tools,
       bootloaders, and so forth), that are required to build Wic images.
-      Following is an example::
+      Here is an example::
 
          WKS_FILE_DEPENDS = "some-native-tool"
 

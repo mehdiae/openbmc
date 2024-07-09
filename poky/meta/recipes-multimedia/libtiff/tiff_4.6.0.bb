@@ -9,6 +9,13 @@ LIC_FILES_CHKSUM = "file://LICENSE.md;md5=a3e32d664d6db1386b4689c8121531c3"
 CVE_PRODUCT = "libtiff"
 
 SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
+           file://CVE-2023-6277-At-image-reading-compare-data-size-of-some-tags-data.patch \
+           file://CVE-2023-6277-At-image-reading-compare-data-size-of-some-tags-data-2.patch \
+           file://CVE-2023-6277-Apply-1-suggestion-s-to-1-file-s.patch \
+           file://CVE-2023-6228.patch \
+           file://CVE-2023-52355-0001.patch \
+           file://CVE-2023-52355-0002.patch \
+           file://CVE-2023-52356.patch \
            "
 
 SRC_URI[sha256sum] = "88b3979e6d5c7e32b50d7ec72fb15af724f6ab2cbf7e10880c360a77e4b5d99a"
@@ -17,6 +24,7 @@ SRC_URI[sha256sum] = "88b3979e6d5c7e32b50d7ec72fb15af724f6ab2cbf7e10880c360a77e4
 UPSTREAM_CHECK_REGEX = "tiff-(?P<pver>\d+(\.\d+)+).tar"
 
 CVE_STATUS[CVE-2015-7313] = "fixed-version: Tested with check from https://security-tracker.debian.org/tracker/CVE-2015-7313 and already 4.3.0 doesn't have the issue"
+CVE_STATUS[CVE-2023-3164] = "cpe-incorrect: Issue only affects the tiffcrop tool not compiled by default since 4.6.0"
 
 inherit autotools multilib_header
 

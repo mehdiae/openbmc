@@ -18,7 +18,11 @@ import os
 import re
 import sys
 import subprocess
+import json
+import urllib.request
 from recipetool.create import RecipeHandler
+from urllib.parse import urldefrag
+from recipetool.create import determine_from_url
 
 logger = logging.getLogger('recipetool')
 
@@ -110,6 +114,69 @@ class PythonRecipeHandler(RecipeHandler):
 
     def __init__(self):
         pass
+
+    def process_url(self, args, classes, handled, extravalues):
+        """
+        Convert any pypi url https://pypi.org/project/<package>/<version> into https://files.pythonhosted.org/packages/source/...
+        which corresponds to the archive location, and add pypi class
+        """
+
+        if 'url' in handled:
+            return None
+
+        fetch_uri = None
+        source = args.source
+        required_version = args.version if args.version else None
+        match = re.match(r'https?://pypi.org/project/([^/]+)(?:/([^/]+))?/?$', urldefrag(source)[0])
+        if match:
+            package = match.group(1)
+            version = match.group(2) if match.group(2) else required_version
+
+            json_url = f"https://pypi.org/pypi/%s/json" % package
+            response = urllib.request.urlopen(json_url)
+            if response.status == 200:
+                data = json.loads(response.read())
+                if not version:
+                    # grab latest version
+                    version = data["info"]["version"]
+                pypi_package = data["info"]["name"]
+                for release in reversed(data["releases"][version]):
+                    if release["packagetype"] == "sdist":
+                        fetch_uri = release["url"]
+                        break
+            else:
+                logger.warning("Cannot handle pypi url %s: cannot fetch package information using %s", source, json_url)
+                return None
+        else:
+            match = re.match(r'^https?://files.pythonhosted.org/packages.*/(.*)-.*$', source)
+            if match:
+                fetch_uri = source
+                pypi_package = match.group(1)
+                _, version = determine_from_url(fetch_uri)
+
+        if match and not args.no_pypi:
+            if required_version and version != required_version:
+                raise Exception("Version specified using --version/-V (%s) and version specified in the url (%s) do not match" % (required_version, version))
+            # This is optionnal if BPN looks like "python-<pypi_package>" or "python3-<pypi_package>" (see pypi.bbclass)
+            # but at this point we cannot know because because user can specify the output name of the recipe on the command line
+            extravalues["PYPI_PACKAGE"] = pypi_package
+            # If the tarball extension is not 'tar.gz' (default value in pypi.bblcass) whe should set PYPI_PACKAGE_EXT in the recipe
+            pypi_package_ext = re.match(r'.*%s-%s\.(.*)$' % (pypi_package, version), fetch_uri)
+            if pypi_package_ext:
+                pypi_package_ext = pypi_package_ext.group(1)
+                if pypi_package_ext != "tar.gz":
+                    extravalues["PYPI_PACKAGE_EXT"] = pypi_package_ext
+
+            # Pypi class will handle S and SRC_URI variables, so remove them
+            # TODO: allow oe.recipeutils.patch_recipe_lines() to accept regexp so we can simplify the following to:
+            # extravalues['SRC_URI(?:\[.*?\])?'] = None
+            extravalues['S'] = None
+            extravalues['SRC_URI'] = None
+
+            classes.append('pypi')
+
+        handled.append('url')
+        return fetch_uri
 
     def handle_classifier_license(self, classifiers, existing_licenses=""):
 
@@ -506,12 +573,15 @@ class PythonSetupPyRecipeHandler(PythonRecipeHandler):
         if 'buildsystem' in handled:
             return False
 
+        logger.debug("Trying setup.py parser")
+
         # Check for non-zero size setup.py files
         setupfiles = RecipeHandler.checkfiles(srctree, ['setup.py'])
         for fn in setupfiles:
             if os.path.getsize(fn):
                 break
         else:
+            logger.debug("No setup.py found")
             return False
 
         # setup.py is always parsed to get at certain required information, such as
@@ -668,6 +738,8 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
         "poetry.core.masonry.api": "python_poetry_core",
         "flit_core.buildapi": "python_flit_core",
         "hatchling.build": "python_hatchling",
+        "maturin": "python_maturin",
+        "mesonpy": "python_mesonpy",
     }
 
     # setuptools.build_meta and flit declare project metadata into the "project" section of pyproject.toml
@@ -708,6 +780,8 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
         "python3-poetry-core-native",
         # already provided by python_flit_core.bbclass
         "python3-flit-core-native",
+        # already provided by python_mesonpy
+        "python3-meson-python-native",
     ]
 
     # add here a list of known and often used packages and the corresponding bitbake package
@@ -719,6 +793,7 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
         "setuptools-scm": "python3-setuptools-scm",
         "hatchling": "python3-hatchling",
         "hatch-vcs": "python3-hatch-vcs",
+        "meson-python" : "python3-meson-python",
     }
 
     def __init__(self):
@@ -726,9 +801,12 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
 
     def process(self, srctree, classes, lines_before, lines_after, handled, extravalues):
         info = {}
+        metadata = {}
 
         if 'buildsystem' in handled:
             return False
+
+        logger.debug("Trying pyproject.toml parser")
 
         # Check for non-zero size setup.py files
         setupfiles = RecipeHandler.checkfiles(srctree, ["pyproject.toml"])
@@ -736,6 +814,7 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
             if os.path.getsize(fn):
                 break
         else:
+            logger.debug("No pyproject.toml found")
             return False
 
         setupscript = os.path.join(srctree, "pyproject.toml")
@@ -747,14 +826,16 @@ class PythonPyprojectTomlRecipeHandler(PythonRecipeHandler):
                 try:
                     import tomli as tomllib
                 except ImportError:
-                    logger.exception("Neither 'tomllib' nor 'tomli' could be imported. Please use python3.11 or above or install tomli module")
-                    return False
-                except Exception:
-                    logger.exception("Failed to parse pyproject.toml")
+                    logger.error("Neither 'tomllib' nor 'tomli' could be imported, cannot scan pyproject.toml.")
                     return False
 
-            with open(setupscript, "rb") as f:
-                config = tomllib.load(f)
+            try:
+                with open(setupscript, "rb") as f:
+                    config = tomllib.load(f)
+            except Exception:
+                logger.exception("Failed to parse pyproject.toml")
+                return False
+
             build_backend = config["build-system"]["build-backend"]
             if build_backend in self.build_backend_map:
                 classes.append(self.build_backend_map[build_backend])

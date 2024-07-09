@@ -402,6 +402,22 @@ class ProcessServer():
                 serverlog("".join(msg))
 
     def idle_thread(self):
+        if self.cooker.configuration.profile:
+            try:
+                import cProfile as profile
+            except:
+                import profile
+            prof = profile.Profile()
+
+            ret = profile.Profile.runcall(prof, self.idle_thread_internal)
+
+            prof.dump_stats("profile-mainloop.log")
+            bb.utils.process_profilelog("profile-mainloop.log")
+            serverlog("Raw profiling information saved to profile-mainloop.log and processed statistics to profile-mainloop.log.processed")
+        else:
+            self.idle_thread_internal()
+
+    def idle_thread_internal(self):
         def remove_idle_func(function):
             with bb.utils.lock_timeout(self._idlefuncsLock):
                 del self._idlefuns[function]
@@ -500,12 +516,18 @@ class ServerCommunicator():
         self.recv = recv
 
     def runCommand(self, command):
-        self.connection.send(command)
+        try:
+            self.connection.send(command)
+        except BrokenPipeError as e:
+            raise BrokenPipeError("bitbake-server might have died or been forcibly stopped, ie. OOM killed") from e
         if not self.recv.poll(30):
             logger.info("No reply from server in 30s (for command %s at %s)" % (command[0], currenttime()))
             if not self.recv.poll(30):
                 raise ProcessTimeout("Timeout while waiting for a reply from the bitbake server (60s at %s)" % currenttime())
-        ret, exc = self.recv.get()
+        try:
+            ret, exc = self.recv.get()
+        except EOFError as e:
+            raise EOFError("bitbake-server might have died or been forcibly stopped, ie. OOM killed") from e
         # Should probably turn all exceptions in exc back into exceptions?
         # For now, at least handle BBHandledException
         if exc and ("BBHandledException" in exc or "SystemExit" in exc):

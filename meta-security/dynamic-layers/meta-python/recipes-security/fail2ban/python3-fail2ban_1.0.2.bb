@@ -54,7 +54,7 @@ do_install:append () {
 do_install_ptest:append () {
     install -d ${D}${PTEST_PATH}
     install -d ${D}${PTEST_PATH}/bin
-    sed -i -e 's/##PYTHON##/${PYTHON_PN}/g' ${D}${PTEST_PATH}/run-ptest
+    sed -i -e 's/##PYTHON##/python3/g' ${D}${PTEST_PATH}/run-ptest
     install -D ${S}/bin/* ${D}${PTEST_PATH}/bin
     rm -f ${D}${PTEST_PATH}/bin/fail2ban-python
 }
@@ -72,4 +72,3 @@ RDEPENDS:${PN} += " python3-logging python3-fcntl python3-json"
 RDEPENDS:${PN}-ptest = "python3-core python3-io python3-modules python3-fail2ban"
 
 RRECOMMENDS:${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'python3-systemd', '', d)}"
-RRECOMMENDS:${PN} += "python3-distutils"

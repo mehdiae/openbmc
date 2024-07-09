@@ -26,10 +26,10 @@ while true; do
     ip="${addr%/*}"
     ip_to_bytes ip_bytes "$ip" || continue
     # Ignore ULAs and non-gBMC addresses
-    (( ip_bytes[0] & 0xfc == 0xfc || ip_bytes[8] != 0xfd )) && continue
+    (( (ip_bytes[0] & 0xfc) == 0xfc || ip_bytes[8] != 0xfd )) && continue
     # Only allow for the short, well known addresses <pfx>:fd01:: and not
     # <pfx>:fd00:83c1:292d:feef. Otherwise, powercycle may be unavailable.
-    (( ip_bytes[9] == 0 )) && continue
+    (( (ip_bytes[9] & 0x0f) == 0 )) && continue
     for i in {10..15}; do
       (( ip_bytes[i] != 0 )) && continue 2
     done
@@ -46,9 +46,9 @@ while true; do
   fi
 done
 
-# We need to guarantee we wait at least 5 minutes from reachable in
+# We need to guarantee we wait at least 10 minutes from reachable in
 # case networking just came up
-wait_min=5
+wait_min=10
 echo "Network is reachable, waiting $wait_min min" >&2
 sleep $((60 * wait_min))
 
@@ -60,7 +60,7 @@ get_dhcp_unit_json() {
     GetAll s org.freedesktop.systemd1.Unit
 }
 
-# Follow the process and make sure it idles for at least 5 minutes before
+# Follow the process and make sure it idles for at least 10 minutes before
 # shutting down. This allows for failures and retries to happen.
 while true; do
   json="$(get_dhcp_unit_json)" || exit
@@ -87,7 +87,7 @@ while true; do
   # The process is already stopped, we are done
   [[ "$activestr" == 'inactive' ]] && exit
 
-  # If the process is running, give it at least 5 minutes from when it started
+  # If the process is running, give it at least 10 minutes from when it started
   cur_s="$(cut -d' ' -f1 /proc/uptime)"
   # Remove floating point if applied since bash can't perform float arithmetic
   cur_s="${cur_s%.*}"

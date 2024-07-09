@@ -6,8 +6,6 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import time
-
 from django.urls import reverse
 from tests.browser.selenium_helpers import SeleniumTestCase
 from selenium.webdriver.support.ui import Select
@@ -49,18 +47,18 @@ class TestNewProjectPage(SeleniumTestCase):
 
         url = reverse('newproject')
         self.get(url)
+        self.wait_until_visible('#new-project-name', poll=3)
         self.enter_text('#new-project-name', project_name)
 
         select = Select(self.find('#projectversion'))
         select.select_by_value(str(self.release.pk))
 
-        time.sleep(1)
         self.click("#create-project-button")
-        time.sleep(2)
 
         # We should get redirected to the new project's page with the
         # notification at the top
-        element = self.wait_until_visible('#project-created-notification')
+        element = self.wait_until_visible(
+            '#project-created-notification', poll=3)
 
         self.assertTrue(project_name in element.text,
                         "New project name not in new project notification")
@@ -81,6 +79,7 @@ class TestNewProjectPage(SeleniumTestCase):
 
         url = reverse('newproject')
         self.get(url)
+        self.wait_until_visible('#new-project-name', poll=3)
 
         self.enter_text('#new-project-name', project_name)
 
@@ -91,9 +90,9 @@ class TestNewProjectPage(SeleniumTestCase):
         radio.click()
 
         self.click("#create-project-button")
-        time.sleep(2)
 
-        element = self.wait_until_visible('#hint-error-project-name')
+        self.wait_until_present('#hint-error-project-name', poll=3)
+        element = self.find('#hint-error-project-name')
 
         self.assertTrue(("Project names must be unique" in element.text),
                         "Did not find unique project name error message")
@@ -105,7 +104,6 @@ class TestNewProjectPage(SeleniumTestCase):
         except InvalidElementStateException:
             pass
 
-        time.sleep(2)
         self.assertTrue(
             (Project.objects.filter(name=project_name).count() == 1),
             "New project not found in database")

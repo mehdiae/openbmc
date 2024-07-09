@@ -9,6 +9,7 @@ DEPENDS:append:gbmc = " jq-native"
 
 GBMCBR_IPMI_CHANNEL ?= "11"
 GBMC_NCSI_IPMI_CHANNEL ??= "1"
+GBMC_NCSI_IPMI_CHANNEL:npcm8xx ??= "2"
 # Only used for extra channels, GBMCBR and NCSI are autopopulated
 # Format looks like "<channel>|<intf> <channel2>|<intf2>", Ex. "2|eth0 3|back"
 GBMC_IPMI_CHANNEL_MAP ??= ""
@@ -92,6 +93,9 @@ python do_gbmc_version () {
       "minor": minor
     }
     dev_id["aux"] =  subpoint << 16 | (0xFFFF & point)
+
+    dev_id["manuf_id"] = 11129
+    dev_id["prod_id"] = 14426
 
   with open(path, 'w') as f:
     json.dump(dev_id, f, sort_keys=True, indent=4)

@@ -30,9 +30,6 @@ function post-platform-init() {
 
     gpioset $(gpiofind host0-sysreset-n)=1
 
-    # gpio-leds is controlling bmc-ready, not by gpio
-    echo 1 > /sys/class/leds/bmc-ready/brightness
-
     echo "Set default FAN speed to 60%"
     for filename in /sys/class/hwmon/*/pwm*
     do
@@ -73,6 +70,10 @@ export output_high_gpios_in_bmc_reboot=(
     "cpld-user-mode"
     "jtag-srst-n"
     "host0-shd-req-n"
+    "uart1-mode1"
+    "uart2-mode1"
+    "uart3-mode1"
+    "uart4-mode1"
 )
 
 export output_low_gpios_in_bmc_reboot=(
@@ -82,6 +83,10 @@ export output_low_gpios_in_bmc_reboot=(
     "led-fault"
     "spi-nor-access"
     "host0-special-boot"
+    "uart1-mode0"
+    "uart2-mode0"
+    "uart3-mode0"
+    "uart4-mode0"
 )
 
 export input_gpios_in_bmc_reboot=(
