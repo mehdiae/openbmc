@@ -51,9 +51,11 @@ RDEPENDS:${PN}-apps = " \
     coremark \
     "
 
+# The size of opkg package manager is 6XX KB.
 SUMMARY:${PN}-extended = "Open Source Extended Applications"
 RDEPENDS:${PN}-extended = " \
     can-utils \
+    opkg \
     "
 
 SUMMARY:${PN}-extra = "Open Source Extra Applications"
