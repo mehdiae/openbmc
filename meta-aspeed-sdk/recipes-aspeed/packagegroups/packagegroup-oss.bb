@@ -16,6 +16,12 @@ PACKAGES = " \
     ${PN}-extra \
     "
 
+# To generate the IPKs, build the following packages by default
+# but do not install them.
+DEPENDS = " \
+    python3-drgn \
+    "
+
 # The size of fio is very large because its dependencies includes python3-core.
 # The size of fio and python3-core are 10MB.
 # A nvme-cli recipe creates post installation script.
