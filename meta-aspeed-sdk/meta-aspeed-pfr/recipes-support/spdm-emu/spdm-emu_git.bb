@@ -11,6 +11,7 @@ SRC_URI = " \
         file://0001-Supporting-Yocto-build.patch \
         file://0002-Enabling-MCTP-over-Kernel-Socket.patch \
         file://0003-Support-both-libmctp-and-socket-based-mctp.patch \
+        file://0004-to-add-PEC-support.patch \
         file://mctp-init.sh \
         file://i2c-attestation-emu.service \
         file://i3c-attestation-emu.service \
