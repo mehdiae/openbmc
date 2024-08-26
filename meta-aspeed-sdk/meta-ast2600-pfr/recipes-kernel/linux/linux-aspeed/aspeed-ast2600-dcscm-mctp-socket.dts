@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) ASPEED Technology Inc.
+
+#include "aspeed-ast2600-dcscm.dts"
+
+/ {
+	model = "AST2600 DC-SCM PFR 5.0";
+};
+
+&i3c0 {
+	status = "okay";
+	mctp-controller;
+};
+
+&i3c1 {
+	/delete-property/ initial-role;
+	/delete-property/ pid;
+	/delete-property/ dcr;
+	mctp-controller;
+};
+
+&i3c4 {
+	status = "disabled";
+};
+
