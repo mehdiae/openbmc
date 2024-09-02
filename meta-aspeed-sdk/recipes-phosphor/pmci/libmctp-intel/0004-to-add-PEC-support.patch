@@ -1,6 +1,6 @@
-From fe328726415e50d0e9c553345e6f14da7c805ac1 Mon Sep 17 00:00:00 2001
+From 3b46d8bfd4e7b8c23b64cf7ffce94fade3072aa9 Mon Sep 17 00:00:00 2001
 From: Kane-Chen-AS <kane_chen@aspeedtech.com>
-Date: Wed, 14 Aug 2024 15:17:38 +0800
+Date: Mon, 2 Sep 2024 15:40:01 +0800
 Subject: [PATCH] to add PEC support
 
 Some hardware or driver doesn't support the PEC validation so
@@ -8,25 +8,24 @@ we need to handle the PEC in application level.
 
 Signed-off-by: Kane-Chen-AS <kane_chen@aspeedtech.com>
 ---
- asti3c.c         | 46 ++++++++++++++++++++++++++++++++++++++++++++--
+ asti3c.c         | 61 ++++++++++++++++++++++++++++++++++++++++++------
  libmctp-asti3c.h |  3 +++
- 2 files changed, 47 insertions(+), 2 deletions(-)
+ 2 files changed, 57 insertions(+), 7 deletions(-)
 
 diff --git a/asti3c.c b/asti3c.c
-index c23d2d2..b1755ec 100644
+index c23d2d2..5c44a6b 100644
 --- a/asti3c.c
 +++ b/asti3c.c
-@@ -10,6 +10,9 @@
- #undef pr_fmt
+@@ -11,6 +11,8 @@
  #define pr_fmt(x) "asti3c: " x
  #define BMC_I3C_SLAVE_ADDR       0x08
-+#define PFR_I3C_ADDR             0x10
-+
-+struct mctp_asti3c_pkt_private *def_priv_data = NULL;
  
++struct mctp_asti3c_pkt_private *def_priv_data = NULL;
++
  static uint8_t crc8 (uint8_t crc, const uint8_t *data, uint8_t len)
  {
-@@ -51,10 +54,14 @@ static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
+         int i, j;
+@@ -51,10 +53,14 @@ static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
  	mctp_prdebug("Transmitting packet, len: %zu", len);
  	mctp_trace_tx(pkt->data, len);
  
@@ -42,7 +41,7 @@ index c23d2d2..b1755ec 100644
  		pec = crc8(0, &i3c_addr, 1);
  		pec = crc8(pec, (uint8_t *)pkt->data, len);
  
-@@ -64,7 +71,7 @@ static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
+@@ -64,7 +70,7 @@ static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
  		write_len = write(pkt_prv->fd, buffer, len);
  		mctp_trace_tx(buffer, len);
  		free(buffer);
@@ -51,7 +50,7 @@ index c23d2d2..b1755ec 100644
  		write_len = write(pkt_prv->fd, pkt->data, len);
  	}
  
-@@ -122,6 +129,16 @@ int mctp_asti3c_poll(int fd, int timeout)
+@@ -122,6 +128,16 @@ int mctp_asti3c_poll(int fd, int timeout)
  	return 0;
  }
  
@@ -68,7 +67,7 @@ index c23d2d2..b1755ec 100644
  int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
  {
  	uint8_t data[MCTP_I3C_BUFFER_SIZE];
-@@ -129,6 +146,7 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
+@@ -129,6 +145,7 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
  	struct mctp_pktbuf *pkt;
  	ssize_t read_len;
  	int rc;
@@ -76,18 +75,37 @@ index c23d2d2..b1755ec 100644
  
  	if (fd < 0) {
  		mctp_prerr("Invalid file descriptor");
-@@ -152,6 +170,10 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
- 		return -1;
+@@ -142,14 +159,24 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
  	}
  
+ 	mctp_trace_rx(&data, read_len);
 +	def = mctp_asti3c_get_def_data();
 +	if (def)
 +		memcpy(&pkt_prv, def, sizeof(struct mctp_asti3c_pkt_private));
-+
- 	pkt_prv.fd = fd;
  
- 	pkt = mctp_pktbuf_alloc(&asti3c->binding, 0);
-@@ -160,6 +182,26 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
+ 	/* PEC is verified at hardware level and does not
+ 	propogate to userspace, thus do not deal with PEC byte */
+-
+-	if ((read_len > (MCTP_BTU + MCTP_HEADER_SIZE)) ||
+-	    (read_len < (MCTP_HEADER_SIZE))) {
+-		mctp_prerr("Incorrect packet size: %zd", read_len);
+-		return -1;
++	if (pkt_prv.append_pec) {
++		if ((read_len > (MCTP_BTU + MCTP_HEADER_SIZE + 1)) ||
++			(read_len < (MCTP_HEADER_SIZE))) {
++			mctp_prerr("Incorrect packet size: %zd", read_len);
++			return -1;
++		}
++	} else {
++		if ((read_len > (MCTP_BTU + MCTP_HEADER_SIZE)) ||
++			(read_len < (MCTP_HEADER_SIZE))) {
++			mctp_prerr("Incorrect packet size: %zd", read_len);
++			return -1;
++		}
+ 	}
+ 
+ 	pkt_prv.fd = fd;
+@@ -160,6 +187,26 @@ int mctp_asti3c_rx(struct mctp_binding_asti3c *asti3c, int fd)
  		return -1;
  	}
  
@@ -97,9 +115,9 @@ index c23d2d2..b1755ec 100644
 +		uint8_t pec;
 +
 +		if (pkt_prv.is_target == true)
-+			i3c_addr = PFR_I3C_ADDR << 1;
++			i3c_addr = BMC_I3C_SLAVE_ADDR << 1;
 +		else
-+			i3c_addr = (PFR_I3C_ADDR << 1) | 0x1;
++			i3c_addr = (BMC_I3C_SLAVE_ADDR << 1) | 0x1;
 +
 +		pec = crc8(0, &i3c_addr, 1);
 +		pec = crc8(pec, data, read_len - 1);
