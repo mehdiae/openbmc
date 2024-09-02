@@ -2,6 +2,7 @@ SUMMARY = "BootMCU firmware and execute SPL"
 DESCRIPTION = "BootMCU is designated to load the first, verified image for the main processor"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
+PROVIDES += "virtual/bootmcu"
 DEPENDS = "ast2700-riscv-linux-gnu-native kern-tools-native swig-native ${PYTHON_PN}-setuptools-native"
 
 do_install[noexec] = "1"
@@ -68,6 +69,13 @@ do_deploy() {
     # spl binman
     install -m 644 ${BOOTMCU_FW_BINARY} ${DEPLOYDIR}
     install -m 644 ${BOOTMCU_FW_BINARY} ${DEPLOYDIR}/${BOOTMCU_FW_BINARY}-${sub_ver}
+
+    # prebuilt
+    if [ -d ${S}/board/aspeed/ibex_ast2700/prebuilt ]; then
+        if [ -n "$(ls -A ${S}/board/aspeed/ibex_ast2700/prebuilt)" ]; then
+            install -m 644 ${S}/board/aspeed/ibex_ast2700/prebuilt/*.bin ${DEPLOYDIR}
+        fi
+    fi
 }
 
 addtask deploy before do_build after do_compile

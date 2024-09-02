@@ -26,7 +26,7 @@ do_merge_uboot() {
 
 do_merge_uboot[depends] += " \
     u-boot:do_deploy \
-    bootmcu-fw:do_deploy \
+    virtual/bootmcu:do_deploy \
     "
 
 addtask do_merge_uboot before do_generate_static after do_generate_rwfs_static
