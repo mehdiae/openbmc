@@ -12,7 +12,6 @@ SRC_URI = " \
         file://0002-Enabling-MCTP-over-Kernel-Socket.patch \
         file://0003-Support-both-libmctp-and-socket-based-mctp.patch \
         file://0004-to-add-PEC-support.patch \
-        file://mctp-init.sh \
         file://i2c-attestation-emu.service \
         file://i3c-attestation-emu.service \
         file://ecp384 \
@@ -37,9 +36,6 @@ do_install:append () {
 	install -d ${D}${systemd_system_unitdir}
 	install -m 0644 ${WORKDIR}/i2c-attestation-emu.service ${D}${systemd_system_unitdir}/
 	install -m 0644 ${WORKDIR}/i3c-attestation-emu.service ${D}${systemd_system_unitdir}/
-
-	install -d ${D}${bindir}
-	install -m 0755 ${WORKDIR}/mctp-init.sh ${D}${bindir}
 
 	install -d ${D}${datadir}/spdm-emu/ecp384
 	install -m 0644 ${WORKDIR}/ecp384/bundle_requester.certchain1.der ${D}${datadir}/spdm-emu/ecp384
