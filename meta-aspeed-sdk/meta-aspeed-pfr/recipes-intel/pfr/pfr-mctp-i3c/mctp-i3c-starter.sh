@@ -13,9 +13,22 @@ SetupEndpoint()
 
 GetPlatformState()
 {
-	# update PlatformState property
-	busctl get-property xyz.openbmc_project.PFR.Manager /xyz/openbmc_project/pfr xyz.openbmc_project.State.Boot.Platform Data > /dev/null
-	busctl get-property xyz.openbmc_project.PFR.Manager /xyz/openbmc_project/pfr xyz.openbmc_project.State.Boot.Platform PlatformState|cut -b 4-|awk -F '"' '{print $1}'
+	result="0x$(aspeed-pfr-tool -r 0x0a)"
+	result=$(( result & 0x22 ))
+	if [[ $result -eq 0x22 ]]; then
+		# update PlatformState property
+		busctl get-property xyz.openbmc_project.PFR.Manager \
+		/xyz/openbmc_project/pfr xyz.openbmc_project.State.Boot.Platform \
+		Data > /dev/null
+		busctl get-property xyz.openbmc_project.PFR.Manager \
+		/xyz/openbmc_project/pfr xyz.openbmc_project.State.Boot.Platform \
+		PlatformState|cut -b 4-|awk -F '"' '{print $1}'
+	else
+		if systemctl status xyz.openbmc_project.PFR.Manager| \
+			grep "code=exited, status=0/SUCCESS" > /dev/null;then
+			echo "T0 boot complete"
+		fi
+	fi
 }
 
 if [ -f /tmp/.mctp_i3c_done ];then
