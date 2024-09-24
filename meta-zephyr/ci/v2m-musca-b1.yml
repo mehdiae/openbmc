@@ -1,6 +1,0 @@
-header:
-  version: 11
-  includes:
-    - ci/base.yml
-
-machine: v2m-musca-b1
