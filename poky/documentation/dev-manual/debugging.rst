@@ -170,7 +170,7 @@ You can use the ``oe-pkgdata-util`` command-line utility to query
 various package-related information. When you use the utility, you must
 use it to view information on packages that have already been built.
 
-Following are a few of the available ``oe-pkgdata-util`` subcommands.
+Here are a few of the available ``oe-pkgdata-util`` subcommands.
 
 .. note::
 
@@ -270,13 +270,17 @@ format and can be converted to images (e.g. using the ``dot`` tool from
       displays paths between graph nodes.
 
 You can use a different method to view dependency information by using
-the following command::
+either::
 
    $ bitbake -g -u taskexp recipename
 
-This command
-displays a GUI window from which you can view build-time and runtime
-dependencies for the recipes involved in building recipename.
+or::
+
+   $ bitbake -g -u taskexp_ncurses recipename
+
+The ``-u taskdep`` option GUI window from which you can view build-time and
+runtime dependencies for the recipes involved in building recipename. The
+``-u taskexp_ncurses`` option uses ncurses instead of GTK to render the UI.
 
 Viewing Task Variable Dependencies
 ==================================
@@ -327,7 +331,7 @@ BitBake has determined by doing the following:
    the task. This list also includes indirect dependencies from
    variables depending on other variables, recursively::
 
-      Task dependencies: ['PV', 'SRCREV', 'SRC_URI', 'SRC_URI[md5sum]', 'SRC_URI[sha256sum]', 'base_do_fetch']
+      Task dependencies: ['PV', 'SRCREV', 'SRC_URI', 'SRC_URI[sha256sum]', 'base_do_fetch']
 
    .. note::
 
@@ -339,7 +343,10 @@ BitBake has determined by doing the following:
    :term:`BB_BASEHASH_IGNORE_VARS`
    information.
 
-There is also a ``bitbake-diffsigs`` command for comparing two
+Debugging signature construction and unexpected task executions
+===============================================================
+
+There is a ``bitbake-diffsigs`` command for comparing two
 ``siginfo`` or ``sigdata`` files. This command can be helpful when
 trying to figure out what changed between two versions of a task. If you
 call ``bitbake-diffsigs`` with just one file, the command behaves like
@@ -356,8 +363,12 @@ BitBake command-line options::
 .. note::
 
    Two common values for `SIGNATURE_HANDLER` are "none" and "printdiff", which
-   dump only the signature or compare the dumped signature with the cached one,
-   respectively.
+   dump only the signature or compare the dumped signature with the most recent one,
+   respectively. "printdiff" will try to establish the most recent
+   signature match (e.g. in the sstate cache) and then
+   compare the matched signatures to determine the stamps and delta
+   where these two stamp trees diverge. This can be used to determine why
+   tasks need to be re-run in situations where that is not expected.
 
 Using BitBake with either of these options causes BitBake to dump out
 ``sigdata`` files in the ``stamps`` directory for every task it would
@@ -608,7 +619,7 @@ logs, keep in mind the goal is to have informative logs while keeping
 the console as "silent" as possible. Also, if you want status messages
 in the log, use the "debug" loglevel.
 
-Following is an example written in Python. The code handles logging for
+Here is an example written in Python. The code handles logging for
 a function that determines the number of tasks needed to be run. See the
 ":ref:`ref-tasks-listtasks`"
 section for additional information::
@@ -636,7 +647,7 @@ logs, you have the same goals --- informative with minimal console output.
 The syntax you use for recipes written in Bash is similar to that of
 recipes written in Python described in the previous section.
 
-Following is an example written in Bash. The code logs the progress of
+Here is an example written in Bash. The code logs the progress of
 the ``do_my_function`` function::
 
    do_my_function() {
@@ -1173,6 +1184,21 @@ To support this kind of debugging, you need do the following:
    Consider that this will reduce the application's performance and is
    recommended only for debugging purposes.
 
+Enabling Minidebuginfo
+======================
+
+Enabling the :term:`DISTRO_FEATURES` minidebuginfo adds a compressed ELF section ``.gnu_debugdata``
+to all binary files, containing only function names, and thus increasing the size of the
+binaries only by 5 to 10%. For comparison, full debug symbols can be 10 times as big as
+a stripped binary, and it is thus not always possible to deploy full debug symbols.
+Minidebuginfo data allows, on the one side, to retrieve a call-stack using
+GDB (command backtrace) without deploying full debug symbols to the target. It also
+allows to retrieve a symbolicated call-stack when using ``systemd-coredump`` to manage
+coredumps (commands ``coredumpctl list`` and ``coredumpctl info``).
+
+This feature was created by Fedora, see https://fedoraproject.org/wiki/Features/MiniDebugInfo for
+more details.
+
 Other Debugging Tips
 ====================
 
@@ -1221,7 +1247,7 @@ Here are some other tips that you might find useful:
                "$@"
       }
 
-   Following are some usage examples::
+   Here are some usage examples::
 
       $ g FOO # Search recursively for "FOO"
       $ g -i foo # Search recursively for "foo", ignoring case

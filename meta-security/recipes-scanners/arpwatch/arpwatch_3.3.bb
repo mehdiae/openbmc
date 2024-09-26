@@ -23,9 +23,7 @@ ARPWATH_REPLY ?= "${ARPWATCH_UID}"
 
 PACKAGECONFIG ??= ""
 
-PACKACONFIG[email] = "-with-watcher=email=${APRWATCH_FROM} --with-watchee=email=${ARPWATH_REPLY}, , postfix, postfix postfix-cfg"
-
-EXTRA_OECONF:append = " --srcdir=${S}"
+PACKAGECONFIG[email] = "-with-watcher=email=${APRWATCH_FROM} --with-watchee=email=${ARPWATH_REPLY}, , postfix, postfix postfix-cfg"
 
 CONFIGUREOPTS = " --build=${BUILD_SYS} \
           --host=${HOST_SYS} \
@@ -41,19 +39,20 @@ CONFIGUREOPTS = " --build=${BUILD_SYS} \
           --localstatedir=${localstatedir} \
           --libdir=${libdir} \
           --includedir=${includedir} \
-          --oldincludedir=${oldincludedir} \
           --infodir=${infodir} \
           --mandir=${mandir} \
+          --srcdir=${S} \
+          --with-sendmail=${sbindir}/sendmail \
           "
 
 do_configure () {
-    ${S}/configure ${CONFIGUREOPTS} ${EXTRA_OECONF}
+    ${S}/configure ${CONFIGUREOPTS}
 }
 
 do_install () {
     install -d ${D}${bindir}
     install -d ${D}${sbindir}
-    install -d ${D}${mandir}
+    install -d ${D}${mandir}/man8
     install -d ${D}${sysconfdir}
     install -d ${D}${sysconfdir}/default
     install -d ${D}${sysconfdir}/init.d

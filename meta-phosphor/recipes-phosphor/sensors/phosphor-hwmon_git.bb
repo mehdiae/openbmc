@@ -11,7 +11,7 @@ DEPENDS += " \
         gpioplus \
         cli11 \
         "
-SRCREV = "47fb49ac4af2b34d2a3d5e2aa062cbb7a7273864"
+SRCREV = "8df95be4e93cd2f2596a8acb1a79cdc0834da26e"
 PACKAGECONFIG ??= ""
 # Meson configure option to enable/disable max31785-msl
 PACKAGECONFIG[max31785-msl] = "-Denable-max31785-msl=true, -Denable-max31785-msl=false"

@@ -6,6 +6,8 @@ a variety of guest operating systems"
 HOMEPAGE = "http://qemu.org"
 LICENSE = "GPL-2.0-only & LGPL-2.1-only"
 
+DEPENDS += "bison-native meson-native ninja-native"
+
 RDEPENDS:${PN}-ptest = "bash"
 
 require qemu-targets.inc
@@ -30,19 +32,33 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://0010-hw-pvrdma-Protect-against-buggy-or-malicious-guest-d.patch \
            file://0002-linux-user-Replace-use-of-lfs64-related-functions-an.patch \
            file://fixedmeson.patch \
-           file://fixmips.patch \
+           file://no-pip.patch \
+           file://4a8579ad8629b57a43daa62e46cc7af6e1078116.patch \
+           file://0001-linux-user-x86_64-Handle-the-vsyscall-page-in-open_s.patch \
+           file://0002-linux-user-loongarch64-Remove-TARGET_FORCE_SHMLBA.patch \
+           file://0003-linux-user-Add-strace-for-shmat.patch \
+           file://0004-linux-user-Rewrite-target_shmat.patch \
+           file://0005-tests-tcg-Check-that-shmat-does-not-break-proc-self-.patch \
+           file://CVE-2023-6683.patch \
            file://qemu-guest-agent.init \
            file://qemu-guest-agent.udev \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
+# SDK_OLDEST_KERNEL is set below 4.17, which is the minimum version required by QEMU >= 8.1
+# This is due to two MMAP flags being used at certain points
+SRC_URI:append:class-nativesdk = " \
+	file://0011-linux-user-workaround-for-missing-MAP_FIXED_NOREPLAC.patch \
+	file://0012-linux-user-workaround-for-missing-MAP_SHARED_VALIDAT.patch \
+        "
 
-SRC_URI[sha256sum] = "541526a764576eb494d2ff5ec46aeb253e62ea29035d1c23c0a8af4e6cd4f087"
+# Support building and using native version on pre 4.17 kernels
+SRC_URI:append:class-native = " \
+	file://0011-linux-user-workaround-for-missing-MAP_FIXED_NOREPLAC.patch \
+	file://0012-linux-user-workaround-for-missing-MAP_SHARED_VALIDAT.patch \
+        "
 
-SRC_URI:append:class-target = " file://cross.patch"
-SRC_URI:append:class-nativesdk = " file://cross.patch"
-
-CVE_STATUS[CVE-2017-5957] = "cpe-incorrect: Applies against virglrender < 0.6.0 and not qemu itself"
+SRC_URI[sha256sum] = "8562751158175f9d187c5f22b57555abe3c870f0325c8ced12c34c6d987729be"
 
 CVE_STATUS[CVE-2007-0998] = "not-applicable-config: The VNC server can expose host files uder some circumstances. We don't enable it by default."
 
@@ -55,6 +71,12 @@ CVE_STATUS[CVE-2023-0664] = "not-applicable-platform: Issue only applies on Wind
 
 # As per https://bugzilla.redhat.com/show_bug.cgi?id=2203387
 CVE_STATUS[CVE-2023-2680] = "not-applicable-platform: RHEL specific issue."
+
+CVE_STATUS[CVE-2023-3019] = "cpe-incorrect: Applies only against versions before 8.2.0"
+
+CVE_STATUS[CVE-2023-5088] = "cpe-incorrect: Applies only against version 8.2.0 and earlier"
+
+CVE_STATUS[CVE-2023-6693] = "cpe-incorrect: Applies only against version 8.2.0 and earlier"
 
 COMPATIBLE_HOST:mipsarchn32 = "null"
 COMPATIBLE_HOST:mipsarchn64 = "null"
@@ -113,8 +135,13 @@ EXTRA_OECONF = " \
     --extra-ldflags='${LDFLAGS}' \
     --disable-download \
     --disable-docs \
+    --host-cc='${BUILD_CC}' \
+    --disable-af-xdp \
     ${PACKAGECONFIG_CONFARGS} \
     "
+
+EXTRA_OECONF:append:class-target = " --cross-prefix=${HOST_PREFIX}"
+EXTRA_OECONF:append:class-nativesdk = " --cross-prefix=${HOST_PREFIX}"
 
 B = "${WORKDIR}/build"
 
@@ -129,6 +156,7 @@ do_configure:prepend:class-native() {
 }
 
 do_configure() {
+    export PKG_CONFIG=pkg-config
     ${S}/configure ${EXTRA_OECONF}
 }
 do_configure[cleandirs] += "${B}"
@@ -172,7 +200,7 @@ do_install:append() {
 
 # Disable kvm/virgl/mesa on targets that do not support it
 PACKAGECONFIG:remove:darwin = "kvm virglrenderer epoxy gtk+"
-PACKAGECONFIG:remove:mingw32 = "kvm virglrenderer epoxy gtk+"
+PACKAGECONFIG:remove:mingw32 = "kvm virglrenderer epoxy gtk+ pie"
 
 PACKAGECONFIG[sdl] = "--enable-sdl,--disable-sdl,libsdl2"
 PACKAGECONFIG[png] = "--enable-png,--disable-png,libpng"
@@ -232,6 +260,8 @@ PACKAGECONFIG[slirp] = "--enable-slirp,--disable-slirp,libslirp"
 PACKAGECONFIG[brlapi] = "--enable-brlapi,--disable-brlapi"
 PACKAGECONFIG[jack] = "--enable-jack,--disable-jack,jack,"
 PACKAGECONFIG[debuginfo] = "--enable-libdw,--disable-libdw,elfutils"
+PACKAGECONFIG[pipewire] = "--enable-pipewire,--disable-pipewire,pipewire"
+PACKAGECONFIG[sndio] = "--enable-sndio,--disable-sndio,sndio"
 
 INSANE_SKIP:${PN}-common = "arch"
 

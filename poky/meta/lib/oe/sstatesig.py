@@ -6,6 +6,7 @@
 import bb.siggen
 import bb.runqueue
 import oe
+import netrc
 
 def sstate_rundepfilter(siggen, fn, recipename, task, dep, depname, dataCaches):
     # Return True if we should keep the dependency, False to drop it
@@ -205,10 +206,10 @@ class SignatureGeneratorOEBasicHashMixIn(object):
             return self.lockedhashes[tid]
         return super().get_stampfile_hash(tid)
 
-    def get_unihash(self, tid):
+    def get_cached_unihash(self, tid):
         if tid in self.lockedhashes and self.lockedhashes[tid] and not self._internal:
             return self.lockedhashes[tid]
-        return super().get_unihash(tid)
+        return super().get_cached_unihash(tid)
 
     def dump_sigtask(self, fn, task, stampbase, runtime):
         tid = fn + ":" + task
@@ -326,6 +327,19 @@ class SignatureGeneratorOEEquivHash(SignatureGeneratorOEBasicHashMixIn, bb.sigge
         self.method = data.getVar('SSTATE_HASHEQUIV_METHOD')
         if not self.method:
             bb.fatal("OEEquivHash requires SSTATE_HASHEQUIV_METHOD to be set")
+        self.max_parallel = int(data.getVar('BB_HASHSERVE_MAX_PARALLEL') or 1)
+        self.username = data.getVar("BB_HASHSERVE_USERNAME")
+        self.password = data.getVar("BB_HASHSERVE_PASSWORD")
+        if not self.username or not self.password:
+            try:
+                n = netrc.netrc()
+                auth = n.authenticators(self.server)
+                if auth is not None:
+                    self.username, _, self.password = auth
+            except FileNotFoundError:
+                pass
+            except netrc.NetrcParseError as e:
+                bb.warn("Error parsing %s:%s: %s" % (e.filename, str(e.lineno), e.msg))
 
 # Insert these classes into siggen's namespace so it can see and select them
 bb.siggen.SignatureGeneratorOEBasicHash = SignatureGeneratorOEBasicHash
@@ -349,13 +363,15 @@ def find_siginfo(pn, taskname, taskhashlist, d):
            pn, taskname = key.split(':', 1)
 
     hashfiles = {}
-    filedates = {}
 
     def get_hashval(siginfo):
         if siginfo.endswith('.siginfo'):
             return siginfo.rpartition(':')[2].partition('_')[0]
         else:
             return siginfo.rpartition('.')[2]
+
+    def get_time(fullpath):
+        return os.stat(fullpath).st_mtime
 
     # First search in stamps dir
     localdata = d.createCopy()
@@ -372,24 +388,21 @@ def find_siginfo(pn, taskname, taskhashlist, d):
     filespec = '%s.%s.sigdata.*' % (stamp, taskname)
     foundall = False
     import glob
+    bb.debug(1, "Calling glob.glob on {}".format(filespec))
     for fullpath in glob.glob(filespec):
         match = False
         if taskhashlist:
             for taskhash in taskhashlist:
                 if fullpath.endswith('.%s' % taskhash):
-                    hashfiles[taskhash] = fullpath
+                    hashfiles[taskhash] = {'path':fullpath, 'sstate':False, 'time':get_time(fullpath)}
                     if len(hashfiles) == len(taskhashlist):
                         foundall = True
                         break
         else:
-            try:
-                filedates[fullpath] = os.stat(fullpath).st_mtime
-            except OSError:
-                continue
             hashval = get_hashval(fullpath)
-            hashfiles[hashval] = fullpath
+            hashfiles[hashval] = {'path':fullpath, 'sstate':False, 'time':get_time(fullpath)}
 
-    if not taskhashlist or (len(filedates) < 2 and not foundall):
+    if not taskhashlist or (len(hashfiles) < 2 and not foundall):
         # That didn't work, look in sstate-cache
         hashes = taskhashlist or ['?' * 64]
         localdata = bb.data.createCopy(d)
@@ -398,6 +411,9 @@ def find_siginfo(pn, taskname, taskhashlist, d):
             localdata.setVar('TARGET_VENDOR', '*')
             localdata.setVar('TARGET_OS', '*')
             localdata.setVar('PN', pn)
+            # gcc-source is a special case, same as with local stamps above
+            if pn.startswith("gcc-source"):
+                localdata.setVar('PN', "gcc")
             localdata.setVar('PV', '*')
             localdata.setVar('PR', '*')
             localdata.setVar('BB_TASKHASH', hashval)
@@ -409,24 +425,18 @@ def find_siginfo(pn, taskname, taskhashlist, d):
                 localdata.setVar('SSTATE_EXTRAPATH', "${NATIVELSBSTRING}/")
             filespec = '%s.siginfo' % localdata.getVar('SSTATE_PKG')
 
+            bb.debug(1, "Calling glob.glob on {}".format(filespec))
             matchedfiles = glob.glob(filespec)
             for fullpath in matchedfiles:
                 actual_hashval = get_hashval(fullpath)
                 if actual_hashval in hashfiles:
                     continue
-                hashfiles[hashval] = fullpath
-                if not taskhashlist:
-                    try:
-                        filedates[fullpath] = os.stat(fullpath).st_mtime
-                    except:
-                        continue
+                hashfiles[actual_hashval] = {'path':fullpath, 'sstate':True, 'time':get_time(fullpath)}
 
-    if taskhashlist:
-        return hashfiles
-    else:
-        return filedates
+    return hashfiles
 
 bb.siggen.find_siginfo = find_siginfo
+bb.siggen.find_siginfo_version = 2
 
 
 def sstate_get_manifest_filename(task, d):

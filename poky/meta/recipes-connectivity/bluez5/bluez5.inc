@@ -55,7 +55,6 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://0001-tests-add-a-target-for-building-tests-without-runnin.patch \
            file://0001-test-gatt-Fix-hung-issue.patch \
            file://0004-src-shared-util.c-include-linux-limits.h.patch \
-           file://0002-input-Fix-.device_probe-failing-if-SDP-record-is-not.patch \
            "
 S = "${WORKDIR}/bluez-${PV}"
 
@@ -87,14 +86,6 @@ NOINST_TOOLS = " \
 do_install:append() {
 	install -d ${D}${INIT_D_DIR}
 	install -m 0755 ${WORKDIR}/init ${D}${INIT_D_DIR}/bluetooth
-
-	install -d ${D}${sysconfdir}/bluetooth/
-	if [ -f ${S}/profiles/network/network.conf ]; then
-		install -m 0644 ${S}/profiles/network/network.conf ${D}/${sysconfdir}/bluetooth/
-	fi
-	if [ -f ${S}/profiles/input/input.conf ]; then
-		install -m 0644 ${S}/profiles/input/input.conf ${D}/${sysconfdir}/bluetooth/
-	fi
 
 	if [ -f ${D}/${sysconfdir}/init.d/bluetooth ]; then
 		sed -i -e 's#@LIBEXECDIR@#${libexecdir}#g' ${D}/${sysconfdir}/init.d/bluetooth

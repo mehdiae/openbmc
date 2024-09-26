@@ -210,7 +210,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-jsonpath-rw \
     python3-jsonpointer \
     python3-jsonref \
-    python3-jsonrpcserver \
     python3-jsonschema \
     python3-jstyleson \
     python3-kconfiglib \
@@ -218,7 +217,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-keras-preprocessing \
     ${@bb.utils.contains("DISTRO_FEATURES", "x11 opengl", "python3-kivy", "", d)} \
     python3-kiwisolver \
-    python3-kmod \
     python3-langtable \
     python3-lazy-object-proxy \
     python3-libconf \
@@ -313,6 +311,7 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-pycodestyle \
     python3-pyconnman \
     python3-pycurl \
+    python3-pydbus \
     python3-pydicti \
     python3-pyephem \
     python3-pyexpect \
@@ -321,7 +320,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-pyflakes \
     python3-pyhamcrest \
     python3-pyiface \
-    python3-pyinotify \
     python3-pyjks \
     python3-pyjwt \
     python3-pykickstart \
@@ -351,7 +349,7 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-pytest-forked \
     python3-pytest-helpers-namespace \
     python3-pytest-html \
-    python3-pytest-lazy-fixture \
+    python3-pytest-lazy-fixtures \
     python3-pytest-metadata \
     python3-pytest-tempdir \
     python3-pytest-timeout \
@@ -392,7 +390,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-serpent \
     python3-service-identity \
     python3-setuptools-declarative-requirements \
-    python3-setuptools-scm-git-archive \
     python3-sh \
     python3-sijax \
     python3-simpleeval \
@@ -439,7 +436,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-typeguard \
     python3-tzlocal \
     python3-u-msgpack-python \
-    python3-uinput \
     python3-ujson \
     python3-unidiff \
     python3-uritemplate \
@@ -462,7 +458,6 @@ RDEPENDS:packagegroup-meta-python3 = "\
     python3-wtforms \
     python3-xlrd \
     python3-xlsxwriter \
-    python3-xmlrunner \
     python3-xmltodict \
     python3-xmodem \
     python3-xstatic \
@@ -513,7 +508,6 @@ RDEPENDS:packagegroup-meta-python3-ptest = "\
     python3-pyasn1-modules-ptest \
     python3-pyroute2-ptest \
     python3-pyserial-ptest \
-    python3-pytest-lazy-fixture-ptest \
     python3-pytoml-ptest \
     python3-pyzmq-ptest \
     python3-requests-file-ptest \

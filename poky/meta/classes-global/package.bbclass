@@ -234,7 +234,7 @@ python () {
         deps = ""
         for dep in (d.getVar('PACKAGE_DEPENDS') or "").split():
             deps += " %s:do_populate_sysroot" % dep
-        if d.getVar('PACKAGE_MINIDEBUGINFO') == '1':
+        if bb.utils.contains('DISTRO_FEATURES', 'minidebuginfo', True, False, d):
             deps += ' xz-native:do_populate_sysroot'
         d.appendVarFlag('do_package', 'depends', deps)
 
@@ -335,6 +335,7 @@ python package_convert_pr_autoinc() {
 }
 
 LOCALEBASEPN ??= "${PN}"
+LOCALE_PATHS ?= "${datadir}/locale"
 
 python package_do_split_locales() {
     oe.package.split_locales(d)

@@ -1,14 +1,26 @@
-image: ${MIRROR_GHCR}/siemens/kas/kas:4.0
+image: ${MIRROR_GHCR}/siemens/kas/kas:4.3.2
 
 variables:
-  CPU_REQUEST: ""
-  DEFAULT_TAG: ""
-  CACHE_DIR: $CI_BUILDS_DIR/persist
-  MIRROR_GHCR: ghcr.io
-  # These are needed as the k8s executor doesn't respect the container entrypoint
-  # by default
+  # These are needed as the k8s executor doesn't respect the container
+  # entrypoint by default
   FF_KUBERNETES_HONOR_ENTRYPOINT: 1
   FF_USE_LEGACY_KUBERNETES_EXECUTION_STRATEGY: 0
+  # The default value for KUBERNETES_CPU_REQUEST
+  CPU_REQUEST: ""
+  # The default machine tag for the build jobs
+  DEFAULT_TAG: ""
+  # The machine tag for the ACS test jobs
+  ACS_TAG: ""
+  # The directory to use as the persistent cache (the root for DL_DIR, SSTATE_DIR, etc)
+  CACHE_DIR: $CI_BUILDS_DIR/persist
+  # The container mirror to use
+  MIRROR_GHCR: ghcr.io
+  # Whether to run the SystemReady ACS tests
+  ACS_TEST: 0
+  # The list of extra Kas fragments to be used when building
+  EXTRA_KAS_FILES: ""
+  # The NVD API key to use when fetching CVEs
+  NVDCVE_API_KEY: ""
 
 stages:
   - prep
@@ -59,7 +71,7 @@ stages:
     # Catch all for everything else
     - if: '$KERNEL != "linux-yocto-dev"'
   script:
-    - KASFILES=$(./ci/jobs-to-kas "$CI_JOB_NAME"):lockfile.yml
+    - KASFILES=$(./ci/jobs-to-kas "$CI_JOB_NAME" $EXTRA_KAS_FILES):lockfile.yml
     - kas dump --update --force-checkout --resolve-refs --resolve-env $KASFILES
     - kas build $KASFILES
     - ./ci/check-warnings $KAS_WORK_DIR/build/warnings.log
@@ -67,8 +79,8 @@ stages:
     name: "logs"
     when: always
     paths:
-      - $CI_PROJECT_DIR/work/build/tmp/work*/**/temp/log.do_*.*
-      - $CI_PROJECT_DIR/work/build/tmp/work*/**/testimage/*
+      - $CI_PROJECT_DIR/work/build/tmp*/work*/**/temp/log.do_*.*
+      - $CI_PROJECT_DIR/work/build/tmp*/work*/**/testimage/*
 
 #
 # Prep stage, update repositories once.
@@ -111,14 +123,18 @@ corstone1000-fvp:
   extends: .build
   parallel:
     matrix:
-      - TESTING: [testimage, tftf]
+      - FIRMWARE: corstone1000-firmware-only
+        TESTING: [testimage, tftf]
+      - FIRMWARE: none
+        TESTING: testimage
 
 corstone1000-mps3:
   extends: .build
   parallel:
     matrix:
-      - TESTING: [none, tftf]
-
+      - FIRMWARE: corstone1000-firmware-only
+        TESTING: [none, tftf]
+      - FIRMWARE: none
 
 fvp-base:
   extends: .build
@@ -126,6 +142,20 @@ fvp-base:
     matrix:
       - TESTING: testimage
       - FIRMWARE: edk2
+      - SYSTEMREADY_FIRMWARE: arm-systemready-firmware
+
+arm-systemready-ir-acs:
+  extends: .build
+  timeout: 12h
+  parallel:
+    matrix:
+      # arm-systemready-ir-acs must be specified after fvp-base for ordering
+      # purposes for the jobs-to-kas output. It is not enough to just have it
+      # in the job name because fvp-base.yml overwrites the target.
+      - PLATFORM: fvp-base
+        ARM_SYSTEMREADY_IR_ACS: arm-systemready-ir-acs
+  tags:
+    - ${ACS_TAG}
 
 fvps:
   extends: .build
@@ -156,18 +186,22 @@ qemu-generic-arm64:
   extends: .build
   parallel:
     matrix:
-      - KERNEL: [linux-yocto, linux-yocto-dev, linux-yocto-rt]
+      - KERNEL: [linux-yocto, linux-yocto-rt]
         TOOLCHAINS: [gcc, clang]
+        TESTING: testimage
+      - KERNEL: linux-yocto-dev
         TESTING: testimage
 
 qemuarm64-secureboot:
   extends: .build
   parallel:
     matrix:
-      - KERNEL: [linux-yocto, linux-yocto-dev, linux-yocto-rt]
+      - KERNEL: [linux-yocto, linux-yocto-rt]
         TOOLCHAINS: [gcc, clang]
         TCLIBC: [glibc, musl]
         TS: [none, qemuarm64-secureboot-ts]
+        TESTING: testimage
+      - KERNEL: linux-yocto-dev
         TESTING: testimage
 
 qemuarm64:
@@ -175,23 +209,27 @@ qemuarm64:
   parallel:
     matrix:
       - DISTRO: poky
-        KERNEL: [linux-yocto, linux-yocto-dev, linux-yocto-rt]
+        KERNEL: [linux-yocto, linux-yocto-rt]
         TOOLCHAINS: [gcc, clang]
         FIRMWARE: [u-boot, edk2]
         TESTING: testimage
       - DISTRO: poky-tiny
         TESTING: testimage
       - VIRT: xen
+      - KERNEL: linux-yocto-dev
+        TESTING: testimage
 
 qemuarm-secureboot:
   extends: .build
   parallel:
     matrix:
-      - KERNEL: [linux-yocto, linux-yocto-dev, linux-yocto-rt]
+      - KERNEL: [linux-yocto, linux-yocto-rt]
         TOOLCHAINS: [gcc, clang]
         TCLIBC: [glibc, musl]
         TESTING: testimage
       - TOOLCHAINS: external-gccarm
+        TESTING: testimage
+      - KERNEL: linux-yocto-dev
         TESTING: testimage
 
 qemuarm:
@@ -199,13 +237,15 @@ qemuarm:
   parallel:
     matrix:
       - DISTRO: poky
-        KERNEL: [linux-yocto, linux-yocto-dev, linux-yocto-rt]
+        KERNEL: [linux-yocto, linux-yocto-rt]
         TOOLCHAINS: [gcc, clang]
         FIRMWARE: [u-boot, edk2]
         TESTING: testimage
       - DISTRO: poky-tiny
         TESTING: testimage
       - VIRT: xen
+      - KERNEL: linux-yocto-dev
+        TESTING: testimage
 
 qemuarmv5:
   extends: .build
@@ -219,14 +259,6 @@ qemuarmv5:
 
 sgi575:
   extends: .build
-
-tc1:
-  extends: .build
-  parallel:
-    matrix:
-      - TESTING: testimage
-  tags:
-    - x86_64
 
 toolchains:
   extends: .build

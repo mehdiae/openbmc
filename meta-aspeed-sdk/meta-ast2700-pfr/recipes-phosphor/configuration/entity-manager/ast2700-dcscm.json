@@ -42,6 +42,12 @@
             "Class": "Aspeed2600_Hwmon",
             "Name": "Chassis Intrusion Sensor",
             "Type": "ChassisIntrusionSensor"
+        },
+        {
+            "Address": "0x38",
+            "Bus": 10,
+            "Name": "PFR",
+            "Type": "PFR"
         }
     ],
     "xyz.openbmc_project.Inventory.Decorator.FruDevice": {
@@ -52,7 +58,7 @@
         "EntityId": 7,
         "EntityInstance": 0
     },
-    "Name": "AST2700 DCSCM",
+    "Name": "AST2700 DCSCM Baseboard",
     "Probe": "TRUE",
     "Type": "Board"
 }

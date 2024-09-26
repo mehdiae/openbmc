@@ -184,7 +184,6 @@ RDEPENDS:packagegroup-meta-oe-core = "\
     libnfc \
     libsigc++-2.0 \
     libsigc++-3 \
-    libxml++ \
     mdbus2 \
     distro-feed-configs \
     mm-common \
@@ -310,6 +309,7 @@ RDEPENDS:packagegroup-meta-oe-devtools ="\
     yasm \
     json-schema-validator \
     poke \
+    microsoft-gsl \
 "
 RDEPENDS:packagegroup-meta-oe-devtools:append:x86 = " cpuid msr-tools pahole pmtools"
 RDEPENDS:packagegroup-meta-oe-devtools:append:x86-64 = " cpuid msr-tools pahole pcimem pmtools"
@@ -326,7 +326,7 @@ RDEPENDS:packagegroup-meta-oe-devtools:remove:mips64el = "luajit nodejs"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:powerpc = "android-tools breakpad lshw luajit uftrace"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:powerpc64 = "android-tools breakpad lshw luajit ply uftrace"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:powerpc64le = "android-tools breakpad lshw luajit ply uftrace"
-RDEPENDS:packagegroup-meta-oe-devtools:remove:riscv64 = "breakpad concurrencykit heaptrack lshw ltrace luajit nodejs ply uftrace"
+RDEPENDS:packagegroup-meta-oe-devtools:remove:riscv64 = "breakpad concurrencykit heaptrack lshw ltrace luajit nodejs ply"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:riscv32 = "breakpad concurrencykit heaptrack lshw ltrace luajit nodejs ply uftrace"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:libc-musl:riscv32 = "php"
 RDEPENDS:packagegroup-meta-oe-devtools:remove:aarch64 = "concurrencykit"
@@ -874,6 +874,7 @@ RDEPENDS:packagegroup-meta-oe-support ="\
     raptor2 \
     rdfind \
     re2 \
+    sdmon \
     sdparm \
     serial-forward \
     read-edid \

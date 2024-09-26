@@ -3,13 +3,9 @@ header:
   includes:
     - ci/base.yml
     - ci/meta-openembedded.yml
-    - ci/poky-tiny.yml
     - ci/meta-secure-core.yml
-
-local_conf_header:
-    extrapackages: |
-    # Intentionally blank to prevent perf from being added to the image in base.yml
+    - kas/corstone1000-image-configuration.yml
 
 target:
-  - corstone1000-image
+  - core-image-minimal
   - perf

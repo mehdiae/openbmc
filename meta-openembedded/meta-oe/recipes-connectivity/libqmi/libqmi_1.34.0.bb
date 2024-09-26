@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = " \
 
 DEPENDS = "glib-2.0 glib-2.0-native"
 
-inherit meson pkgconfig bash-completion gobject-introspection
+inherit meson pkgconfig bash-completion gobject-introspection upstream-version-is-even
 
 SRCREV = "3f07d6e5b4677558543b3b4484ea88ad92257e92"
 SRC_URI = "git://gitlab.freedesktop.org/mobile-broadband/libqmi.git;protocol=https;branch=qmi-1-34"

@@ -9,7 +9,7 @@
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 DEPENDS:prepend = "nodejs-native "
-SRCREV = "1b417cd406ce65401dcb8d695fe5424287092cb1"
+SRCREV = "620e6466db409f535fc3d4a2ab85dd672e3de6dd"
 PV = "1.0+git${SRCPV}"
 # This recipe requires online access to build, as it uses NPM for dependency
 # management and resolution.
@@ -20,6 +20,11 @@ SRC_URI = "git://github.com/openbmc/webui-vue.git;branch=master;protocol=https"
 S = "${WORKDIR}/git"
 
 inherit allarch
+
+# Ideally this recipe would use npm.bbclass, but it doesn't.  Since npm uses
+# python3, we need to inherit this to get the Yocto version of python3 instead
+# of the hosttools one.
+inherit python3native
 
 RDEPENDS:${PN}:append = " bmcweb"
 

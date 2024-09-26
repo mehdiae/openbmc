@@ -45,4 +45,4 @@ EXTRA_IMAGE_FEATURES:append = " \
 # Enable spi-nor-ecc.inc and unmask below to generate an image-rwfs with cleanmarker size set to 16.
 #OVERLAY_MKFS_OPTS:spi-nor-ecc = " -c 16 -e 262144 --pad=${RWFS_SIZE} "
 
-inherit image_types_phosphor_aspeed
+IMAGE_CLASSES:append:aspeed-g7 = " image_types_phosphor_aspeed_g7"
