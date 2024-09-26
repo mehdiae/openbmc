@@ -290,12 +290,12 @@ class URI(object):
 
     def _param_str_split(self, string, elmdelim, kvdelim="="):
         ret = collections.OrderedDict()
-        for k, v in [x.split(kvdelim, 1) for x in string.split(elmdelim) if x]:
+        for k, v in [x.split(kvdelim, 1) if kvdelim in x else (x, None) for x in string.split(elmdelim) if x]:
             ret[k] = v
         return ret
 
     def _param_str_join(self, dict_, elmdelim, kvdelim="="):
-        return elmdelim.join([kvdelim.join([k, v]) for k, v in dict_.items()])
+        return elmdelim.join([kvdelim.join([k, v]) if v else k for k, v in dict_.items()])
 
     @property
     def hostport(self):
@@ -875,6 +875,7 @@ FETCH_EXPORT_VARS = ['HOME', 'PATH',
                      'AWS_ROLE_ARN',
                      'AWS_WEB_IDENTITY_TOKEN_FILE',
                      'AWS_DEFAULT_REGION',
+                     'AWS_SESSION_TOKEN',
                      'GIT_CACHE_PATH',
                      'REMOTE_CONTAINERS_IPC',
                      'SSL_CERT_DIR']
@@ -942,7 +943,10 @@ def runfetchcmd(cmd, d, quiet=False, cleanup=None, log=None, workdir=None):
         elif e.stderr:
             output = "output:\n%s" % e.stderr
         else:
-            output = "no output"
+            if log:
+                output = "see logfile for output"
+            else:
+                output = "no output"
         error_message = "Fetch command %s failed with exit code %s, %s" % (e.command, e.exitcode, output)
     except bb.process.CmdError as e:
         error_message = "Fetch command %s could not be run:\n%s" % (e.command, e.msg)
@@ -1114,7 +1118,8 @@ def try_mirror_url(fetch, origud, ud, ld, check = False):
             logger.debug("Mirror fetch failure for url %s (original url: %s)" % (ud.url, origud.url))
             logger.debug(str(e))
         try:
-            ud.method.clean(ud, ld)
+            if ud.method.cleanup_upon_failure():
+                ud.method.clean(ud, ld)
         except UnboundLocalError:
             pass
         return False
@@ -1438,6 +1443,12 @@ class FetchMethod(object):
         be displayed if there is no checksum)?
         """
         return False
+
+    def cleanup_upon_failure(self):
+        """
+        When a fetch fails, should clean() be called?
+        """
+        return True
 
     def verify_donestamp(self, ud, d):
         """
@@ -1884,7 +1895,7 @@ class Fetch(object):
                             logger.debug(str(e))
                         firsterr = e
                         # Remove any incomplete fetch
-                        if not verified_stamp:
+                        if not verified_stamp and m.cleanup_upon_failure():
                             m.clean(ud, self.d)
                         logger.debug("Trying MIRRORS")
                         mirrors = mirror_from_string(self.d.getVar('MIRRORS'))
@@ -1947,7 +1958,7 @@ class Fetch(object):
                     ret = m.try_mirrors(self, ud, self.d, mirrors, True)
 
             if not ret:
-                raise FetchError("URL %s doesn't work" % u, u)
+                raise FetchError("URL doesn't work", u)
 
     def unpack(self, root, urls=None):
         """

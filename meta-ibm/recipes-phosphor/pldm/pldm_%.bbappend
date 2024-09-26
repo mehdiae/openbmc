@@ -1,8 +1,8 @@
 # Force the mctp-demux to be used until machine is ready to use in-kernel MCTP
-PACKAGECONFIG = "transport-mctp-demux"
+PACKAGECONFIG:append = " transport-mctp-demux oem-ibm system-specific-bios-json"
 
-PACKAGECONFIG += "oem-ibm"
-PACKAGECONFIG[oem-ibm] = "-Doem-ibm=enabled, -Doem-ibm=disabled, , squashfs-tools"
+# Huygens does not currently want the IBM OEM functions (no PHYP)
+PACKAGECONFIG:remove:huygens = " oem-ibm"
 
 EXTRA_OEMESON += " \
         -Dsoftoff-timeout-seconds=2700 \

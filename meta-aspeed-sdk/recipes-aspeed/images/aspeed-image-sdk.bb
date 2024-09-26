@@ -131,7 +131,7 @@ python do_deploy:ast-mmc() {
 do_deploy[depends] = " \
     virtual/kernel:do_deploy \
     virtual/bootloader:do_deploy \
-    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'bootmcu-fw:do_deploy', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'ast-bootmcu', 'virtual/bootmcu:do_deploy', '', d)} \
     "
 do_fetch[noexec] = "1"
 do_unpack[noexec] = "1"

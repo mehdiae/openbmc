@@ -7,6 +7,7 @@ SRC_URI = " \
     gitsm://github.com/flatpak/flatpak;protocol=https;branch=main \
     file://0001-flatpak-pc-add-pc_sysrootdir.patch \
     file://0001-meson.build-require-for-native-wayland-scanner.patch \
+    file://0001-meson.build-require-native-gtkdoc.patch \
 "
 
 SRCREV = "27b11b93c2a80a91c9461bc6c7f5e9a201406041"
@@ -36,14 +37,10 @@ DEPENDS = " \
 "
 
 RDEPENDS:${PN} = " \
-    bubblewrap \
     ca-certificates \
     dconf \
     flatpak-xdg-utils \
-    xdg-dbus-proxy \
 "
-
-EXTRA_OEMESON += "-Dsystem_dbus_proxy=${bindir}/xdg-dbus-proxy -Dsystem_bubblewrap=${bindir}/bwrap"
 
 GIR_MESON_OPTION = "gir"
 GIR_MESON_ENABLE_FLAG = 'enabled'

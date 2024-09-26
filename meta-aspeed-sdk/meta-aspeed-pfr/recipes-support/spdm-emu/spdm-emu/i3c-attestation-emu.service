@@ -1,6 +1,5 @@
 [Unit]
 Description=I3C Attestation Emulator
-After=pfr-mctp-i3c.service
 
 [Service]
 Restart=always
@@ -31,7 +30,4 @@ RestartSec=5
 StartLimitInterval=0
 Type=simple
 StandardOutput=null
-
-[Install]
-WantedBy=multi-user.target
 

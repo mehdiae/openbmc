@@ -40,7 +40,7 @@ BBLAYERS_CONF_UPDATE_FUNCS += " \
     conf/site.conf:SCONF_VERSION:SITE_CONF_VERSION:oecore_update_siteconf \
 "
 
-SANITY_DIFF_TOOL ?= "meld"
+SANITY_DIFF_TOOL ?= "diff -u"
 
 SANITY_LOCALCONF_SAMPLE ?= "${COREBASE}/meta*/conf/templates/default/local.conf.sample"
 python oecore_update_localconf() {
@@ -532,7 +532,7 @@ def check_git_version(sanity_data):
 def check_perl_modules(sanity_data):
     import subprocess
     ret = ""
-    modules = ( "Text::ParseWords", "Thread::Queue", "Data::Dumper" )
+    modules = ( "Text::ParseWords", "Thread::Queue", "Data::Dumper", "File::Compare", "File::Copy", "open ':std'", "FindBin" )
     errresult = ''
     for m in modules:
         try:
@@ -839,6 +839,10 @@ def check_sanity_everybuild(status, d):
     if omask & 0o755:
         status.addresult("Please use a umask which allows a+rx and u+rwx\n")
     os.umask(omask)
+
+    # Ensure /tmp is NOT mounted with noexec
+    if os.statvfs("/tmp").f_flag & os.ST_NOEXEC:
+        raise_sanity_error("/tmp shouldn't be mounted with noexec.", d)
 
     if d.getVar('TARGET_ARCH') == "arm":
         # This path is no longer user-readable in modern (very recent) Linux

@@ -87,6 +87,7 @@ from contextlib import contextmanager
 from   bb.fetch2 import FetchMethod
 from   bb.fetch2 import runfetchcmd
 from   bb.fetch2 import logger
+from   bb.fetch2 import trusted_network
 
 
 sha1_re = re.compile(r'^[0-9a-f]{40}$')
@@ -147,6 +148,9 @@ class Git(FetchMethod):
         return ud.type in ['git']
 
     def supports_checksum(self, urldata):
+        return False
+
+    def cleanup_upon_failure(self):
         return False
 
     def urldata_init(self, ud, d):
@@ -258,7 +262,7 @@ class Git(FetchMethod):
             for name in ud.names:
                 ud.unresolvedrev[name] = 'HEAD'
 
-        ud.basecmd = d.getVar("FETCHCMD_git") or "git -c gc.autoDetach=false -c core.pager=cat"
+        ud.basecmd = d.getVar("FETCHCMD_git") or "git -c gc.autoDetach=false -c core.pager=cat -c safe.bareRepository=all"
 
         write_tarballs = d.getVar("BB_GENERATE_MIRROR_TARBALLS") or "0"
         ud.write_tarballs = write_tarballs != "0" or ud.rebaseable
@@ -273,7 +277,7 @@ class Git(FetchMethod):
                     ud.unresolvedrev[name] = ud.revisions[name]
                 ud.revisions[name] = self.latest_revision(ud, d, name)
 
-        gitsrcname = '%s%s' % (ud.host.replace(':', '.'), ud.path.replace('/', '.').replace('*', '.').replace(' ','_'))
+        gitsrcname = '%s%s' % (ud.host.replace(':', '.'), ud.path.replace('/', '.').replace('*', '.').replace(' ','_').replace('(', '_').replace(')', '_'))
         if gitsrcname.startswith('.'):
             gitsrcname = gitsrcname[1:]
 
@@ -324,7 +328,10 @@ class Git(FetchMethod):
         return ud.clonedir
 
     def need_update(self, ud, d):
-        return self.clonedir_need_update(ud, d) or self.shallow_tarball_need_update(ud) or self.tarball_need_update(ud)
+        return self.clonedir_need_update(ud, d) \
+                or self.shallow_tarball_need_update(ud) \
+                or self.tarball_need_update(ud) \
+                or self.lfs_need_update(ud, d)
 
     def clonedir_need_update(self, ud, d):
         if not os.path.exists(ud.clonedir):
@@ -333,6 +340,15 @@ class Git(FetchMethod):
             return True
         for name in ud.names:
             if not self._contains_ref(ud, d, name, ud.clonedir):
+                return True
+        return False
+
+    def lfs_need_update(self, ud, d):
+        if self.clonedir_need_update(ud, d):
+            return True
+
+        for name in ud.names:
+            if not self._lfs_objects_downloaded(ud, d, name, ud.clonedir):
                 return True
         return False
 
@@ -355,6 +371,16 @@ class Git(FetchMethod):
         # is not possible
         if bb.utils.to_boolean(d.getVar("BB_FETCH_PREMIRRORONLY")):
             return True
+        # If the url is not in trusted network, that is, BB_NO_NETWORK is set to 0
+        # and BB_ALLOWED_NETWORKS does not contain the host that ud.url uses, then
+        # we need to try premirrors first as using upstream is destined to fail.
+        if not trusted_network(d, ud.url):
+            return True
+        # the following check is to ensure incremental fetch in downloads, this is
+        # because the premirror might be old and does not contain the new rev required,
+        # and this will cause a total removal and new clone. So if we can reach to
+        # network, we prefer upstream over premirror, though the premirror might contain
+        # the new rev.
         if os.path.exists(ud.clonedir):
             return False
         return True
@@ -375,7 +401,11 @@ class Git(FetchMethod):
             else:
                 tmpdir = tempfile.mkdtemp(dir=d.getVar('DL_DIR'))
                 runfetchcmd("tar -xzf %s" % ud.fullmirror, d, workdir=tmpdir)
-                fetch_cmd = "LANG=C %s fetch -f --progress %s " % (ud.basecmd, shlex.quote(tmpdir))
+                output = runfetchcmd("%s remote" % ud.basecmd, d, quiet=True, workdir=ud.clonedir)
+                if 'mirror' in output:
+                    runfetchcmd("%s remote rm mirror" % ud.basecmd, d, workdir=ud.clonedir)
+                runfetchcmd("%s remote add --mirror=fetch mirror %s" % (ud.basecmd, tmpdir), d, workdir=ud.clonedir)
+                fetch_cmd = "LANG=C %s fetch -f --update-head-ok  --progress mirror " % (ud.basecmd)
                 runfetchcmd(fetch_cmd, d, workdir=ud.clonedir)
         repourl = self._get_repo_url(ud)
 
@@ -452,7 +482,7 @@ class Git(FetchMethod):
             if missing_rev:
                 raise bb.fetch2.FetchError("Unable to find revision %s even from upstream" % missing_rev)
 
-        if self._contains_lfs(ud, d, ud.clonedir) and self._need_lfs(ud):
+        if self.lfs_need_update(ud, d):
             # Unpack temporary working copy, use it to run 'git checkout' to force pre-fetching
             # of all LFS blobs needed at the srcrev.
             #
@@ -514,7 +544,7 @@ class Git(FetchMethod):
 
             logger.info("Creating tarball of git repository")
             with create_atomic(ud.fullmirror) as tfile:
-                mtime = runfetchcmd("git log --all -1 --format=%cD", d,
+                mtime = runfetchcmd("{} log --all -1 --format=%cD".format(ud.basecmd), d,
                         quiet=True, workdir=ud.clonedir)
                 runfetchcmd("tar -czf %s --owner oe:0 --group oe:0 --mtime \"%s\" ."
                         % (tfile, mtime), d, workdir=ud.clonedir)
@@ -643,7 +673,7 @@ class Git(FetchMethod):
             elif not need_lfs:
                 bb.note("Repository %s has LFS content but it is not being fetched" % (repourl))
             else:
-                runfetchcmd("%s lfs install" % ud.basecmd, d, workdir=destdir)
+                runfetchcmd("%s lfs install --local" % ud.basecmd, d, workdir=destdir)
 
         if not ud.nocheckout:
             if subpath:
@@ -694,6 +724,35 @@ class Git(FetchMethod):
         if len(output.split()) > 1:
             raise bb.fetch2.FetchError("The command '%s' gave output with more then 1 line unexpectedly, output: '%s'" % (cmd, output))
         return output.split()[0] != "0"
+
+    def _lfs_objects_downloaded(self, ud, d, name, wd):
+        """
+        Verifies whether the LFS objects for requested revisions have already been downloaded
+        """
+        # Bail out early if this repository doesn't use LFS
+        if not self._need_lfs(ud) or not self._contains_lfs(ud, d, wd):
+            return True
+
+        # The Git LFS specification specifies ([1]) the LFS folder layout so it should be safe to check for file
+        # existence.
+        # [1] https://github.com/git-lfs/git-lfs/blob/main/docs/spec.md#intercepting-git
+        cmd = "%s lfs ls-files -l %s" \
+                % (ud.basecmd, ud.revisions[name])
+        output = runfetchcmd(cmd, d, quiet=True, workdir=wd).rstrip()
+        # Do not do any further matching if no objects are managed by LFS
+        if not output:
+            return True
+
+        # Match all lines beginning with the hexadecimal OID
+        oid_regex = re.compile("^(([a-fA-F0-9]{2})([a-fA-F0-9]{2})[A-Fa-f0-9]+)")
+        for line in output.split("\n"):
+            oid = re.search(oid_regex, line)
+            if not oid:
+                bb.warn("git lfs ls-files output '%s' did not match expected format." % line)
+            if not os.path.exists(os.path.join(wd, "lfs", "objects", oid.group(2), oid.group(3), oid.group(1))):
+                return False
+
+        return True
 
     def _need_lfs(self, ud):
         return ud.parm.get("lfs", "1") == "1"
@@ -810,38 +869,42 @@ class Git(FetchMethod):
         """
         pupver = ('', '')
 
-        tagregex = re.compile(d.getVar('UPSTREAM_CHECK_GITTAGREGEX') or r"(?P<pver>([0-9][\.|_]?)+)")
         try:
             output = self._lsremote(ud, d, "refs/tags/*")
         except (bb.fetch2.FetchError, bb.fetch2.NetworkAccess) as e:
             bb.note("Could not list remote: %s" % str(e))
             return pupver
 
+        rev_tag_re = re.compile(r"([0-9a-f]{40})\s+refs/tags/(.*)")
+        pver_re = re.compile(d.getVar('UPSTREAM_CHECK_GITTAGREGEX') or r"(?P<pver>([0-9][\.|_]?)+)")
+        nonrel_re = re.compile(r"(alpha|beta|rc|final)+")
+
         verstring = ""
-        revision = ""
         for line in output.split("\n"):
             if not line:
                 break
 
-            tag_head = line.split("/")[-1]
+            m = rev_tag_re.match(line)
+            if not m:
+                continue
+
+            (revision, tag) = m.groups()
+
             # Ignore non-released branches
-            m = re.search(r"(alpha|beta|rc|final)+", tag_head)
-            if m:
+            if nonrel_re.search(tag):
                 continue
 
             # search for version in the line
-            tag = tagregex.search(tag_head)
-            if tag is None:
+            m = pver_re.search(tag)
+            if not m:
                 continue
 
-            tag = tag.group('pver')
-            tag = tag.replace("_", ".")
+            pver = m.group('pver').replace("_", ".")
 
-            if verstring and bb.utils.vercmp(("0", tag, ""), ("0", verstring, "")) < 0:
+            if verstring and bb.utils.vercmp(("0", pver, ""), ("0", verstring, "")) < 0:
                 continue
 
-            verstring = tag
-            revision = line.split()[0]
+            verstring = pver
             pupver = (verstring, revision)
 
         return pupver

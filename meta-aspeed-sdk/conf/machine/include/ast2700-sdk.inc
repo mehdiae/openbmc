@@ -39,3 +39,6 @@ OPTEEMACHINE = "aspeed-ast2700"
 UBOOT_FIT_ARM_TRUSTED_FIRMWARE_A_IMAGE ?= "${DEPLOY_DIR_IMAGE}/${TFA_BUILD_TARGET}.bin"
 UBOOT_FIT_OPTEE_OS_IMAGE ?= "${DEPLOY_DIR_IMAGE}/optee/tee-raw.bin"
 
+# bootmcu
+PREFERRED_PROVIDER_virtual/bootmcu ?= "bootmcu-spl"
+

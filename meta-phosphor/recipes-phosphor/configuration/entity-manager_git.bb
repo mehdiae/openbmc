@@ -8,11 +8,13 @@ DEPENDS = "boost \
            nlohmann-json \
            sdbusplus \
            valijson \
-           ${PYTHON_PN}-jsonschema-native \
 "
-SRCREV = "6fa0602db8250905808991e5f7206151dd28b346"
+SRCREV = "cc5b2affcbdff0770f3486174cf4de13b3eab17b"
 PACKAGECONFIG ??= "ipmi-fru"
 PACKAGECONFIG[ipmi-fru] = "-Dfru-device=true, -Dfru-device=false, i2c-tools,"
+PACKAGECONFIG[validate-json] = "-Dvalidate-json=true, \
+                                -Dvalidate-json=false, \
+                                ${PYTHON_PN}-jsonschema-native"
 PV = "0.1+git${SRCPV}"
 
 SRC_URI = "git://github.com/openbmc/entity-manager.git;branch=master;protocol=https \

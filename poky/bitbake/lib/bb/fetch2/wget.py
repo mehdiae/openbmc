@@ -87,7 +87,10 @@ class Wget(FetchMethod):
         if not ud.localfile:
             ud.localfile = d.expand(urllib.parse.unquote(ud.host + ud.path).replace("/", "."))
 
-        self.basecmd = d.getVar("FETCHCMD_wget") or "/usr/bin/env wget -t 2 -T 30 --passive-ftp"
+        self.basecmd = d.getVar("FETCHCMD_wget") or "/usr/bin/env wget -t 2 -T 30"
+
+        if ud.type == 'ftp' or ud.type == 'ftps':
+            self.basecmd += " --passive-ftp"
 
         if not self.check_certs(d):
             self.basecmd += " --no-check-certificate"
@@ -375,7 +378,7 @@ class Wget(FetchMethod):
                     return self.checkstatus(fetch, ud, d, False)
                 else:
                     # debug for now to avoid spamming the logs in e.g. remote sstate searches
-                    logger.debug2("checkstatus() urlopen failed: %s" % e)
+                    logger.debug2("checkstatus() urlopen failed for %s: %s" % (uri,e))
                     return False
 
         return True

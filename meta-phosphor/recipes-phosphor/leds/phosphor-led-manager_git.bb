@@ -24,6 +24,18 @@ PACKAGECONFIG[persistent-led-asserted] = "-Dpersistent-led-asserted=enabled, \
 PV = "1.0+git${SRCPV}"
 PR = "r1"
 
+LED_ORG_JSON_PATTERNS ??= "${@ d.getVar('OBMC_ORG_YAML_SUBDIRS').replace('/', '.')}"
+LED_CONFIG_GREP_ARGS = "${@ ''.join([ ' -e ' + x for x in d.getVar('LED_ORG_JSON_PATTERNS').split() ])}"
+do_install:append() {
+    for f in "${D}${datadir}/${PN}/"*.json ;
+    do
+        if ! echo "$(basename $f)" | grep -q ${LED_CONFIG_GREP_ARGS};
+        then
+            rm -f ${f}
+        fi
+    done
+}
+
 SYSTEMD_PACKAGES = "${PN} ${PN}-faultmonitor"
 S = "${WORKDIR}/git"
 SYSTEMD_SERVICE:${PN} += "obmc-led-group-start@.service obmc-led-group-stop@.service"
@@ -32,6 +44,7 @@ SYSTEMD_LINK:${PN} += "../obmc-led-group-start@.service:multi-user.target.wants/
 STATES = "start stop"
 SYSTEMD_LINK:${PN} += "${@compose_list_zip(d, 'FMT', 'CHASSIS_TARGETS', 'STATES')}"
 SYSTEMD_LINK:${PN} += "${@compose_list(d, 'CHASSIS_LED_BLACKOUT_FMT', 'OBMC_CHASSIS_INSTANCES' )}"
+SYSTEMD_LINK[vardeps] += "OBMC_CHASSIS_INSTANCES"
 # Install the override to set up a Conflicts relation
 SYSTEMD_OVERRIDE:${PN} += "bmc_booted.conf:obmc-led-group-start@bmc_booted.service.d/bmc_booted.conf"
 

@@ -21,6 +21,7 @@ from .ConfHandler import include, init
 
 __func_start_regexp__    = re.compile(r"(((?P<py>python(?=(\s|\()))|(?P<fr>fakeroot(?=\s)))\s*)*(?P<func>[\w\.\-\+\{\}\$:]+)?\s*\(\s*\)\s*{$" )
 __inherit_regexp__       = re.compile(r"inherit\s+(.+)" )
+__inherit_def_regexp__   = re.compile(r"inherit_defer\s+(.+)" )
 __export_func_regexp__   = re.compile(r"EXPORT_FUNCTIONS\s+(.+)" )
 __addtask_regexp__       = re.compile(r"addtask\s+(?P<func>\w+)\s*((before\s*(?P<before>((.*(?=after))|(.*))))|(after\s*(?P<after>((.*(?=before))|(.*)))))*")
 __deltask_regexp__       = re.compile(r"deltask\s+(.+)")
@@ -33,6 +34,7 @@ __infunc__ = []
 __inpython__ = False
 __body__   = []
 __classname__ = ""
+__residue__ = []
 
 cached_statements = {}
 
@@ -40,8 +42,10 @@ def supports(fn, d):
     """Return True if fn has a supported extension"""
     return os.path.splitext(fn)[-1] in [".bb", ".bbclass", ".inc"]
 
-def inherit(files, fn, lineno, d):
+def inherit(files, fn, lineno, d, deferred=False):
     __inherit_cache = d.getVar('__inherit_cache', False) or []
+    #if "${" in files and not deferred:
+    #    bb.warn("%s:%s has non deferred conditional inherit" % (fn, lineno))
     files = d.expand(files).split()
     for file in files:
         classtype = d.getVar("__bbclasstype", False)
@@ -77,7 +81,7 @@ def inherit(files, fn, lineno, d):
             __inherit_cache = d.getVar('__inherit_cache', False) or []
 
 def get_statements(filename, absolute_filename, base_name):
-    global cached_statements
+    global cached_statements, __residue__, __body__
 
     try:
         return cached_statements[absolute_filename]
@@ -96,6 +100,11 @@ def get_statements(filename, absolute_filename, base_name):
         if __inpython__:
             # add a blank line to close out any python definition
             feeder(lineno, "", filename, base_name, statements, eof=True)
+
+        if __residue__:
+            raise ParseError("Unparsed lines %s: %s" % (filename, str(__residue__)), filename, lineno)
+        if __body__:
+            raise ParseError("Unparsed lines from unclosed function %s: %s" % (filename, str(__body__)), filename, lineno)
 
         if filename.endswith(".bbclass") or filename.endswith(".inc"):
             cached_statements[absolute_filename] = statements
@@ -263,6 +272,11 @@ def feeder(lineno, s, fn, root, statements, eof=False):
     m = __inherit_regexp__.match(s)
     if m:
         ast.handleInherit(statements, fn, lineno, m)
+        return
+
+    m = __inherit_def_regexp__.match(s)
+    if m:
+        ast.handleInheritDeferred(statements, fn, lineno, m)
         return
 
     return ConfHandler.feeder(lineno, s, fn, statements, conffile=False)

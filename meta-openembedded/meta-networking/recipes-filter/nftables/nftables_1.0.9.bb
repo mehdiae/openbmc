@@ -1,4 +1,9 @@
 SUMMARY = "Netfilter Tables userspace utillites"
+DESCRIPTION = "nftables replaces the popular {ip,ip6,arp,eb}tables. \
+               This software provides an in-kernel packet classification framework \
+               that is based on a network-specific Virtual Machine (VM), \
+               nft, a userspace command line tool and libnftables, a high-level userspace library."
+HOMEPAGE = "https://netfilter.org/projects/nftables"
 SECTION = "net"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=81ec33bb3e47b460fc993ac768c74b62"
@@ -7,6 +12,8 @@ DEPENDS = "libmnl libnftnl bison-native \
            ${@bb.utils.contains('PACKAGECONFIG', 'mini-gmp', '', 'gmp', d)}"
 
 SRC_URI = "http://www.netfilter.org/projects/nftables/files/${BP}.tar.xz \
+           file://0001-tests-shell-Fix-sets-reset_command_0-for-current-ker.patch \
+           file://0001-tests-shell-skip-secmark-tests-if-kernel-does-not-su.patch \
            file://run-ptest \
           "
 SRC_URI[sha256sum] = "a3c304cd9ba061239ee0474f9afb938a9bb99d89b960246f66f0c3a0a85e14cd"
@@ -29,8 +36,6 @@ EXTRA_OECONF = " \
 SETUPTOOLS_SETUP_PATH = "${S}/py"
 
 inherit ${@bb.utils.contains('PACKAGECONFIG', 'python', 'setuptools3', '', d)}
-
-RRECOMMENDS:${PN} += "kernel-module-nf-tables"
 
 PACKAGES =+ "${PN}-python"
 FILES:${PN}-python = "${PYTHON_SITEPACKAGES_DIR}"
@@ -59,7 +64,29 @@ do_install() {
     fi
 }
 
-RDEPENDS:${PN}-ptest += " ${PN}-python bash make iproute2 iputils-ping procps python3-core python3-ctypes python3-json python3-misc sed util-linux"
+RDEPENDS:${PN}-ptest += " ${PN}-python bash coreutils make iproute2 iputils-ping procps python3-core python3-ctypes python3-json python3-misc sed util-linux"
+
+RRECOMMENDS:${PN}-ptest += "\
+kernel-module-nft-chain-nat     kernel-module-nft-queue \
+kernel-module-nft-compat        kernel-module-nft-quota \
+kernel-module-nft-connlimit     kernel-module-nft-redir \
+kernel-module-nft-ct            kernel-module-nft-reject \
+kernel-module-nft-flow-offload  kernel-module-nft-reject-inet \
+kernel-module-nft-hash          kernel-module-nft-reject-ipv4 \
+kernel-module-nft-limit         kernel-module-nft-reject-ipv6 \
+kernel-module-nft-log           kernel-module-nft-socket \
+kernel-module-nft-masq          kernel-module-nft-synproxy \
+kernel-module-nft-nat           kernel-module-nft-tunnel \
+kernel-module-nft-numgen        kernel-module-nft-xfrm \
+kernel-module-nft-osf \
+kernel-module-nf-flow-table \
+kernel-module-nf-flow-table-inet \
+kernel-module-nf-nat \
+kernel-module-nf-log-syslog \
+kernel-module-nf-nat-ftp \
+kernel-module-nf-nat-sip \
+kernel-module-8021q \
+kernel-module-dummy"
 
 TESTDIR = "tests"
 

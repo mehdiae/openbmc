@@ -161,6 +161,9 @@ metadata, as extra layers can define their own:
 -  *keyboard:* Include keyboard support (e.g. keymaps will be loaded
    during boot).
 
+-  *minidebuginfo:* Add minimal debug symbols :ref:`(minidebuginfo)<dev-manual/debugging:enabling minidebuginfo>`
+   to binary files containing, allowing ``coredumpctl`` and ``gdb`` to show symbolicated stack traces.
+
 -  *multiarch:* Enable building applications with multiple architecture
    support.
 
@@ -268,7 +271,7 @@ you can add several different predefined packages such as development
 utilities or packages with debug information needed to investigate
 application problems or profile applications.
 
-Here are the image features available for all images:
+The image features available for all images are:
 
 -  *allow-empty-password:* Allows Dropbear and OpenSSH to accept
    logins from accounts having an empty password string.

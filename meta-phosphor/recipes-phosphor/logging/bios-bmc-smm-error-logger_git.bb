@@ -4,7 +4,6 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e3fc50a88d0a364313df4b21ef20c29e"
 DEPENDS += " \
   boost \
-  fmt \
   stdplus \
   systemd \
   nlohmann-json \
@@ -12,7 +11,7 @@ DEPENDS += " \
   sdbusplus \
   phosphor-dbus-interfaces \
 "
-SRCREV = "3b1226dde6784ca640b53c5c6705a10ca59e043a"
+SRCREV = "5de90619619115af21ffa5c7bae279e88bd86429"
 PV = "0.1+git${SRCPV}"
 PR = "r1"
 
