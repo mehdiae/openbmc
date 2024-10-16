@@ -32,4 +32,4 @@ TZ = '/etc/localtime'
 # ARCHIVER_MODE[recipe] = "1"
 # COPYLEFT_LICENSE_INCLUDE = "*"
 
-PACKAGECONFIG:append = " pldm"
+PACKAGECONFIG:append = " phosphor-pldm"
