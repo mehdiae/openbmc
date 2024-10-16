@@ -29,12 +29,12 @@ PACKAGECONFIG[transport-af-mctp] = "-Dtransport-implementation=af-mctp"
 PACKAGECONFIG[oem-ibm] = "-Doem-ibm=enabled, -Doem-ibm=disabled, , squashfs-tools"
 PACKAGECONFIG[system-specific-bios-json] = "-Dsystem-specific-bios-json=enabled, -Dsystem-specific-bios-json=disabled"
 PACKAGECONFIG ??= ""
-PACKAGECONFIG:append:df-mctp = " transport-af-mctp"
+PACKAGECONFIG:append:df-mctp = " transport-mctp-demux"
 
 EXTRA_OEMESON = " \
         -Dtests=disabled \
-        "
-
+        -Doem-ibm=disabled \
+"
 pkg_prerm:${PN} () {
     LINK="$D$systemd_system_unitdir/obmc-host-shutdown@0.target.wants/pldmSoftPowerOff.service"
     rm $LINK
