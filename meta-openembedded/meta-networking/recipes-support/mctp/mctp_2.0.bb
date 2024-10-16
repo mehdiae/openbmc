@@ -11,6 +11,8 @@ SRC_URI = "git://github.com/CodeConstruct/mctp;branch=main;protocol=https"
 
 S = "${WORKDIR}/git"
 
+EXTRA_OEMESON += " -Dtests=false"
+
 inherit meson pkgconfig systemd
 
 PACKAGECONFIG ??= " \
