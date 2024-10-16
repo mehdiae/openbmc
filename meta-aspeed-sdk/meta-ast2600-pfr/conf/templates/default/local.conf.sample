@@ -32,4 +32,4 @@ TZ = '/etc/localtime'
 # ARCHIVER_MODE[recipe] = "1"
 # COPYLEFT_LICENSE_INCLUDE = "*"
 
-IMAGE_INSTALL:append = " pldmd pldmtool libpldm "
+IMAGE_INSTALL:append = " pldm"
