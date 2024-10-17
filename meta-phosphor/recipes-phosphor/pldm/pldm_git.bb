@@ -2,7 +2,7 @@ HOMEPAGE = "https://github.com/openbmc/pldm"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
 SRC_URI = "git://github.com/mehdiae/pldm;branch=master;protocol=https"
-SRCREV = "2cf4d041ffa1bb13c766f258030af61d97e90505"
+SRCREV = "a66dce00a317fa8e8fe74ace99baa4e8d8f2ec80"
 
 SUMMARY = "PLDM Stack"
 DESCRIPTION = "Implementation of the PLDM specifications"
@@ -34,6 +34,8 @@ PACKAGECONFIG:append:df-mctp = " transport-mctp-demux"
 EXTRA_OEMESON = " \
         -Dtests=disabled \
         -Doem-ibm=disabled \
+        -Dlibpldmresponder=disabled \
+        
 "
 pkg_prerm:${PN} () {
     LINK="$D$systemd_system_unitdir/obmc-host-shutdown@0.target.wants/pldmSoftPowerOff.service"
