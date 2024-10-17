@@ -33,7 +33,6 @@ PACKAGECONFIG:append:df-mctp = " transport-mctp-demux"
 
 EXTRA_OEMESON = " \
         -Dtests=disabled \
-        -Dlibpldmresponder=disabled \
 "
 pkg_prerm:${PN} () {
     LINK="$D$systemd_system_unitdir/obmc-host-shutdown@0.target.wants/pldmSoftPowerOff.service"
