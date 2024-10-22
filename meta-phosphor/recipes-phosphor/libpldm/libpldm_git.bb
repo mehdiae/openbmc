@@ -15,7 +15,7 @@ PACKAGECONFIG[oem-ibm] = "-Doem-ibm=enabled,-Doem-ibm=disabled,,"
 
 PV = "git${SRCPV}"
 PR = "r1"
-SRC_URI = "git://github.com/openbmc/libpldm;branch=main;protocol=https"
+SRC_URI = "git://github.com/mehdiae/libpldm;branch=main;protocol=https"
 
 S = "${WORKDIR}/git"
 
