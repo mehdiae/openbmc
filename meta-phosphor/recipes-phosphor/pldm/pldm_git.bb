@@ -2,7 +2,7 @@ HOMEPAGE = "https://github.com/openbmc/pldm"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
 SRC_URI = "git://github.com/mehdiae/pldm;branch=master;protocol=https"
-SRCREV = "753014db52dd0a82936dbadaeb69dcccb4787611"
+SRCREV = "dd31a758758aa9955fffa690b119478865ef2507"
 
 SUMMARY = "PLDM Stack"
 DESCRIPTION = "Implementation of the PLDM specifications"
