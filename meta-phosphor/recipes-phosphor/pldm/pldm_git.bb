@@ -30,7 +30,8 @@ PACKAGECONFIG[oem-ibm] = "-Doem-ibm=enabled, -Doem-ibm=disabled, , squashfs-tool
 PACKAGECONFIG[system-specific-bios-json] = "-Dsystem-specific-bios-json=enabled, -Dsystem-specific-bios-json=disabled"
 PACKAGECONFIG ??= ""
 PACKAGECONFIG:append:df-mctp = "transport-af-mctp"
-
+PACKAGECONFIG ?= "transport-af-mctp"
+PACKAGECONFIG_remove = "transport-mctp-demux"
 EXTRA_OEMESON = " \
         -Dtests=disabled \
 "
