@@ -31,7 +31,7 @@ PACKAGECONFIG[system-specific-bios-json] = "-Dsystem-specific-bios-json=enabled,
 PACKAGECONFIG ??= ""
 PACKAGECONFIG:append:df-mctp = "transport-af-mctp"
 PACKAGECONFIG ?= "transport-af-mctp"
-PACKAGECONFIG_remove = "transport-mctp-demux"
+PACKAGECONFIG:remove = "transport-mctp-demux"
 EXTRA_OEMESON = " \
         -Dtests=disabled \
 "
