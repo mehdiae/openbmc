@@ -43,7 +43,7 @@ EXTRA_USERS_PARAMS = " \
 # Change time zone to local time from UTC for applying localtime
 # in kernel build time.
 TZ = '/etc/localtime'
-
+PACKAGECONFIG:pn-phosphor-pldm = "transport-af-mctp"
 # Enable spi-nor-ecc.inc if BMC flash model support ECC mode.
 #require conf/machine/include/spi-nor-ecc.inc
 
