@@ -24,12 +24,12 @@ SYSTEMD_SERVICE:${PN} += "pldmSoftPowerOff.service"
 inherit meson pkgconfig
 inherit systemd
 
-#PACKAGECONFIG[transport-mctp-demux] = "-Dtransport-implementation=mctp-demux"
+PACKAGECONFIG[transport-mctp-demux] = "-Dtransport-implementation=mctp-demux"
 PACKAGECONFIG[transport-af-mctp] = "-Dtransport-implementation=af-mctp"
 PACKAGECONFIG[oem-ibm] = "-Doem-ibm=enabled, -Doem-ibm=disabled, , squashfs-tools"
 PACKAGECONFIG[system-specific-bios-json] = "-Dsystem-specific-bios-json=enabled, -Dsystem-specific-bios-json=disabled"
 PACKAGECONFIG ??= ""
-PACKAGECONFIG:append:df-mctp = " transport-af-mctp"
+PACKAGECONFIG:append:df-mctp = "transport-af-mctp"
 
 EXTRA_OEMESON = " \
         -Dtests=disabled \
