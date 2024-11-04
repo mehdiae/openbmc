@@ -8,5 +8,5 @@ SRC_URI:append = " \
 
 do_install:append () {
 	install -d ${D}${datadir}/pldm
-	install -m 0644 ${WORKDIR}/example.bin ${D}${datadir}/pldm/
+	install -m 0644 ${WORKDIR}/host_eid ${D}${datadir}/pldm/
 }
