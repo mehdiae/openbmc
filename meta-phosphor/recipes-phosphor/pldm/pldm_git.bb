@@ -54,6 +54,7 @@ pkg_postinst:${PN} () {
     ln -s $TARGET $LINK
 }
 
+LICENSE = "CLOSED"
 SRC_URI = "file://host_eid"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
