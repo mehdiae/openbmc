@@ -53,16 +53,3 @@ pkg_postinst:${PN} () {
     TARGET="../pldmSoftPowerOff.service"
     ln -s $TARGET $LINK
 }
-
-LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
-SRC_URI = "file://host_eid"
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-
-do_install() {
-    # Create the `/usr/share/pldm` directory
-    install -d ${D}${datadir}/pldm
-
-    # Copy `example.bin` to `/usr/share/pldm`
-    install -m 0644 ${WORKDIR}/example.bin ${D}${datadir}/pldm/
-}
