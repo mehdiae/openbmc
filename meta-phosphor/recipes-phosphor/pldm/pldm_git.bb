@@ -55,7 +55,7 @@ pkg_postinst:${PN} () {
 }
 
 SRC_URI = "file://host_eid"
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 do_install() {
     # Create the `/usr/share/pldm` directory
