@@ -41,6 +41,7 @@ pkg_prerm:${PN} () {
     LINK="$D$systemd_system_unitdir/obmc-host-warm-reboot@0.target.wants/pldmSoftPowerOff.service"
     rm $LINK
 }
+
 # Install pldmSoftPowerOff.service in correct targets
 pkg_postinst:${PN} () {
     mkdir -p $D$systemd_system_unitdir/obmc-host-shutdown@0.target.wants
@@ -51,4 +52,15 @@ pkg_postinst:${PN} () {
     LINK="$D$systemd_system_unitdir/obmc-host-warm-reboot@0.target.wants/pldmSoftPowerOff.service"
     TARGET="../pldmSoftPowerOff.service"
     ln -s $TARGET $LINK
+}
+
+SRC_URI = "file://host_eid"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+do_install() {
+    # Create the `/usr/share/pldm` directory
+    install -d ${D}${datadir}/pldm
+
+    # Copy `example.bin` to `/usr/share/pldm`
+    install -m 0644 ${WORKDIR}/example.bin ${D}${datadir}/pldm/
 }
